@@ -273,6 +273,7 @@ dialog.drawer[open]{animation:drw .18s ease-out}
   #subnav{margin-top:0}
 }
 @media print{.side,.topbar,.botnav,#subnav,#evHead{display:none !important}.shell{display:block}}
+#cText{white-space:pre-line}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#1d4e89">
@@ -469,7 +470,7 @@ dialog.drawer[open]{animation:drw .18s ease-out}
   <section class="view" id="v-evenements">
     <div class="card">
       <div class="row between"><h2>Événements et budgets</h2>
-        <div class="row w"><button type="button" id="evAll">Ajouter les événements du cahier</button><button type="button" class="primary" id="evNew">+ Nouvel événement</button></div></div>
+        <div class="row w"><button type="button" id="evFix" hidden></button><button type="button" id="evAll">Ajouter les événements du cahier</button><button type="button" class="primary" id="evNew">+ Nouvel événement</button></div></div>
       <div class="chips" id="evFilt"></div>
       <div class="scroll"><table id="bgTable"></table></div>
       <p class="small muted" style="margin:0">Seuls les événements « en cours » sont proposés à la saisie, avec leurs sous-rubriques. Le réalisé neutralise les fonds de caisse. Un écart positif signifie que l'événement fait mieux que prévu. Changer le nom d'un événement renomme toutes ses écritures ; choisir le nom d'un autre événement les fusionne.</p>
@@ -696,8 +697,8 @@ dialog.drawer[open]{animation:drw .18s ease-out}
   <h2 id="vTitle">Événement</h2>
   <div class="field"><label for="vNom">Nom, avec l'année</label><input type="text" id="vNom" required placeholder="ex. FETE 2027"></div>
   <div class="grid2">
-    <div class="field"><label for="vDeb">Début</label><input type="date" id="vDeb"></div>
-    <div class="field"><label for="vFin">Fin</label><input type="date" id="vFin"></div>
+    <div class="field"><label for="vDeb">Date de l'événement (jour J)</label><input type="date" id="vDeb" required></div>
+    <div class="field"><label for="vFin">Dernier jour, si plusieurs jours</label><input type="date" id="vFin"></div>
   </div>
   <div class="grid2">
     <div class="field"><label for="vStat">Statut</label><select id="vStat"><option value="ouvert">En cours (proposé à la saisie)</option><option value="clos">Clos</option></select></div>
@@ -1290,6 +1291,22 @@ function evList(){
   for(const e of M.events){const x=map.get(e.name)||{name:e.name,managed:null,ev:null};x.ev=e;map.set(e.name,x);}
   return [...map.values()];
 }
+// Date de référence d'un événement : début saisi, sinon le jour qui concentre le plus d'opérations (les acomptes versés des mois avant ne comptent pas plus que le jour J).
+function evDate(x){
+  if(x.managed&&x.managed.debut)return x.managed.debut;
+  return peakDate(x.ev);
+}
+function peakDate(e){
+  if(!e||!e.lines.length)return "";
+  const n={}; let best="",bn=0;
+  for(const l of e.lines){if(!l.iso)continue;n[l.iso]=(n[l.iso]||0)+1;if(n[l.iso]>bn||(n[l.iso]===bn&&l.iso>best)){best=l.iso;bn=n[l.iso];}}
+  return best;
+}
+const evSortKey=x=>evDate(x)||(yearOf(x.name)?yearOf(x.name)+"-12-31":"9999");
+// date saisie qui est en fait celle du premier acompte (reprise automatique du cahier)
+// le jour J estimé n'est utilisable que s'il tombe dans l'année du nom (sinon ce ne sont que des acomptes)
+const peakOk=x=>{const p=peakDate(x.ev),y=yearOf(x.name);return !!p&&(!y||+p.slice(0,4)===y);};
+const dateSuspecte=x=>{const m=x.managed,e=x.ev;if(!m||!m.debut)return false;const y=yearOf(x.name);if(y&&+m.debut.slice(0,4)<y)return true;if(!e||m.debut!==e.first)return false;const p=peakDate(e);return !!p&&Math.abs(Date.parse(p)-Date.parse(m.debut))>45*864e5;};
 const isOpen=x=>!!(x.managed&&x.managed.statut!=="clos");
 function eventOptions(cur,date){
   const yr=String(date||today()).slice(0,4), vals=new Set();
@@ -1500,19 +1517,19 @@ function renderEvenements(){
   const st=x=>x.managed?(x.managed.statut==="clos"?"clos":"ouvert"):"hors";
   const counts={all:list.length,ouvert:0,clos:0,hors:0}; list.forEach(x=>counts[st(x)]++);
   $("evFilt").innerHTML=[["all","Tous"],["ouvert","En cours"],["clos","Clos"],["hors","Non listés"]].map(([k,l])=>`<button type="button" class="chip ${evFilter===k?"on":""}" data-evf="${k}">${l} · ${counts[k]}</button>`).join("");
-  const key=x=>(x.managed&&x.managed.debut)||(x.ev&&x.ev.first)||"9999";
-  const rows=list.filter(x=>evFilter==="all"||st(x)===evFilter).sort((a,b)=>key(b).localeCompare(key(a)));
+  const rows=list.filter(x=>evFilter==="all"||st(x)===evFilter).sort((a,b)=>evSortKey(b).localeCompare(evSortKey(a))||a.name.localeCompare(b.name));
   const fd=d=>d?fdate(d):"…";
-  $("bgTable").innerHTML=`<thead><tr><th>Événement</th><th>Dates</th><th>Statut</th><th class="r">Recettes prévues</th><th class="r">réalisées</th><th class="r">Dépenses prévues</th><th class="r">réalisées</th><th class="r">Résultat prévu</th><th class="r">réalisé</th><th class="r">Écart</th><th>Budget</th>${w?"<th></th>":""}</tr></thead><tbody>`+(rows.length?rows.map(x=>{
+  $("bgTable").innerHTML=`<thead><tr><th>Événement</th><th>Date</th><th>Statut</th><th class="r">Recettes prévues</th><th class="r">réalisées</th><th class="r">Dépenses prévues</th><th class="r">réalisées</th><th class="r">Résultat prévu</th><th class="r">réalisé</th><th class="r">Écart</th><th>Budget</th>${w?"<th></th>":""}</tr></thead><tbody>`+(rows.length?rows.map(x=>{
     const m=x.managed, e=x.ev, b=S.budgets.find(y=>eventKey(y.evenement).parent===x.name);
     const rr=e?e.rec:0, rd=e?e.dep:0, res=rr-rd, pr=b?b.recettes-b.depenses:null;
     const bst=!b?`<span class="pill neutral">Sans budget</span>`:rd>b.depenses+0.005?`<span class="pill bad">Dépenses dépassées</span>`:(e&&!e.upcoming&&res<pr-0.005)?`<span class="pill warn">Résultat sous le prévu</span>`:`<span class="pill good">Dans le budget</span>`;
     const stp=!m?`<span class="pill warn">Non listé</span>`:m.statut==="clos"?`<span class="pill neutral">Clos</span>`:`<span class="pill good">En cours</span>`;
-    const dates=m&&(m.debut||m.fin)?`${fd(m.debut)} → ${fd(m.fin)}`:e?`${fd(e.first)} → ${fd(e.last)}`:"·";
+    const dates=m&&m.debut?(dateSuspecte(x)?`<span class="pill warn">À vérifier</span> ${fd(m.debut)}`:fd(m.debut)+(m.fin&&m.fin!==m.debut?" → "+fd(m.fin):"")):`<span class="pill warn">Date à saisir</span>${evDate(x)?` <span class="muted">≈ ${fd(evDate(x))}</span>`:""}`;
     const note=(m&&m.note)||(b&&b.note);
     return `<tr><td><button type="button" class="link" data-ev="${esc(x.name)}"><b>${esc(x.name)}</b></button>${m&&m.sous&&m.sous.length?`<div class="small muted">Sous-rubriques : ${esc(m.sous.join(", "))}</div>`:""}${note?`<div class="small muted">${esc(note)}</div>`:""}</td><td class="small num">${dates}</td><td>${stp}</td><td class="r num">${b?fm(b.recettes):"·"}</td><td class="r num">${e?fm(rr):"·"}</td><td class="r num">${b?fm(b.depenses):"·"}</td><td class="r num">${e?fm(rd):"·"}</td><td class="r num">${b?sg(pr):"·"}</td><td class="r num ${cls(res)}">${e?sg(res):"·"}</td><td class="r num ${b&&e?cls(res-pr):""}">${b&&e?sg(res-pr):"·"}</td><td>${bst}</td>${w?`<td><button type="button" class="mini" data-evedit="${esc(x.name)}">${m?"Modifier":"Ajouter à la liste"}</button></td>`:""}</tr>`;
   }).join(""):`<tr><td colspan="12" class="muted">Aucun événement.</td></tr>`)+`</tbody>`;
   $("evAll").disabled=!list.some(x=>!x.managed&&x.ev);
+  const sus=list.filter(dateSuspecte); $("evFix").hidden=!sus.length; $("evFix").textContent=`Corriger ${sus.length} date(s) à vérifier`;
 }
 function rapLines(){const acc=$("rAcc").value;return M.lines.filter(l=>l.acc===acc);}
 function renderRap(){
@@ -1914,10 +1931,10 @@ function renderFiche(name,tab){
   const x=evList().find(y=>y.name===name)||{name,managed:null,ev:null}, m=x.managed, e=M.events.find(y=>y.name===name);
   const st=!m?pill2("Non listé","warn"):m.statut==="clos"?pill2("Clos","neutral"):pill2("En cours","good");
   const res=e&&!e.upcoming?(e.res>0.005?pill2("Bénéficiaire","good"):e.res<-0.005?pill2("Déficitaire","bad"):""):"";
-  const d1=(m&&m.debut)||(e&&e.first), d2=(m&&m.fin)||(e&&e.last);
+  const d1=m&&m.debut, d2=m&&m.fin;
   const y=yearOf(name), next=y?famOf(name)+" "+(y+1):null, w=canWrite();
   $("evHead").hidden=false;
-  $("evHead").innerHTML=`<div class="fh-top"><div class="fh-id"><nav aria-label="Fil d'Ariane" class="small"><a href="#evenements">Événements</a> / ${esc(name)}</nav><div class="fh-title"><h2>${esc(name)}</h2>${st}${res}</div><span class="small muted">${d1?`Du ${fdate(d1)} au ${fdate(d2||d1)}`:"Dates à renseigner"}${m&&m.sous&&m.sous.length?` · sous-rubriques ${esc(m.sous.join(", "))}`:""}</span></div>
+  $("evHead").innerHTML=`<div class="fh-top"><div class="fh-id"><nav aria-label="Fil d'Ariane" class="small"><a href="#evenements">Événements</a> / ${esc(name)}</nav><div class="fh-title"><h2>${esc(name)}</h2>${st}${res}</div><span class="small muted">${d1?(d2&&d2!==d1?`Du ${fdate(d1)} au ${fdate(d2)}`:`Le ${fdate(d1)}`)+(dateSuspecte(x)?" · date à vérifier (premier acompte ?)":""):"Date à saisir : bouton Modifier"}${m&&m.sous&&m.sous.length?` · sous-rubriques ${esc(m.sous.join(", "))}`:""}</span></div>
     <div class="row">${w?`<button type="button" data-fhedit="1">Modifier</button>`:""}${w&&next&&!allEventNames().includes(next)?`<button type="button" data-fhnext="${esc(next)}">Préparer ${esc(next)}</button>`:""}<button type="button" class="primary" data-fhpres="1">Présentation</button></div></div>`;
   $("subnav").hidden=false;
   $("subnav").innerHTML=FICHE_TABS.map(([k,l])=>`<a href="${ficheHash(name,k)}" class="${k===tab?"on":""}">${esc(l)}</a>`).join("");
@@ -2053,7 +2070,7 @@ function openEventDialog(name,cb){
   const m=x&&x.managed, e=x&&x.ev, b=name?S.budgets.find(y=>eventKey(y.evenement).parent===name):null;
   $("vTitle").textContent=!name?"Nouvel événement":m?"Modifier l'événement":"Ajouter l'événement à la liste";
   $("vNom").value=name||"";
-  $("vDeb").value=(m&&m.debut)||(e&&e.first)||""; $("vFin").value=(m&&m.fin)||(e&&e.last)||"";
+  $("vDeb").value=x&&!dateSuspecte(x)?evDate(x):(x&&peakOk(x)?peakDate(e):""); $("vFin").value=(m&&m.fin&&m.fin>=$("vDeb").value&&!dateSuspecte(x))?m.fin:"";
   $("vStat").value=(m&&m.statut)||"ouvert";
   $("vSous").value=((m&&m.sous)||(e?Object.keys(e.subs).filter(k=>k!=="Général"):[])).join(", ");
   $("vRec").value=b?dec(b.recettes):""; $("vDep").value=b?dec(b.depenses):"";
@@ -2069,6 +2086,8 @@ $("fV").addEventListener("submit",async ev=>{
   const fail=t=>{err.textContent=t;err.hidden=false;};
   if(!name)return fail("Saisissez le nom de l'événement, avec l'année (ex. FETE 2027).");
   if(HORS_RE.test(name))return fail("Ce nom est réservé aux écritures hors événement.");
+  if(!$("vDeb").value)return fail("Saisissez la date de l'événement : elle sert au classement et à la trésorerie prévisionnelle.");
+  if($("vFin").value&&$("vFin").value<$("vDeb").value)return fail("Le dernier jour est avant la date de l'événement.");
   if(!from&&evList().some(x=>x.name===name&&x.managed))return fail("Cet événement existe déjà dans la liste.");
   const ops=[], jr=[];
   if(from&&name!==from){
@@ -2098,11 +2117,18 @@ $("vDel").onclick=async()=>{
   if(n&&await ask(`Retirer ${n} de la liste des événements ? Les écritures et le budget sont conservés.`,"Retirer"))
     await run(store.commit([{t:"delete",col:"evenements",id:slug(n)}],{action:"Événement",texte:`${n} retiré de la liste`}),"Événement retiré de la liste.");
 };
+$("evFix").onclick=async()=>{
+  const all=evList().filter(dateSuspecte), sus=all.filter(peakOk), man=all.filter(x=>!peakOk(x));
+  if(!sus.length){flash(`À saisir à la main (Modifier) : ${man.map(x=>x.name).join(", ")}. Il n'y a encore que des acomptes, le jour de l'événement ne peut pas être déduit.`,true);return;}
+  if(!await ask(`Ces dates sont celles de la première opération (souvent un acompte), pas du jour de l'événement. Les remplacer par le jour qui compte le plus d'opérations ?\n\n${sus.map(x=>`${x.name} : ${fdate(x.managed.debut)} → ${fdate(peakDate(x.ev))}`).join("\n")}${man.length?`\n\nÀ saisir vous-même avec Modifier (que des acomptes pour l'instant) : ${man.map(x=>x.name).join(", ")}`:""}`,"Corriger"))return;
+  const ops=sus.map(x=>({t:"merge",col:"evenements",id:slug(x.name),data:{debut:peakDate(x.ev),fin:null}}));
+  await run(store.commit(ops,{action:"Événement",texte:`Dates corrigées : ${sus.map(x=>x.name+" "+fdate(peakDate(x.ev))).join(", ")}`}),`${sus.length} date(s) corrigée(s). Vérifiez-les dans chaque fiche.`);
+};
 $("evAll").onclick=async()=>{
   const add=evList().filter(x=>!x.managed&&x.ev); if(!add.length)return;
-  if(!await ask(`Ajouter ${add.length} événement(s) du cahier à la liste ? Ceux sans écriture depuis plus de 45 jours sont marqués « clos ». Vérifiez ensuite leurs dates : la première écriture est souvent un acompte.`,"Ajouter"))return;
+  if(!await ask(`Ajouter ${add.length} événement(s) du cahier à la liste ? Ceux sans écriture depuis plus de 45 jours sont marqués « clos ». La date retenue est le jour qui compte le plus d'opérations : vérifiez-la ensuite.`,"Ajouter"))return;
   const lim=new Date(Date.now()-45*864e5).toISOString().slice(0,10);
-  const ops=add.map(x=>({t:"set",col:"evenements",id:slug(x.name),data:{nom:x.name,debut:x.ev.first,fin:x.ev.last,statut:x.ev.upcoming||(x.ev.last&&x.ev.last>=lim)?"ouvert":"clos",sous:Object.keys(x.ev.subs).filter(k=>k!=="Général"),note:""}}));
+  const ops=add.map(x=>({t:"set",col:"evenements",id:slug(x.name),data:{nom:x.name,debut:peakOk(x)?peakDate(x.ev):null,fin:null,statut:x.ev.upcoming||(x.ev.last&&x.ev.last>=lim)?"ouvert":"clos",sous:Object.keys(x.ev.subs).filter(k=>k!=="Général"),note:""}}));
   await run(store.commit(ops,{action:"Événement",texte:`${add.length} événements ajoutés à la liste`}),`${add.length} événement(s) ajouté(s) à la liste.`);
 };
 
@@ -3256,15 +3282,17 @@ function renderAccueil(){
   if(S.articles.length){const st=stockState(), al=S.articles.filter(a=>a.actif!==false&&(+a.seuil>0&&st.get(a.id).qty<+a.seuil));if(al.length)add(al.length,"article(s) sous le seuil d'alerte, à racheter","#stock");}
   if(S.previsions.length){const pj=projection(), bl=pj.rows.find(x=>x.solde<pj.seuil);if(bl)add("!",`trésorerie prévue sous ${fm0(pj.seuil)} en ${esc(monthLabel(bl.ym))} (${fm0(bl.solde)})`,"#tresorerie","bad");}
   for(const x of evList().filter(isOpen)){if(!pvLines(x.name).length&&!S.budgets.some(b=>eventKey(b.evenement).parent===x.name))add("—",`${esc(x.name)} n'a pas encore de budget`,ficheHash(x.name,"budget"),"neutral");}
+  const nd=evList().filter(x=>x.managed&&(!x.managed.debut||dateSuspecte(x)));
+  if(nd.length)add(nd.length,`événement(s) sans date ou avec une date à vérifier (${esc(nd.slice(0,3).map(x=>x.name).join(", "))}${nd.length>3?"…":""})`,"#evenements","warn");
   const dv=M.lines.filter(l=>!l.iso||l.cat==="Divers").length;
   if(dv)add(dv,"opération(s) sans date ou classée(s) « Divers » à vérifier","#controles","neutral");
   $("hTodo").innerHTML=T.join("")||`<li class="muted">Rien à faire : tout est à jour.</li>`;
   $("hTodoN").textContent=T.length?T.length+" point(s)":"";
   // événements en cours
-  const open=evList().filter(x=>isOpen(x)||(x.ev&&x.ev.upcoming)).sort((a,b)=>String((a.managed&&a.managed.debut)||(a.ev&&a.ev.first)||"").localeCompare(String((b.managed&&b.managed.debut)||(b.ev&&b.ev.first)||"")));
+  const open=evList().filter(x=>isOpen(x)||(x.ev&&x.ev.upcoming)).sort((a,b)=>evSortKey(a).localeCompare(evSortKey(b)));
   $("hEvents").innerHTML=open.length?`<div class="evl">${open.map(x=>{
     const e=x.ev, L=pvLines(x.name), bg=S.budgets.find(b=>eventKey(b.evenement).parent===x.name);
-    const prev=L.length?sumOf(L,l=>(l.sens==="rec"?1:-1)*(+l.montant||0)):bg?bg.recettes-bg.depenses:null, d=(x.managed&&x.managed.debut)||(e&&e.first);
+    const prev=L.length?sumOf(L,l=>(l.sens==="rec"?1:-1)*(+l.montant||0)):bg?bg.recettes-bg.depenses:null, d=x.managed&&x.managed.debut;
     return `<button type="button" data-ev="${esc(x.name)}"><span><b>${esc(x.name)}</b><span class="small muted">${d?fdate(d):"date à fixer"}${e?` · ${e.lines.length} opération(s)`:""}</span></span><span class="r"><b class="num ${e?cls(e.res):""}">${e?sg(e.res):"—"}</b><span class="small muted">${prev!=null?"prévu "+sg(prev):"pas de budget"}</span></span></button>`;}).join("")}</div>`
     :`<p class="muted" style="margin:0">Aucun événement en cours.</p>${w?`<div class="row"><button type="button" class="primary" data-newev="1">+ Créer un événement</button></div>`:""}`;
   const last=M.lines.filter(l=>l.iso).slice(-8).reverse();
