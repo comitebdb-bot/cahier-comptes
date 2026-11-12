@@ -1510,7 +1510,7 @@ function renderEvenements(){
     const stp=!m?`<span class="pill warn">Non listé</span>`:m.statut==="clos"?`<span class="pill neutral">Clos</span>`:`<span class="pill good">En cours</span>`;
     const dates=m&&(m.debut||m.fin)?`${fd(m.debut)} → ${fd(m.fin)}`:e?`${fd(e.first)} → ${fd(e.last)}`:"·";
     const note=(m&&m.note)||(b&&b.note);
-    return `<tr><td>${e?`<button type="button" class="link" data-ev="${esc(x.name)}">${esc(x.name)}</button>`:`<b>${esc(x.name)}</b>`}${m&&m.sous&&m.sous.length?`<div class="small muted">Sous-rubriques : ${esc(m.sous.join(", "))}</div>`:""}${note?`<div class="small muted">${esc(note)}</div>`:""}</td><td class="small num">${dates}</td><td>${stp}</td><td class="r num">${b?fm(b.recettes):"·"}</td><td class="r num">${e?fm(rr):"·"}</td><td class="r num">${b?fm(b.depenses):"·"}</td><td class="r num">${e?fm(rd):"·"}</td><td class="r num">${b?sg(pr):"·"}</td><td class="r num ${cls(res)}">${e?sg(res):"·"}</td><td class="r num ${b&&e?cls(res-pr):""}">${b&&e?sg(res-pr):"·"}</td><td>${bst}</td>${w?`<td><button type="button" class="mini" data-evedit="${esc(x.name)}">${m?"Modifier":"Ajouter à la liste"}</button></td>`:""}</tr>`;
+    return `<tr><td><button type="button" class="link" data-ev="${esc(x.name)}"><b>${esc(x.name)}</b></button>${m&&m.sous&&m.sous.length?`<div class="small muted">Sous-rubriques : ${esc(m.sous.join(", "))}</div>`:""}${note?`<div class="small muted">${esc(note)}</div>`:""}</td><td class="small num">${dates}</td><td>${stp}</td><td class="r num">${b?fm(b.recettes):"·"}</td><td class="r num">${e?fm(rr):"·"}</td><td class="r num">${b?fm(b.depenses):"·"}</td><td class="r num">${e?fm(rd):"·"}</td><td class="r num">${b?sg(pr):"·"}</td><td class="r num ${cls(res)}">${e?sg(res):"·"}</td><td class="r num ${b&&e?cls(res-pr):""}">${b&&e?sg(res-pr):"·"}</td><td>${bst}</td>${w?`<td><button type="button" class="mini" data-evedit="${esc(x.name)}">${m?"Modifier":"Ajouter à la liste"}</button></td>`:""}</tr>`;
   }).join(""):`<tr><td colspan="12" class="muted">Aucun événement.</td></tr>`)+`</tbody>`;
   $("evAll").disabled=!list.some(x=>!x.managed&&x.ev);
 }
@@ -1879,8 +1879,9 @@ const ALIAS={ecritures:"operations",budget:"evenements",previsionnel:"evenements
 const VIEWS={accueil:renderAccueil,synthese:renderSynthese,ecritures:renderLines,evenements:renderEvenements,previsionnel:renderPrev,evenement:renderEvent,editions:renderEditions,encarts:renderEncarts,rapprochement:renderRap,presentation:renderPres,controles:renderControles,journal:renderJournal,reglages:renderReglages,stock:renderStock,stockev:renderStockEv,mouvements:renderMvts,buvette:renderBuvette};
 let FICHE=null;
 const ficheHash=(name,tab)=>"#fiche/"+(tab||"apercu")+"/"+slug(name);
-function openFiche(name,tab){location.hash=ficheHash(name,tab);window.scrollTo(0,0);}
-function allEventNames(){return [...new Set([...evList().map(x=>x.name),...S.previsions.map(p=>eventKey(p.evenement).parent)])];}
+let FICHE_NEW=null;
+function openFiche(name,tab){FICHE_NEW=name;location.hash=ficheHash(name,tab);window.scrollTo(0,0);}
+function allEventNames(){return [...new Set([...evList().map(x=>x.name),...(FICHE_NEW?[FICHE_NEW]:[]),...S.budgets.map(b=>eventKey(b.evenement).parent),...S.previsions.map(p=>eventKey(p.evenement).parent)])];}
 function showView(v){for(const k in VIEWS)$("v-"+k).classList.toggle("on",k===v);}
 function show(){
   let h=decodeURIComponent(location.hash.replace("#",""));
