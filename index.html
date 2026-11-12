@@ -157,6 +157,11 @@ td .mini{white-space:nowrap}
 #r2Table select{max-width:230px}
 input[type=number],input[type=month]{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);max-width:100%}
 @media (max-width:520px){.kf{grid-template-columns:1fr}}
+/* sections Trésorerie / Stock */
+.sections{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px;width:max-content;max-width:100%}
+.sections a{padding:8px 20px;border-radius:7px;text-decoration:none;color:var(--muted);font-weight:700;font-family:var(--display);font-size:16px}
+.sections a.on{background:var(--accent);color:var(--surface)}
+body:not(.can-stock) .ws{display:none !important}
 /* connexion */
 .auth{max-width:420px;margin:8vh auto 0;display:flex;flex-direction:column;gap:14px}
 .field{display:flex;flex-direction:column;gap:4px}
@@ -240,10 +245,13 @@ body:not(.can-write) .w{display:none !important}
   <div id="net" class="msg warn" hidden></div>
   <div id="flash" class="msg" hidden></div>
 
+  <div class="sections" id="sections"><a href="#synthese" data-sec="treso">Trésorerie</a><a href="#stock" data-sec="stock">Stock</a></div>
+
   <nav class="tabs" id="tabs">
     <a href="#synthese">Synthèse</a>
     <a href="#ecritures">Écritures</a>
     <a href="#evenements">Événements</a>
+    <a href="#previsionnel">Prévisionnel</a>
     <a href="#evenement">Bilan d'un événement</a>
     <a href="#editions">Éditions</a>
     <a href="#encarts">Encarts</a>
@@ -252,6 +260,12 @@ body:not(.can-write) .w{display:none !important}
     <a href="#controles">Contrôles</a>
     <a href="#journal">Journal</a>
     <a href="#reglages">Réglages</a>
+  </nav>
+  <nav class="tabs" id="tabsStock" hidden>
+    <a href="#stock">État du stock</a>
+    <a href="#stockev">Stock par événement</a>
+    <a href="#mouvements">Mouvements</a>
+    <a href="#buvette">Analyse buvette</a>
   </nav>
 
   <div class="card" id="empty" hidden>
@@ -357,6 +371,24 @@ body:not(.can-write) .w{display:none !important}
     </div>
   </section>
 
+  <section class="view" id="v-previsionnel">
+    <div class="card">
+      <div class="row between">
+        <div class="row"><h2>Prévisionnel</h2><select id="pvSel" aria-label="Événement"></select></div>
+        <div class="row w"><button type="button" id="pvPrev">Partir de l'édition précédente</button><button type="button" id="pvAddRec">+ Recette prévue</button><button type="button" class="primary" id="pvAddDep">+ Dépense prévue</button></div>
+      </div>
+      <div class="tiles" id="pvTiles"></div>
+      <div class="scroll"><table id="pvTable"></table></div>
+      <p class="small muted" style="margin:0">Réalisé : écritures du cahier pour cet événement, par poste. Écart positif : mieux que prévu. « Pour l'équilibre » : quantité à vendre, les autres lignes restant identiques, pour un résultat nul. Une dépense « engagée » correspond à un devis signé ou une commande passée. Le total du prévisionnel devient le budget de l'événement.</p>
+    </div>
+    <div class="card">
+      <div class="row between"><h2>Trésorerie prévisionnelle sur 12 mois</h2><span id="prjPill"></span></div>
+      <div id="prjChart"></div>
+      <div class="scroll"><table id="prjTable"></table></div>
+      <p class="small muted" style="margin:0">Part de la trésorerie actuelle. Au mois de chaque événement en cours, ajoute ce qui reste à encaisser et à payer d'après son prévisionnel ; les dépenses engagées avec une échéance sont placées à leur échéance. Ajoute aussi les écritures récurrentes. Seuil d'alerte réglable dans Réglages.</p>
+    </div>
+  </section>
+
   <section class="view" id="v-encarts">
     <div class="card">
       <div class="row between">
@@ -428,14 +460,71 @@ body:not(.can-write) .w{display:none !important}
       <div class="scroll"><table id="jTable"></table></div></div>
   </section>
 
+  <section class="view" id="v-stock">
+    <div class="tiles" id="stTiles"></div>
+    <div class="card">
+      <div class="row between"><h2>État du stock</h2>
+        <div class="row ws"><button type="button" id="stInv">Inventaire</button><button type="button" id="stLoss">Perte ou casse</button><button type="button" id="stRet">Retour d'événement</button><button type="button" id="stOut">Sortie vers un événement</button><button type="button" class="primary" id="stIn">Réception d'achat</button></div></div>
+      <div class="row"><div class="chips" id="stCats"></div><input type="search" id="stQ" placeholder="Rechercher un article" aria-label="Rechercher un article"></div>
+      <div class="row between"><span class="small muted" id="stCount"></span>
+        <div class="row"><button type="button" class="ws" id="stNew">+ Article</button><label class="btn ws" for="stFile">Importer des articles</label><input type="file" id="stFile" accept=".xlsx,.xls,.csv" hidden><button type="button" class="ws" id="stTpl">Modèle d'import</button><button type="button" id="stShop">Copier la liste de courses</button></div></div>
+      <div class="scroll"><table id="stTable"></table></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-stockev">
+    <div class="row"><label for="seSel" class="muted">Événement</label><select id="seSel"></select><span class="small muted" id="seRef"></span></div>
+    <div class="tiles" id="seTiles"></div>
+    <div class="card">
+      <div class="row between"><h2>Consommation de l'événement</h2><div class="row ws"><button type="button" id="seOut">Sortie vers l'événement</button><button type="button" id="seRet">Retour après l'événement</button></div></div>
+      <div class="scroll"><table id="seTable"></table></div>
+      <p class="small muted" style="margin:0">Consommé = sorti − revenu + pertes. Coût au prix d'achat de l'article. La recette attendue (consommé × prix de vente) se compare à la caisse buvette du cahier : un écart important signale des oublis, des offerts ou des erreurs de caisse.</p>
+    </div>
+    <div class="card">
+      <div class="row between"><h2>Préparer l'événement</h2><button type="button" id="seCopy">Copier la liste d'achats</button></div>
+      <p class="small muted" style="margin:0" id="sePrepTxt"></p>
+      <div class="scroll"><table id="sePrep"></table></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-mouvements">
+    <div class="card">
+      <div class="row between"><h2>Mouvements de stock</h2><span class="small muted" id="mvCount"></span></div>
+      <div class="row"><select id="mvArt" aria-label="Article"></select><select id="mvEv" aria-label="Événement"></select>
+        <select id="mvType" aria-label="Opération"><option value="">Toutes les opérations</option><option value="entree">Réceptions</option><option value="sortie">Sorties</option><option value="retour">Retours</option><option value="perte">Pertes</option><option value="retfour">Retours fournisseur</option><option value="inventaire">Inventaires</option></select></div>
+      <div class="scroll"><table id="mvTable"></table></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-buvette">
+    <div class="row between">
+      <div class="row"><label for="bvSel" class="muted">Événement</label><select id="bvSel"></select></div>
+      <div class="row ws"><button type="button" id="bvTpl">Modèle d'import</button><label class="btn primary" for="bvFile">Importer des factures (Excel)</label><input type="file" id="bvFile" accept=".xlsx,.xls,.csv" hidden></div>
+    </div>
+    <div class="tiles" id="bvTiles"></div>
+    <div class="card">
+      <h2>Coût et marge par produit vendu</h2>
+      <div class="scroll"><table id="bvTable"></table></div>
+      <p class="small muted" style="margin:0" id="bvNote"></p>
+      <p class="small muted" style="margin:0">Unités = quantité consommée × unités vendues par article (fiche de l'article, ex. fût de 30 L = 120 verres de 25 cl). Coût au prix d'achat TTC net des retours et avoirs. Les coûts annexes (gaz de la tireuse) sont rattachés au produit avec 0 unité.</p>
+    </div>
+    <div class="card"><h2>Achats non rattachés à la grille</h2><div class="scroll"><table id="bvOther"></table></div></div>
+    <div class="card"><h2>Prix d'achat par édition et fournisseur</h2><div class="scroll"><table id="bvPrix"></table></div></div>
+    <div class="card">
+      <div class="row between"><h2>Grille de prix de la buvette</h2>
+        <div class="row w"><label for="tgCible" class="small">Marge visée (%)</label><input type="text" inputmode="decimal" id="tgCible" style="width:70px"><button type="button" id="tgAdd">+ Produit</button><button type="button" id="tgReset">Annuler les changements</button><button type="button" class="primary" id="tgSave">Enregistrer la grille</button></div></div>
+      <div class="scroll"><table id="tgTable"></table></div>
+    </div>
+  </section>
+
   <section class="view" id="v-reglages">
     <div class="card w"><h2>Demandes d'accès</h2><div class="scroll"><table id="dTable"></table></div></div>
     <div class="card w"><h2>Membres</h2>
-      <p class="small muted" style="margin:0">Un lecteur consulte tout sans rien modifier. Un trésorier saisit, pointe, gère les événements, les encarts et les accès.</p>
+      <p class="small muted" style="margin:0">Un lecteur consulte tout sans rien modifier. Un gestionnaire de stock consulte tout et gère uniquement le stock. Un trésorier gère tout, y compris les accès.</p>
       <div class="scroll"><table id="mTable"></table></div></div>
     <div class="card w"><h2>Saisie</h2>
-      <div class="row"><div class="field" style="max-width:260px"><label for="sFrais">Frais bancaires par virement (€)</label><input type="text" inputmode="decimal" id="sFrais"></div><button type="button" id="sFraisOk">Enregistrer</button></div>
-      <p class="small muted" style="margin:0">Montant proposé par la case « Ajouter aussi les frais de virement ». Mettez 0 pour masquer la case.</p></div>
+      <div class="row"><div class="field" style="max-width:260px"><label for="sFrais">Frais bancaires par virement (€)</label><input type="text" inputmode="decimal" id="sFrais"></div><div class="field" style="max-width:260px"><label for="sSeuil">Seuil d'alerte de trésorerie (€)</label><input type="text" inputmode="decimal" id="sSeuil"></div><button type="button" id="sFraisOk">Enregistrer</button></div>
+      <p class="small muted" style="margin:0">Frais : montant proposé par la case « Ajouter aussi les frais de virement » (0 pour masquer la case). Seuil : la trésorerie prévisionnelle vous alerte si elle descend en dessous.</p></div>
     <div class="card w"><div class="row between"><h2>Écritures récurrentes</h2><button type="button" class="primary" id="uNew">+ Écriture récurrente</button></div>
       <p class="small muted" style="margin:0">Chaque mois, l'application propose de créer ces écritures (frais de tenue de compte, cotisation carte…).</p>
       <div class="scroll"><table id="uTable"></table></div></div>
@@ -506,6 +595,7 @@ body:not(.can-write) .w{display:none !important}
     <div class="field"><label for="vRec">Recettes prévues (€)</label><input type="text" inputmode="decimal" id="vRec"></div>
     <div class="field"><label for="vDep">Dépenses prévues (€)</label><input type="text" inputmode="decimal" id="vDep"></div>
   </div>
+  <p class="small muted" id="vBudHint" hidden style="margin:0">Budget calculé depuis le prévisionnel détaillé (onglet Prévisionnel).</p>
   <div class="field"><label for="vNote">Note (hypothèses : nombre de repas, cachets, subvention…)</label><textarea id="vNote" rows="2"></textarea></div>
   <div id="vErr" class="msg err" hidden></div>
   <div class="row between"><button type="button" class="danger" id="vDel">Retirer de la liste</button><div class="row"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div></div>
@@ -689,6 +779,91 @@ body:not(.can-write) .w{display:none !important}
   <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
 </form></dialog>
 
+<!-- ligne du prévisionnel -->
+<dialog id="dlgL"><form id="fL">
+  <h2 id="lTitle">Ligne du prévisionnel</h2>
+  <div class="grid2">
+    <div class="field"><label>Sens</label><div class="seg"><label><input type="radio" name="lSens" value="rec" id="lRec"><span>Recette</span></label><label><input type="radio" name="lSens" value="dep" id="lDep" checked><span>Dépense</span></label></div></div>
+    <div class="field"><label for="lPoste">Poste</label><select id="lPoste"></select></div>
+  </div>
+  <div class="field"><label for="lLib">Libellé</label><input type="text" id="lLib" placeholder="ex. Orchestre samedi soir, Repas du dimanche"></div>
+  <div class="grid5">
+    <div class="field"><label for="lQte">Quantité</label><input type="text" inputmode="decimal" id="lQte" placeholder="ex. 300"></div>
+    <div class="field"><label for="lPu">Prix unitaire (€)</label><input type="text" inputmode="decimal" id="lPu" placeholder="ex. 15"></div>
+    <div class="field"><label for="lMont">Montant (€)</label><input type="text" inputmode="decimal" id="lMont" required></div>
+  </div>
+  <div class="grid2" id="lEngF">
+    <div class="field"><label for="lStat">Statut</label><select id="lStat"><option value="prevu">Prévu</option><option value="engage">Engagé (devis signé, commande passée)</option></select></div>
+    <div class="field"><label for="lEch">Échéance de paiement</label><input type="date" id="lEch"></div>
+  </div>
+  <div class="field"><label for="lNote">Note</label><input type="text" id="lNote"></div>
+  <p class="small muted" style="margin:0">Quantité × prix unitaire calcule le montant. Pour une recette, ils permettent de calculer combien il faut vendre pour équilibrer l'événement.</p>
+  <div id="lErr" class="msg err" hidden></div>
+  <div class="row between"><button type="button" class="danger" id="lDel">Supprimer</button><div class="row"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div></div>
+</form></dialog>
+
+<!-- article de stock -->
+<dialog id="dlgArt"><form id="fArt">
+  <h2 id="arTitle">Article</h2>
+  <div class="field"><label for="arNom">Nom de l'article</label><input type="text" id="arNom" required placeholder="ex. Coca-Cola 33 cl"></div>
+  <div class="grid2">
+    <div class="field"><label for="arCat">Catégorie</label><select id="arCat"></select></div>
+    <div class="field"><label for="arUnite">Unité de comptage</label><input type="text" id="arUnite" list="unitList" placeholder="ex. canette, fût, carton"><datalist id="unitList"><option value="bouteille"></option><option value="canette"></option><option value="fût"></option><option value="carton"></option><option value="pack"></option><option value="pièce"></option><option value="kg"></option><option value="litre"></option><option value="rouleau"></option><option value="lot"></option></datalist></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="arSeuil">Seuil d'alerte (stock minimum)</label><input type="text" inputmode="decimal" id="arSeuil"></div>
+    <div class="field"><label for="arLieu">Lieu de stockage</label><input type="text" id="arLieu"></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="arPA">Prix d'achat unitaire (€)</label><input type="text" inputmode="decimal" id="arPA"></div>
+    <div class="field"><label for="arPV">Prix de vente unitaire (€), si vendu à l'unité</label><input type="text" inputmode="decimal" id="arPV"></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="arTarif">Vendu à la buvette comme</label><select id="arTarif"></select></div>
+    <div class="field"><label for="arRend">Unités vendues par article</label><input type="text" inputmode="decimal" id="arRend" placeholder="ex. fût 30 L = 120 verres"></div>
+  </div>
+  <div class="field" id="arInitF"><label for="arInit">Stock actuel (enregistré comme inventaire du jour)</label><input type="text" inputmode="decimal" id="arInit"></div>
+  <div class="field"><label for="arNote">Note</label><input type="text" id="arNote"></div>
+  <label class="small" id="arActL"><input type="checkbox" id="arAct" checked> Article actif (décocher pour le masquer sans perdre l'historique)</label>
+  <div id="arErr" class="msg err" hidden></div>
+  <div class="row between"><button type="button" class="danger" id="arDel">Supprimer</button><div class="row"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div></div>
+</form></dialog>
+
+<!-- mouvement de stock -->
+<dialog id="dlgS" class="wide"><form id="fS">
+  <h2 id="sTitle">Mouvement de stock</h2>
+  <div class="grid5">
+    <div class="field"><label for="sMode">Opération</label><select id="sMode"><option value="entree">Réception d'achat</option><option value="sortie">Sortie vers un événement</option><option value="retour">Retour d'un événement</option><option value="perte">Perte, casse ou offert</option><option value="retfour">Retour au fournisseur ou avoir</option><option value="inventaire">Inventaire (comptage)</option></select></div>
+    <div class="field"><label for="sDate">Date</label><input type="date" id="sDate" required></div>
+    <div class="field" id="sEvtF"><label for="sEvt" id="sEvtL">Événement</label><select id="sEvt" class="evsel"></select></div>
+    <div class="field"><label for="sNote">Fournisseur ou note</label><input type="text" id="sNote" placeholder="ex. ABD, Super U"></div>
+  </div>
+  <div class="row"><div class="chips" id="sCats"></div><input type="search" id="sQ" placeholder="Filtrer les articles" aria-label="Filtrer les articles"></div>
+  <div class="scroll" style="max-height:46vh;overflow-y:auto"><table id="sTable"></table></div>
+  <div id="sCahier" hidden>
+    <label class="small"><input type="checkbox" id="sEcr" checked> Créer aussi la dépense dans le cahier (une écriture par poste : boissons, courses…)</label>
+    <div class="grid5">
+      <div class="field"><label for="sAcc">Compte</label><select id="sAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
+      <div class="field"><label for="sType">Paiement</label><select id="sType"></select></div>
+      <div class="field"><label for="sDes">Désignation</label><input type="text" id="sDes" placeholder="ex. ABD - Facture 2600123"></div>
+    </div>
+  </div>
+  <p class="small" style="margin:0" id="sSum"></p>
+  <div id="sErr" class="msg err" hidden></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+</form></dialog>
+
+<!-- import de factures buvette -->
+<dialog id="dlgBV"><form id="fBV">
+  <h2>Importer des factures</h2>
+  <p style="margin:0" id="bviInfo"></p>
+  <div class="field"><label>Ces achats</label>
+    <label class="small"><input type="radio" name="bviMode" value="conso" checked> ont été consommés pendant l'événement (le stock ne change pas ; choix pour une fête passée)</label>
+    <label class="small"><input type="radio" name="bviMode" value="stock"> entrent dans le stock (vous ferez ensuite les sorties vers l'événement)</label></div>
+  <p class="small muted" style="margin:0">Les articles inconnus sont créés. Une quantité négative correspond à un retour au fournisseur ou un avoir. Aucune écriture n'est créée dans le cahier : les factures y sont déjà.</p>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Importer</button></div>
+</form></dialog>
+
 <!-- import -->
 <dialog id="dlgI"><form id="fI">
   <h2>Importer des écritures</h2>
@@ -863,12 +1038,12 @@ function build(ecr){
 /* ================= stockage : Firebase ou démonstration ================= */
 // Toutes les écritures en base passent par commit(ops, journal) : une liste d'opérations
 // {t:"set"|"update"|"merge"|"delete", col, id, data} appliquées par lots, plus les lignes du journal.
-const S={ready:false,user:null,role:null,ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},pending:0};
+const S={ready:false,user:null,role:null,ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},pending:0,previsions:[],articles:[],mouvements:[]};
 let onData=()=>{};
 const slug=s=>strip(s).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"sans-nom";
 const resume=e=>`${fdate(e.date)} · ${e.compte==="LA"?"Livret A":"Compte courant"} · ${e.evenement} · ${e.designation} · ${(+e.recette||0)>0?"+"+fm(+e.recette):"−"+fm(+e.depense||0)}`;
-const P=()=>Object.assign({fraisVirement:0.3,recurrentes:[]},S.params);
-const KEYS={ecritures:"ecr",budgets:"budgets",evenements:"evenements",caisses:"caisses",annonceurs:"annonceurs",parametres:"paramsList",journal:"journal",membres:"membres",demandes:"demandes"};
+const P=()=>Object.assign({fraisVirement:0.3,seuilTreso:2000,margeCible:65,recurrentes:[]},S.params);
+const KEYS={ecritures:"ecr",budgets:"budgets",evenements:"evenements",caisses:"caisses",annonceurs:"annonceurs",parametres:"paramsList",journal:"journal",membres:"membres",demandes:"demandes",previsions:"previsions",articles:"articles",mouvements:"mouvements"};
 const afterData=()=>{S.params=S.paramsList.find(x=>x.id==="general")||{};};
 const asList=j=>Array.isArray(j)?j:j?[j]:[];
 
@@ -887,7 +1062,7 @@ function firebaseStore(){
     const keep=r=>{try{if(r)localStorage.setItem(key,r);else localStorage.removeItem(key);}catch(e){}return r;};
     let d;
     try{d=await within(db.doc("membres/"+u.uid).get(),8000);}catch(e){return cached;}
-    if(d.exists) return keep(d.data().role==="tresorier"?"tresorier":"lecteur");
+    if(d.exists) {const rr=d.data().role;return keep(rr==="tresorier"||rr==="stock"?rr:"lecteur");}
     if(!navigator.onLine) return cached;
     // le premier trésorier est désigné par son identifiant dans les règles de sécurité
     try{await within(db.doc("membres/"+u.uid).set({email:u.email,nom:S.user.nom,role:"tresorier",at:now()}),8000);return keep("tresorier");}catch(e){}
@@ -901,12 +1076,12 @@ function firebaseStore(){
       if(count){pend[key]=s.docs.filter(d=>d.metadata.hasPendingWrites).length;S.pending=Object.values(pend).reduce((a,b)=>a+b,0);}
       afterData();onData();
     },err));
-    for(const c of ["ecritures","budgets","evenements","caisses","annonceurs","parametres"]) col(db.collection(c),KEYS[c],true);
+    for(const c of ["ecritures","budgets","evenements","caisses","annonceurs","parametres","previsions","articles","mouvements"]) col(db.collection(c),KEYS[c],true);
     col(db.collection("journal").orderBy("at","desc").limit(300),"journal",false);
     if(S.role==="tresorier"){col(db.collection("membres"),"membres",true);col(db.collection("demandes"),"demandes",false);}
   }
   auth.onAuthStateChanged(async u=>{
-    stop(); Object.assign(S,{ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},role:null,pending:0});
+    stop(); Object.assign(S,{ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},role:null,pending:0,previsions:[],articles:[],mouvements:[]});
     if(!u){S.user=null;S.ready=true;onData();return;}
     S.user={uid:u.uid,email:u.email,nom:pendingName||u.displayName||u.email};
     S.role=await role(u); S.ready=true; onData();
@@ -941,7 +1116,7 @@ function firebaseStore(){
 }
 
 function demoStore(){
-  const KEY="cahier-comptes-demo-v2", LIST=["ecr","budgets","journal","evenements","caisses","annonceurs","paramsList"];
+  const KEY="cahier-comptes-demo-v2", LIST=["ecr","budgets","journal","evenements","caisses","annonceurs","paramsList","previsions","articles","mouvements"];
   let D={};
   try{D=JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){D={};}
   for(const k of LIST) if(!Array.isArray(D[k]))D[k]=[];
@@ -972,6 +1147,8 @@ function demoStore(){
 let store, M=build([]), season="all", curEv=null, curFam=null, editing=null, pendingImport=null;
 const SEL=new Set(); let lastPick=null, shownIds=[];
 const canWrite=()=>S.role==="tresorier";
+const canStock=()=>S.role==="tresorier"||S.role==="stock";
+const ROLE_LBL={tresorier:"trésorier",stock:"gestionnaire de stock",lecteur:"lecteur"};
 const seasonsOf=()=>[...new Set(M.events.map(e=>e.year).filter(Boolean))].sort();
 const inSeason=e=>season==="all"||e.year===+season;
 const lineInSeason=l=>season==="all"||l.year===+season;
@@ -1013,7 +1190,7 @@ function eventOptions(cur,date){
   const c=normEv(cur);
   let top=`<option value="">Choisir un événement…</option>`;
   if(c&&!vals.has(c)) top+=`<option value="${esc(c)}">${esc(c)}</option>`;
-  return top+h+`<option value="__new">+ Créer un événement…</option>`;
+  return top+h+(canWrite()?`<option value="__new">+ Créer un événement…</option>`:"");
 }
 function setEv(sel,cur,date){sel.innerHTML=eventOptions(cur,date);sel.value=normEv(cur);if(sel.value!==normEv(cur))sel.value="";sel.dataset.prev=sel.value;}
 
@@ -1097,6 +1274,7 @@ function insights(evs){
   if(top.length) out.push(`Trois premiers postes de dépense : ${top.map(([k,v])=>`${esc(k)} ${fm0(v)} (${pct(v/td)})`).join(", ")}.`);
   const up=evs.filter(e=>e.upcoming);
   if(up.length) out.push(`Acomptes déjà versés pour ${up.map(e=>`${b(e.name)} (${fm(e.dep)})`).join(", ")} : ils pèsent sur la trésorerie actuelle sans recette en face.`);
+  if(S.previsions.length){const pj=projection(), bl=pj.rows.find(x=>x.solde<pj.seuil);if(bl)out.push(`Trésorerie prévisionnelle : elle descendrait à ${b(fm(bl.solde))} en ${monthLabel(bl.ym)}, sous le seuil d'alerte de ${fm(pj.seuil)}. Voir l'onglet Prévisionnel.`);}
   return out;
 }
 function tresoSvg(until){
@@ -1290,11 +1468,12 @@ function renderReglages(){
   $("offTxt").textContent=DEMO?"En mode démonstration, les données restent sur cet appareil.":"Hors connexion, l'application reste utilisable : les écritures saisies sont gardées sur l'appareil puis envoyées au retour du réseau. Il faut s'être connecté au moins une fois sur l'appareil avec Internet.";
   if(!canWrite())return;
   if(document.activeElement!==$("sFrais"))$("sFrais").value=String(P().fraisVirement).replace(".",",");
+  if(document.activeElement!==$("sSeuil"))$("sSeuil").value=String(P().seuilTreso).replace(".",",");
   const rs=P().recurrentes||[];
   $("uTable").innerHTML=`<thead><tr><th>Désignation</th><th>Compte</th><th>Événement</th><th class="r">Montant</th><th>Paiement</th><th>Jour</th><th>Depuis</th><th>Dernière créée</th><th></th></tr></thead><tbody>${rs.length?rs.map(r=>`<tr><td>${esc(r.designation)}</td><td class="small">${r.compte==="LA"?"Livret A":"Compte courant"}</td><td class="small">${esc(r.evenement)}</td><td class="r num ${r.sens==="rec"?"pos":"neg"}">${r.sens==="rec"?"+":"−"}${fm(+r.montant||0)}</td><td class="small">${esc(r.type)}</td><td class="num">${esc(r.jour)}</td><td class="small num">${esc(monthLabel(r.depuis))}</td><td class="small num">${esc(monthLabel(r.derniere))}</td><td><button type="button" class="mini" data-uedit="${esc(r.id)}">Modifier</button></td></tr>`).join(""):`<tr><td colspan="9" class="muted">Aucune écriture récurrente. Exemple : tenue de compte, 5,65 € le 11 de chaque mois.</td></tr>`}</tbody>`;
   if(DEMO){$("dTable").innerHTML=`<tbody><tr><td class="muted">La gestion des accès s'active une fois la connexion configurée.</td></tr></tbody>`;$("mTable").innerHTML="";return;}
   $("dTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Demandé le</th><th></th></tr></thead><tbody>`+(S.demandes.length?S.demandes.map(d=>`<tr><td>${esc(d.nom||"")}</td><td>${esc(d.email||"")}</td><td class="small num">${esc(tsText(d.at))}</td><td><button type="button" class="mini primary" data-ok="${esc(d.id)}">Accepter en lecteur</button><button type="button" class="mini" data-no="${esc(d.id)}">Refuser</button></td></tr>`).join(""):`<tr><td colspan="4" class="muted">Aucune demande en attente. Un nouveau membre ouvre l'application, clique sur « Créer mon compte », puis sa demande apparaît ici.</td></tr>`)+`</tbody>`;
-  $("mTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th><th></th></tr></thead><tbody>`+S.membres.map(m=>{const self=m.id===S.user.uid;return `<tr><td>${esc(m.nom||"")}${self?` <span class="muted small">(vous)</span>`:""}</td><td>${esc(m.email||"")}</td><td><select data-role="${esc(m.id)}" ${self?"disabled":""} aria-label="Rôle"><option value="lecteur" ${m.role!=="tresorier"?"selected":""}>Lecteur</option><option value="tresorier" ${m.role==="tresorier"?"selected":""}>Trésorier</option></select></td><td>${self?"":`<button type="button" class="mini danger" data-rm="${esc(m.id)}">Retirer l'accès</button>`}</td></tr>`;}).join("")+`</tbody>`;
+  $("mTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th><th></th></tr></thead><tbody>`+S.membres.map(m=>{const self=m.id===S.user.uid;return `<tr><td>${esc(m.nom||"")}${self?` <span class="muted small">(vous)</span>`:""}</td><td>${esc(m.email||"")}</td><td><select data-role="${esc(m.id)}" ${self?"disabled":""} aria-label="Rôle"><option value="lecteur" ${m.role!=="tresorier"&&m.role!=="stock"?"selected":""}>Lecteur</option><option value="stock" ${m.role==="stock"?"selected":""}>Gestionnaire de stock</option><option value="tresorier" ${m.role==="tresorier"?"selected":""}>Trésorier</option></select></td><td>${self?"":`<button type="button" class="mini danger" data-rm="${esc(m.id)}">Retirer l'accès</button>`}</td></tr>`;}).join("")+`</tbody>`;
 }
 
 /* ---------- caisse d'un événement ---------- */
@@ -1557,14 +1736,18 @@ $("pSel").addEventListener("change",e=>{pKey=e.target.value;renderPres();});
 $("pNotes").addEventListener("input",e=>{setNotes(e.target.value);renderPres();});
 
 /* ================= navigation ================= */
-const VIEWS={synthese:renderSynthese,ecritures:renderLines,evenements:renderEvenements,evenement:renderEvent,editions:renderEditions,encarts:renderEncarts,rapprochement:renderRap,presentation:renderPres,controles:renderControles,journal:renderJournal,reglages:renderReglages};
+const VIEWS={synthese:renderSynthese,ecritures:renderLines,evenements:renderEvenements,previsionnel:renderPrev,evenement:renderEvent,editions:renderEditions,encarts:renderEncarts,rapprochement:renderRap,presentation:renderPres,controles:renderControles,journal:renderJournal,reglages:renderReglages,stock:renderStock,stockev:renderStockEv,mouvements:renderMvts,buvette:renderBuvette};
+const STOCK_VIEWS=["stock","stockev","mouvements","buvette"];
 const ALIAS={budget:"evenements",acces:"reglages"};
 function show(){
   let v=location.hash.replace("#",""); v=ALIAS[v]||v;
-  if(!VIEWS[v])v="synthese";
+  if(!VIEWS[v])v=S.role==="stock"?"stock":"synthese";
+  const sec=STOCK_VIEWS.includes(v)?"stock":"treso";
+  $("tabs").hidden=sec!=="treso"; $("tabsStock").hidden=sec!=="stock";
+  document.querySelectorAll("#sections a").forEach(a=>a.classList.toggle("on",a.dataset.sec===sec));
   for(const k in VIEWS)$("v-"+k).classList.toggle("on",k===v);
-  for(const a of $("tabs").children)a.classList.toggle("on",a.getAttribute("href")==="#"+v);
-  $("empty").hidden=M.lines.length>0||["reglages","journal","evenements","encarts"].includes(v);
+  document.querySelectorAll("#tabs a,#tabsStock a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+v));
+  $("empty").hidden=M.lines.length>0||sec==="stock"||["reglages","journal","evenements","encarts","previsionnel"].includes(v);
   VIEWS[v]();
   renderRecBanner("recBanner"); renderRecBanner("recBanner2");
 }
@@ -1576,13 +1759,14 @@ function render(){
     const scr=!S.ready?"scrLoad":!S.user?"scrAuth":!S.role?"scrWait":"app";
     for(const s of ["scrLoad","scrAuth","scrWait","app"])$(s).hidden=s!==scr;
     document.body.classList.toggle("can-write",canWrite());
+    document.body.classList.toggle("can-stock",canStock());
     if(scr==="scrWait")$("wUid").value=S.user.uid;
     if(scr!=="app")return;
     M=build(S.ecr);
     $("demo").hidden=!DEMO;
     renderNet();
     $("src").textContent=[ASSO,`${M.lines.length} écritures`,M.maxIso?`dernière écriture le ${fdate(M.maxIso)}`:""].filter(Boolean).join(" · ");
-    $("who").textContent=`${S.user.nom} · ${canWrite()?"trésorier":"lecteur"}`;
+    $("who").textContent=`${S.user.nom} · ${ROLE_LBL[S.role]||S.role}`;
     if(season!=="all"&&!seasonsOf().includes(+season))season="all";
     show();
   });
@@ -1691,6 +1875,7 @@ function openEventDialog(name,cb){
   $("vSous").value=((m&&m.sous)||(e?Object.keys(e.subs).filter(k=>k!=="Général"):[])).join(", ");
   $("vRec").value=b?dec(b.recettes):""; $("vDep").value=b?dec(b.depenses):"";
   $("vNote").value=(m&&m.note)||(b&&b.note)||"";
+  const pvx=!!(name&&pvLines(name).length); $("vRec").readOnly=$("vDep").readOnly=pvx; $("vBudHint").hidden=!pvx;
   $("vDel").hidden=!m; $("vErr").hidden=true;
   $("dlgV").showModal(); $("vNom").focus();
 }
@@ -1711,13 +1896,17 @@ $("fV").addEventListener("submit",async ev=>{
     const ob=S.budgets.find(b=>eventKey(b.evenement).parent===from); if(ob)ops.push({t:"delete",col:"budgets",id:ob.id});
     const oc=S.caisses.find(c=>c.id===slug(from));
     if(oc){if(!S.caisses.some(c=>c.id===slug(name)))ops.push({t:"set",col:"caisses",id:slug(name),data:{evenement:name,sessions:oc.sessions||[]}});ops.push({t:"delete",col:"caisses",id:slug(from)});}
+    const op=pvDoc(from); if(op){if(!pvDoc(name))ops.push({t:"set",col:"previsions",id:slug(name),data:{evenement:name,lignes:op.lignes||[]}});ops.push({t:"delete",col:"previsions",id:op.id});}
+    S.mouvements.filter(m=>m.evenement&&eventKey(m.evenement).parent===from).forEach(m=>{const k=eventKey(m.evenement);ops.push({t:"update",col:"mouvements",id:m.id,data:{evenement:k.sub?name+" - "+k.sub:name}});});
     jr.push({action:"Modification",texte:`Événement « ${from} » ${merge?"fusionné avec":"renommé en"} « ${name} » (${ls.length} écritures)`});
   }
   const doc={nom:name,debut:$("vDeb").value||null,fin:$("vFin").value||null,statut:$("vStat").value,sous:[...new Set($("vSous").value.split(/[,;]/).map(normEv).filter(Boolean))],note:$("vNote").value.trim()};
   ops.push({t:"set",col:"evenements",id:slug(name),data:doc});
   const r=$("vRec").value.trim(), d=$("vDep").value.trim(), oldB=S.budgets.find(b=>eventKey(b.evenement).parent===name);
-  if(r||d)ops.push({t:"set",col:"budgets",id:oldB?oldB.id:slug(name),data:{evenement:name,recettes:round2(parseNum(r)),depenses:round2(parseNum(d)),note:doc.note}});
-  else if(oldB&&(!from||from===name))ops.push({t:"delete",col:"budgets",id:oldB.id});
+  if(!$("vRec").readOnly){
+    if(r||d)ops.push({t:"set",col:"budgets",id:oldB?oldB.id:slug(name),data:{evenement:name,recettes:round2(parseNum(r)),depenses:round2(parseNum(d)),note:doc.note}});
+    else if(oldB&&(!from||from===name))ops.push({t:"delete",col:"budgets",id:oldB.id});
+  }
   jr.push({action:"Événement",texte:`${name} : ${doc.statut==="clos"?"clos":"en cours"}${doc.debut?", du "+fdate(doc.debut):""}${doc.fin?" au "+fdate(doc.fin):""}${r||d?`, budget recettes ${fm(parseNum(r))} / dépenses ${fm(parseNum(d))}`:""}`});
   if(await run(store.commit(ops,jr),"Événement enregistré.")){$("dlgV").close();if(evCb)evCb(name);}
 });
@@ -1824,7 +2013,7 @@ $("uDel").onclick=async()=>{
   if(r&&await ask(`Supprimer l'écriture récurrente « ${r.designation} » ? Les écritures déjà créées sont conservées.`,"Supprimer"))
     await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{recurrentes:(P().recurrentes||[]).filter(x=>x.id!==r.id)}}],{action:"Réglages",texte:`Écriture récurrente « ${r.designation} » supprimée`}),"Écriture récurrente supprimée.");
 };
-$("sFraisOk").onclick=()=>{const v=round2(parseNum($("sFrais").value));run(store.commit([{t:"merge",col:"parametres",id:"general",data:{fraisVirement:v}}],{action:"Réglages",texte:"Frais par virement : "+fm(v)}),"Réglage enregistré.");};
+$("sFraisOk").onclick=()=>{const v=round2(parseNum($("sFrais").value)), s=round2(parseNum($("sSeuil").value));run(store.commit([{t:"merge",col:"parametres",id:"general",data:{fraisVirement:v,seuilTreso:s}}],{action:"Réglages",texte:`Frais par virement : ${fm(v)} · seuil d'alerte de trésorerie : ${fm(s)}`}),"Réglages enregistrés.");};
 function openGen(){
   GEN=recPending(); if(!GEN.length)return;
   $("gTable").innerHTML=`<thead><tr><th></th><th>Date</th><th>Désignation</th><th>Événement</th><th class="r">Montant</th></tr></thead><tbody>${GEN.map((x,i)=>`<tr><td><input type="checkbox" data-gi="${i}" checked aria-label="Créer"></td><td class="num">${fdate(x.iso)}</td><td>${esc(x.r.designation)}</td><td class="small">${esc(x.r.evenement)}</td><td class="r num ${x.r.sens==="rec"?"pos":"neg"}">${x.r.sens==="rec"?"+":"−"}${fm(+x.r.montant)}</td></tr>`).join("")}</tbody>`;
@@ -2101,7 +2290,7 @@ async function readFile(file){
   }
   if(!rows.length)throw new Error("Aucune écriture trouvée. Le fichier doit garder les colonnes Date, EVENEMENT, Designation, Recettes, Dépenses, Type de Payement, Commentaires.");
   const sh=n=>wb.Sheets[n]?XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}).slice(1).filter(r=>r&&r.some(v=>v!=null&&v!=="")):null;
-  const extra={ev:sh("Événements"),ann:sh("Annonceurs"),cpt:sh("Comptages de caisse"),rec:sh("Récurrentes"),reg:sh("Réglages")};
+  const extra={ev:sh("Événements"),ann:sh("Annonceurs"),cpt:sh("Comptages de caisse"),rec:sh("Récurrentes"),reg:sh("Réglages"),pv:sh("Prévisionnel"),art:sh("Articles"),mvt:sh("Mouvements de stock"),tg:sh("Grille buvette")};
   return {rows,sheets:names.length,noDate,name:file.name,extra};
 }
 function restoreOps(x){
@@ -2132,11 +2321,24 @@ function restoreOps(x){
     x.cpt.forEach((r,i)=>{const n=eventKey(r[0]).parent;if(!n)return;if(!by.has(n))by.set(n,[]);by.get(n).push({id:"s"+i+Date.now().toString(36),libelle:String(r[1]||""),date:parseDate(r[2]),activite:String(r[3]||"Buvette & caisse"),montant:round2(parseNum(r[4])),fond:round2(parseNum(r[5])),cb:round2(parseNum(r[6])),detail:parseDetail(r[7])});});
     by.forEach((s,n)=>ops.push({t:"set",col:"caisses",id:slug(n),data:{evenement:n,sessions:s}}));
   }
-  if(x.rec||x.reg){
+  if(x.rec||x.reg||x.tg){
     const p={};
     if(x.rec)p.recurrentes=x.rec.filter(r=>r[0]).map((r,i)=>({id:"r"+i+Date.now().toString(36),designation:String(r[0]),compte:/livret/i.test(String(r[1]))?"LA":"CC",evenement:normEv(r[2])||"AUTRE",sens:/recette/i.test(String(r[3]))?"rec":"dep",montant:round2(parseNum(r[4])),type:String(r[5]||"Prélevement"),poste:POSTES_ALL.includes(String(r[6]||""))?String(r[6]):"",jour:parseInt(r[7])||1,depuis:ymOf(r[8])||today().slice(0,7),derniere:ymOf(r[9])}));
-    if(x.reg){const f=x.reg.find(r=>/frais/i.test(String(r[0])));if(f)p.fraisVirement=round2(parseNum(f[1]));}
+    if(x.reg){const f=x.reg.find(r=>/frais/i.test(String(r[0])));if(f)p.fraisVirement=round2(parseNum(f[1]));const s=x.reg.find(r=>/seuil/i.test(String(r[0])));if(s)p.seuilTreso=round2(parseNum(s[1]));const mc=x.reg.find(r=>/marge/i.test(String(r[0])));if(mc)p.margeCible=parseNum(mc[1]);}
+    if(x.tg)p.tarifs=x.tg.filter(r=>r[1]).map(r=>({id:String(r[0]||("t"+Math.random().toString(36).slice(2,8))),nom:String(r[1]),famille:String(r[2]||"Autre"),prix:round2(parseNum(r[3]))}));
     ops.push({t:"merge",col:"parametres",id:"general",data:p});
+  }
+  if(x.pv){
+    S.previsions.forEach(d=>ops.push({t:"delete",col:"previsions",id:d.id}));
+    const by=new Map(), nul=v=>v==null||v==="";
+    x.pv.forEach((r,i)=>{const n=eventKey(r[0]).parent;if(!n)return;if(!by.has(n))by.set(n,[]);by.get(n).push({id:"l"+i+Date.now().toString(36),sens:/recette/i.test(String(r[1]))?"rec":"dep",poste:String(r[2]||""),libelle:String(r[3]||""),qte:nul(r[4])?null:parseNum(r[4]),pu:nul(r[5])?null:round2(parseNum(r[5])),montant:round2(parseNum(r[6])),statut:/engag/i.test(String(r[7]))?"engage":"prevu",echeance:parseDate(r[8]),note:String(r[9]||"")});});
+    by.forEach((l,n)=>ops.push({t:"set",col:"previsions",id:slug(n),data:{evenement:n,lignes:l}}));
+  }
+  if(x.art){
+    S.articles.forEach(a=>ops.push({t:"delete",col:"articles",id:a.id})); S.mouvements.forEach(m=>ops.push({t:"delete",col:"mouvements",id:m.id}));
+    const ids=new Map();
+    for(const r of x.art){const nom=String(r[0]||"").trim();if(!nom)continue;const id=store.newId("articles");ids.set(strip(nom),id);ops.push({t:"set",col:"articles",id,data:{nom,categorie:CATS.includes(String(r[1]))?String(r[1]):"Autre",unite:String(r[2]||""),seuil:round2(parseNum(r[3])),prixAchat:round2(parseNum(r[4])),prixVente:round2(parseNum(r[5])),lieu:String(r[6]||""),note:String(r[7]||""),actif:!/^non$/i.test(String(r[8]||"")),tarif:(()=>{const n=strip(r[10]);if(!n)return "";const src=x.tg?x.tg.map(q=>({id:String(q[0]),nom:String(q[1])})):tarifs();const f=src.find(q=>strip(q.nom)===n);return f?f.id:"";})(),rendement:parseNum(r[11])}});}
+    if(x.mvt)x.mvt.forEach((r,i)=>{const id=ids.get(strip(r[2]));if(!id)return;const ty=Object.keys(MVT).find(k=>strip(MVT[k][0])===strip(r[1]))||"entree";ops.push({t:"set",col:"mouvements",id:store.newId("mouvements"),data:{date:parseDate(r[0]),type:ty,article:id,articleNom:String(r[2]),qte:round2(parseNum(r[3])),pu:Math.round(parseNum(r[4])*10000)/10000,evenement:normEv(r[5]),note:String(r[6]||""),ecart:null,ordre:i,par:String(r[7]||""),fournisseur:String(r[8]||""),facture:String(r[9]||"")}});});
   }
   return ops;
 }
@@ -2146,7 +2348,7 @@ async function startImport(file){
     pendingImport=await readFile(file);
     const p=pendingImport, x=p.extra, parts=[];
     $("iInfo").textContent=`${p.name} : ${p.rows.length} écritures lues sur ${p.sheets} feuille(s)`+(p.noDate?`, dont ${p.noDate} sans date lisible.`:".");
-    if(x.ev)parts.push(`${x.ev.length} événement(s)`); if(x.ann)parts.push(`${new Set(x.ann.map(r=>strip(r[0]))).size} annonceur(s)`); if(x.cpt)parts.push(`${x.cpt.length} comptage(s) de caisse`); if(x.rec)parts.push(`${x.rec.length} écriture(s) récurrente(s)`);
+    if(x.ev)parts.push(`${x.ev.length} événement(s)`); if(x.ann)parts.push(`${new Set(x.ann.map(r=>strip(r[0]))).size} annonceur(s)`); if(x.cpt)parts.push(`${x.cpt.length} comptage(s) de caisse`); if(x.rec)parts.push(`${x.rec.length} écriture(s) récurrente(s)`); if(x.pv)parts.push(`${x.pv.length} ligne(s) de prévisionnel`); if(x.art)parts.push(`${x.art.length} article(s) de stock`); if(x.mvt)parts.push(`${x.mvt.length} mouvement(s) de stock`);
     $("iExtraL").hidden=!parts.length&&!x.reg; $("iExtra").checked=true;
     $("iExtraT").textContent=`Restaurer aussi les autres données de la sauvegarde : ${parts.join(", ")||"réglages"} (remplace les listes actuelles)`;
     $("iModeF").hidden=!S.ecr.length; document.querySelector("input[name=iMode][value=add]").checked=true;
@@ -2201,7 +2403,17 @@ function exportXlsx(){
   const rR=[["Désignation","Compte","Événement","Sens","Montant","Paiement","Poste","Jour","Depuis","Dernière créée"]];
   for(const r of P().recurrentes||[])rR.push([r.designation,r.compte==="LA"?"Livret A":"Compte courant",r.evenement,r.sens==="rec"?"Recette":"Dépense",+r.montant||0,r.type,r.poste||"",+r.jour||1,r.depuis||"",r.derniere||""]);
   add("Récurrentes",rR);
-  add("Réglages",[["Paramètre","Valeur"],["Frais par virement",+P().fraisVirement]]);
+  const pvR=[["Événement","Sens","Poste","Libellé","Quantité","Prix unitaire","Montant","Statut","Échéance","Note"]];
+  for(const d of S.previsions)for(const l of d.lignes||[])pvR.push([d.evenement,l.sens==="rec"?"Recette":"Dépense",l.poste,l.libelle||"",l.qte==null?"":+l.qte,l.pu==null?"":+l.pu,+l.montant||0,l.statut==="engage"?"Engagé":"Prévu",l.echeance||"",l.note||""]);
+  add("Prévisionnel",pvR);
+  const stS=stockState(), arR=[["Article","Catégorie","Unité","Seuil","Prix d'achat","Prix de vente","Lieu","Note","Actif","Stock actuel","Vendu comme","Unités vendues par article"]];
+  for(const a of S.articles.slice().sort(artSort))arR.push([a.nom,a.categorie||"",a.unite||"",+a.seuil||0,+a.prixAchat||0,+a.prixVente||0,a.lieu||"",a.note||"",a.actif===false?"non":"oui",(stS.get(a.id)||{qty:0}).qty,(tarifOf(a.tarif)||{nom:""}).nom,+a.rendement||0]);
+  add("Articles",arR);
+  const mvR=[["Date","Opération","Article","Quantité","Prix unitaire","Événement","Note","Saisi par","Fournisseur","Facture"]];
+  for(const m of S.mouvements.slice().sort(byOrder))mvR.push([m.date||"",(MVT[m.type]||["?"])[0],(S.articles.find(a=>a.id===m.article)||{nom:m.articleNom}).nom,+m.qte||0,+m.pu||0,m.evenement||"",m.note||"",m.par||"",m.fournisseur||"",m.facture||""]);
+  add("Mouvements de stock",mvR);
+  add("Grille buvette",[["Id","Produit vendu","Famille","Prix"],...tarifs().map(x=>[x.id,x.nom,x.famille,+x.prix])]);
+  add("Réglages",[["Paramètre","Valeur"],["Frais par virement",+P().fraisVirement],["Seuil d'alerte de trésorerie",+P().seuilTreso],["Marge visée buvette (%)",+P().margeCible]]);
   download(new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),`Cahier_des_comptes_${today()}.xlsx`);
   try{localStorage.setItem("cahier-derniere-sauvegarde",today());}catch(e){}
   renderLines();
@@ -2247,7 +2459,7 @@ document.addEventListener("change",async e=>{
     if(l&&!await run(store.commit([{t:"update",col:"ecritures",id:l.id,data:{pointe:t.checked}}],{action:t.checked?"Pointage":"Dépointage",texte:resume({date:l.iso,compte:l.acc,evenement:l.evt,designation:l.des,recette:l.rec,depense:l.dep})})))t.checked=!t.checked;
     return;
   }
-  if(t.dataset.role){const m=S.membres.find(x=>x.id===t.dataset.role);if(m)await run(store.commit([{t:"merge",col:"membres",id:m.id,data:{role:t.value}}],{action:"Accès",texte:`${m.nom||m.email} : ${t.value==="tresorier"?"trésorier":"lecteur"}`}),"Rôle modifié.");return;}
+  if(t.dataset.role){const m=S.membres.find(x=>x.id===t.dataset.role);if(m)await run(store.commit([{t:"merge",col:"membres",id:m.id,data:{role:t.value}}],{action:"Accès",texte:`${m.nom||m.email} : ${ROLE_LBL[t.value]||t.value}`}),"Rôle modifié.");return;}
   if(t.dataset.astat){
     const a=S.annonceurs.find(x=>x.id===t.dataset.astat); if(!a)return;
     const v=t.value, y=aYear, enc=Object.assign({},a.encarts||{});
@@ -2270,6 +2482,573 @@ app.addEventListener("dragover",e=>{if(canWrite()){e.preventDefault();app.classL
 app.addEventListener("dragleave",()=>app.classList.remove("drop"));
 app.addEventListener("drop",e=>{if(!canWrite())return;e.preventDefault();app.classList.remove("drop");const f=e.dataTransfer.files[0];if(f)startImport(f);});
 window.addEventListener("hashchange",()=>{if(S.user&&S.role)show();});
+
+/* ================= prévisionnel ================= */
+const pvDoc=n=>S.previsions.find(p=>p.id===slug(n));
+const pvLines=n=>{const d=pvDoc(n);return (d&&d.lignes)||[];};
+const yearOf=n=>{const m=/(\d{4})/.exec(n||"");return m?+m[1]:null;};
+const famOf=n=>String(n||"").replace(/\s*\d{4}\s*/," ").replace(/\s+/g," ").trim();
+let pvEv=null, lEditing=null;
+function pvNames(){
+  const names=new Set(), L=evList();
+  L.forEach(x=>{if(isOpen(x)||(x.ev&&x.ev.upcoming))names.add(x.name);});
+  S.previsions.forEach(p=>names.add(eventKey(p.evenement).parent));
+  const key=n=>{const x=L.find(y=>y.name===n);return (x&&x.managed&&(x.managed.debut||x.managed.fin))||(x&&x.ev&&x.ev.first)||String(yearOf(n)||9999);};
+  return [...names].filter(Boolean).sort((a,b)=>key(a).localeCompare(key(b)));
+}
+function renderPrev(){
+  const names=pvNames();
+  if(!pvEv||!names.includes(pvEv)) pvEv=names.find(n=>pvLines(n).length)||names[0]||null;
+  $("pvSel").innerHTML=names.length?names.map(n=>`<option ${n===pvEv?"selected":""}>${esc(n)}</option>`).join(""):`<option value="">Aucun événement en cours</option>`;
+  $("pvPrev").disabled=$("pvAddRec").disabled=$("pvAddDep").disabled=!pvEv;
+  renderProjection();
+  if(!pvEv){$("pvTiles").innerHTML="";$("pvTable").innerHTML=`<tbody><tr><td class="muted">Créez d'abord un événement « en cours » dans l'onglet Événements.</td></tr></tbody>`;return;}
+  const L=pvLines(pvEv), e=M.events.find(x=>x.name===pvEv), w=canWrite();
+  const pRec=sumOf(L.filter(l=>l.sens==="rec"),l=>+l.montant||0), pDep=sumOf(L.filter(l=>l.sens==="dep"),l=>+l.montant||0);
+  const rRec=e?e.rec:0, rDep=e?e.dep:0, res=pRec-pDep;
+  const engP={}; L.filter(l=>l.sens==="dep"&&l.statut==="engage").forEach(l=>{engP[l.poste]=(engP[l.poste]||0)+(+l.montant||0);});
+  const engRest=sumOf(Object.entries(engP),([k,v])=>Math.max(0,v-((e&&e.depCat[k])||0)));
+  $("pvTiles").innerHTML=`
+    <div class="tile"><h3>Recettes prévues</h3><div class="v">${fm(pRec)}</div><div class="s">réalisées à date ${fm(rRec)}</div></div>
+    <div class="tile"><h3>Dépenses prévues</h3><div class="v">${fm(pDep)}</div><div class="s">réalisées à date ${fm(rDep)}</div></div>
+    <div class="tile ${tone(res)}"><h3>Résultat prévu</h3><div class="v ${cls(res)}">${sg(res)}</div><div class="s">réalisé à date ${sg(rRec-rDep)}</div></div>
+    <div class="tile ${engRest>0.005?"acc":""}"><h3>Engagé, reste à payer</h3><div class="v">${fm(engRest)}</div><div class="s">devis signés et commandes</div></div>`;
+  const nc=w?10:9;
+  const block=(sens,title)=>{
+    const lines=L.filter(l=>l.sens===sens), real=e?(sens==="rec"?e.recCat:e.depCat):{};
+    const postes=[...new Set([...lines.map(l=>l.poste),...Object.keys(real).filter(k=>k!=="Fond de caisse"&&Math.abs(real[k])>0.005)])];
+    const pvOf=p=>sumOf(lines.filter(l=>l.poste===p),l=>+l.montant||0);
+    postes.sort((a,b)=>(pvOf(b)||real[b]||0)-(pvOf(a)||real[a]||0));
+    let h=`<tr class="grp"><td colspan="${nc}">${title}</td></tr>`;
+    for(const p of postes){
+      const ls=lines.filter(l=>l.poste===p), pv=pvOf(p), rv=real[p]||0, ec=sens==="rec"?rv-pv:pv-rv;
+      for(const l of ls){
+        const need=sens==="rec"&&+l.qte>0&&+l.pu>0?(res>=0?"atteint":qfmt(Math.ceil(+l.qte+(-res)/(+l.pu)))):"";
+        const st=sens==="dep"?(l.statut==="engage"?`<span class="pill warn">Engagé</span>`:`<span class="pill neutral">Prévu</span>`)+(l.echeance?` <span class="small muted">${fdate(l.echeance)}</span>`:""):"";
+        h+=`<tr><td class="small muted">${esc(p)}</td><td>${esc(l.libelle||"")}${l.note?`<div class="small muted">${esc(l.note)}</div>`:""}</td><td class="r num">${l.qte?qfmt(l.qte):""}</td><td class="r num">${+l.pu?fm(+l.pu):""}</td><td class="r num">${fm(+l.montant||0)}</td><td></td><td></td><td>${st}</td><td class="r num small">${need}</td>${w?`<td><button type="button" class="mini" data-pvl="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
+      }
+      h+=`<tr class="total"><td colspan="4">${esc(p)}${ls.length?"":` <span class="pill warn">non prévu</span>`}</td><td class="r num">${fm(pv)}</td><td class="r num">${fm(rv)}</td><td class="r num ${cls(ec)}">${Math.abs(ec)<0.005?"·":sg(ec)}</td><td colspan="${nc-7}"></td></tr>`;
+    }
+    if(!postes.length)h+=`<tr><td colspan="${nc}" class="muted">Aucune ligne.</td></tr>`;
+    return h;
+  };
+  $("pvTable").innerHTML=`<thead><tr><th>Poste</th><th>Libellé</th><th class="r">Qté</th><th class="r">Prix unit.</th><th class="r">Prévu</th><th class="r">Réalisé</th><th class="r">Écart</th><th>Statut</th><th class="r">Pour l'équilibre</th>${w?"<th></th>":""}</tr></thead><tbody>${block("rec","Recettes")}${block("dep","Dépenses")}<tr class="total"><td colspan="4">Résultat</td><td class="r num ${cls(res)}">${sg(res)}</td><td class="r num ${cls(rRec-rDep)}">${sg(rRec-rDep)}</td><td colspan="${nc-6}"></td></tr></tbody>`;
+}
+function projection(){
+  const seuil=+P().seuilTreso||0, t=today(), start=t.slice(0,7), months=[...Array(12)].map((_,i)=>addMonth(start,i));
+  const flows=new Map(months.map(m=>[m,[]]));
+  const add=(ym,label,amt)=>{if(Math.abs(amt)<0.005)return;const k=ym<start?start:ym;if(flows.has(k))flows.get(k).push({label,amt:round2(amt)});};
+  for(const r of P().recurrentes||[])for(const ym of months){if(r.depuis&&ym<r.depuis)continue;if(r.derniere&&ym<=r.derniere)continue;add(ym,r.designation,(r.sens==="rec"?1:-1)*(+r.montant||0));}
+  const noDate=[], L=evList();
+  for(const d of S.previsions){
+    const name=eventKey(d.evenement).parent, ls=d.lignes||[], e=M.events.find(x=>x.name===name), m=L.find(x=>x.name===name);
+    if(m&&m.managed&&m.managed.statut==="clos")continue;
+    const remRec=Math.max(0,sumOf(ls.filter(l=>l.sens==="rec"),l=>+l.montant||0)-(e?e.rec:0));
+    let remDep=Math.max(0,sumOf(ls.filter(l=>l.sens==="dep"),l=>+l.montant||0)-(e?e.dep:0));
+    for(const l of ls.filter(l=>l.sens==="dep"&&l.statut==="engage"&&l.echeance&&l.echeance>=t).sort((a,b)=>a.echeance.localeCompare(b.echeance))){
+      const a=Math.min(remDep,+l.montant||0); if(a>0){add(l.echeance.slice(0,7),`${name} : ${l.libelle||l.poste}`,-a);remDep-=a;}
+    }
+    const when=m&&m.managed&&(m.managed.fin||m.managed.debut);
+    if(!when){if(remRec>0.005||remDep>0.005)noDate.push(name);continue;}
+    add(when.slice(0,7),`${name} : recettes restantes`,remRec); add(when.slice(0,7),`${name} : dépenses restantes`,-remDep);
+  }
+  const start0=round2(sumOf(M.lines,l=>l.rec-l.dep)); let solde=start0;
+  const rows=months.map(ym=>{const f=flows.get(ym), inn=sumOf(f.filter(x=>x.amt>0),x=>x.amt), out=sumOf(f.filter(x=>x.amt<0),x=>-x.amt);solde=round2(solde+inn-out);return {ym,f,inn,out,solde};});
+  const min=rows.reduce((a,r)=>r.solde<a.solde?r:a,rows[0]);
+  return {start:start0,rows,min,seuil,noDate};
+}
+function niceStep(span){const raw=Math.max(span,1)/4, p=Math.pow(10,Math.floor(Math.log10(raw)));return [1,2,2.5,5,10].map(k=>k*p).find(s=>s>=raw)||10*p;}
+function renderProjection(){
+  const p=projection(), r=p.rows, below=r.find(x=>x.solde<p.seuil);
+  $("prjPill").innerHTML=below?`<span class="pill bad">Sous le seuil de ${fm0(p.seuil)} en ${monthLabel(below.ym)} : ${fm0(below.solde)}</span>`:`<span class="pill good">Au plus bas : ${fm0(p.min.solde)} en ${monthLabel(p.min.ym)}</span>`;
+  const W=900,H=230,L=70,R=20,T=16,B=30, vals=[p.start,...r.map(x=>x.solde),p.seuil];
+  let lo=Math.min(0,...vals), hi=Math.max(...vals); const step=niceStep(hi-lo); lo=Math.floor(lo/step)*step; hi=Math.ceil(hi/step)*step; if(hi<=lo)hi=lo+step;
+  const n=r.length, x=i=>L+i*(W-L-R)/n, y=v=>T+(hi-v)/(hi-lo)*(H-T-B);
+  let g="";
+  for(let v=lo;v<=hi+0.01;v+=step)g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${fm0(v)}</text>`;
+  g+=`<text x="${x(0)}" y="${H-10}" text-anchor="middle">auj.</text>`+r.map((m,i)=>`<text x="${x(i+1)}" y="${H-10}" text-anchor="middle">${esc((MOIS[+m.ym.slice(5)-1]||"").replace(".",""))}</text>`).join("");
+  if(p.seuil>0)g+=`<line x1="${L}" x2="${W-R}" y1="${y(p.seuil)}" y2="${y(p.seuil)}" stroke="var(--bad)" stroke-dasharray="5 4"/><text x="${W-R}" y="${y(p.seuil)-5}" text-anchor="end" style="fill:var(--bad)">seuil ${fm0(p.seuil)}</text>`;
+  const pts=[[x(0),y(p.start)],...r.map((m,i)=>[x(i+1),y(m.solde)])];
+  const path=pts.map((q,i)=>(i?"L":"M")+q[0].toFixed(1)+" "+q[1].toFixed(1)).join("");
+  const mi=r.indexOf(p.min);
+  $("prjChart").innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Trésorerie prévue fin de mois">${g}<path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linejoin="round"/>${pts.map((q,i)=>`<circle cx="${q[0]}" cy="${q[1]}" r="${i===mi+1?4.5:2.6}" fill="${i&&r[i-1].solde<p.seuil?"var(--bad)":"var(--accent)"}"/>`).join("")}<text x="${pts[mi+1][0]}" y="${pts[mi+1][1]+18}" text-anchor="middle" style="fill:var(--ink);font-weight:600">${fm0(p.min.solde)}</text></svg>`;
+  $("prjTable").innerHTML=`<thead><tr><th>Mois</th><th class="r">Entrées prévues</th><th class="r">Sorties prévues</th><th class="r">Trésorerie fin de mois</th><th>Détail</th></tr></thead><tbody><tr><td>Aujourd'hui</td><td></td><td></td><td class="r num"><b>${fm(p.start)}</b></td><td class="small muted">compte courant + Livret A</td></tr>${r.map(m=>`<tr><td>${monthLabel(m.ym)}</td><td class="r num pos">${m.inn?fm(m.inn):""}</td><td class="r num neg">${m.out?fm(m.out):""}</td><td class="r num ${m.solde<p.seuil?"neg":""}"><b>${fm(m.solde)}</b></td><td class="small muted">${esc(m.f.map(f=>`${f.label} ${sg(f.amt)}`).join(" · "))}</td></tr>`).join("")}${p.noDate.length?`<tr><td colspan="5" class="small"><span class="pill warn">Non projeté</span> ${esc(p.noDate.join(", "))} : renseignez les dates dans l'onglet Événements.</td></tr>`:""}</tbody>`;
+}
+
+/* ---------- lignes du prévisionnel ---------- */
+function lPostes(){const s=$("lRec").checked?"rec":"dep", cur=$("lPoste").value;$("lPoste").innerHTML=(s==="rec"?POSTES_REC:POSTES_DEP).map(v=>`<option ${v===cur?"selected":""}>${esc(v)}</option>`).join("");$("lEngF").hidden=s==="rec";}
+function openLine(id,sens){
+  if(!pvEv)return;
+  lEditing=id?pvLines(pvEv).find(l=>l.id===id):null;
+  const l=lEditing||{sens:sens||"dep",poste:sens==="rec"?"Réservations (repas, emplacements)":"Animation & spectacle",libelle:"",qte:null,pu:null,montant:null,statut:"prevu",echeance:"",note:""};
+  $("lTitle").textContent=`${lEditing?"Modifier":"Ajouter"} une ligne · ${pvEv}`;
+  $("lRec").checked=l.sens==="rec"; $("lDep").checked=l.sens!=="rec";
+  $("lPoste").innerHTML=""; lPostes(); $("lPoste").value=l.poste;
+  $("lLib").value=l.libelle||""; $("lQte").value=l.qte?String(l.qte).replace(".",","):""; $("lPu").value=dec(l.pu); $("lMont").value=dec(l.montant);
+  $("lStat").value=l.statut||"prevu"; $("lEch").value=l.echeance||""; $("lNote").value=l.note||"";
+  $("lDel").hidden=!lEditing; $("lErr").hidden=true; $("dlgL").showModal(); $("lLib").focus();
+}
+async function savePv(lines,texte,msg){
+  const n=pvEv, ops=[], b=S.budgets.find(x=>eventKey(x.evenement).parent===n);
+  if(lines.length){
+    ops.push({t:"set",col:"previsions",id:slug(n),data:{evenement:n,lignes:lines}});
+    ops.push({t:"set",col:"budgets",id:b?b.id:slug(n),data:{evenement:n,recettes:round2(sumOf(lines.filter(l=>l.sens==="rec"),l=>+l.montant||0)),depenses:round2(sumOf(lines.filter(l=>l.sens==="dep"),l=>+l.montant||0)),note:(b&&b.note)||""}});
+  } else { ops.push({t:"delete",col:"previsions",id:slug(n)}); if(b)ops.push({t:"delete",col:"budgets",id:b.id}); }
+  return run(store.commit(ops,{action:"Prévisionnel",texte:`${n} : ${texte}`}),msg);
+}
+$("pvSel").addEventListener("change",e=>{pvEv=e.target.value;renderPrev();});
+$("pvAddRec").onclick=()=>openLine(null,"rec"); $("pvAddDep").onclick=()=>openLine(null,"dep");
+$("fL").addEventListener("input",e=>{
+  if(e.target.name==="lSens")lPostes();
+  if(e.target.id==="lQte"||e.target.id==="lPu"){const q=parseNum($("lQte").value),u=parseNum($("lPu").value);if(q>0&&u>0)$("lMont").value=String(round2(q*u)).replace(".",",");}
+});
+$("fL").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const sens=$("lRec").checked?"rec":"dep", mont=round2(parseNum($("lMont").value));
+  if(!(mont>0)){$("lErr").textContent="Le montant doit être positif (ou saisissez quantité et prix unitaire).";$("lErr").hidden=false;return;}
+  const q=$("lQte").value.trim(), u=$("lPu").value.trim();
+  const line={id:lEditing?lEditing.id:"l"+Date.now().toString(36),sens,poste:$("lPoste").value,libelle:$("lLib").value.trim(),qte:q?parseNum(q):null,pu:u?round2(parseNum(u)):null,montant:mont,statut:sens==="dep"?$("lStat").value:"prevu",echeance:sens==="dep"&&$("lEch").value?$("lEch").value:null,note:$("lNote").value.trim()};
+  const lines=pvLines(pvEv).filter(x=>x.id!==line.id).concat([line]);
+  if(await savePv(lines,`ligne « ${line.libelle||line.poste} » ${sens==="rec"?"recette":"dépense"} ${fm(mont)}${line.statut==="engage"?" (engagée)":""}`,"Ligne enregistrée."))$("dlgL").close();
+});
+$("lDel").onclick=async()=>{
+  const l=lEditing; $("dlgL").close();
+  if(l&&await ask(`Supprimer la ligne « ${l.libelle||l.poste} » (${fm(+l.montant||0)}) ?`,"Supprimer"))
+    await savePv(pvLines(pvEv).filter(x=>x.id!==l.id),`ligne « ${l.libelle||l.poste} » supprimée`,"Ligne supprimée.");
+};
+$("pvPrev").onclick=async()=>{
+  if(!pvEv)return;
+  const fam=famOf(pvEv), y=yearOf(pvEv)||9999;
+  const prev=M.events.filter(e=>e.family===fam&&e.year&&e.year<y&&!e.upcoming).sort((a,b)=>b.year-a.year)[0];
+  if(!prev){flash(`Aucune édition précédente de « ${fam} » dans le cahier.`,true);return;}
+  const cur=pvLines(pvEv);
+  if(!await ask(`Créer le prévisionnel de ${pvEv} à partir du réalisé de ${prev.name} (une ligne par poste) ?${cur.length?`\nLes ${cur.length} ligne(s) actuelle(s) seront remplacées.`:""}`,"Créer"))return;
+  const lines=[]; let i=0;
+  for(const [sens,obj] of [["rec",prev.recCat],["dep",prev.depCat]])for(const [p,v] of Object.entries(obj)){if(p==="Fond de caisse"||v<=0.005)continue;lines.push({id:"l"+Date.now().toString(36)+(i++),sens,poste:p,libelle:`Comme ${prev.name}`,qte:null,pu:null,montant:round2(v),statut:"prevu",echeance:null,note:""});}
+  await savePv(lines,`prévisionnel créé depuis le réalisé de ${prev.name} (${lines.length} lignes)`,`${lines.length} ligne(s) reprises de ${prev.name} : ajustez-les.`);
+};
+
+/* ================= stock ================= */
+const CATS=["Boissons","Alimentaire","Consommables","Goodies & textile","Matériel","Autre"];
+const CAT_POSTE={"Boissons":"Boissons","Alimentaire":"Courses & consommables","Consommables":"Courses & consommables","Goodies & textile":"Goodies & textile","Matériel":"Matériel & équipement","Autre":"Divers"};
+const MVT={entree:["Réception","good",1],sortie:["Sortie","warn",-1],retour:["Retour","neutral",1],perte:["Perte","bad",-1],retfour:["Retour fournisseur","neutral",-1],inventaire:["Inventaire","neutral",0]};
+const MODE_LBL={entree:"Réception d'achat",sortie:"Sortie vers un événement",retour:"Retour d'un événement",perte:"Perte, casse ou offert",retfour:"Retour au fournisseur ou avoir",inventaire:"Inventaire (comptage)"};
+const qfmt=v=>(Math.round((+v||0)*100)/100).toLocaleString("fr-FR");
+let stCat="all", SM={qty:{},pu:{},cat:"all"}, arEditing=null, seEv=null;
+const byOrder=(a,b)=>String(a.date||"").localeCompare(String(b.date||""))||(a.ordre||0)-(b.ordre||0);
+function stockState(){
+  const st=new Map(S.articles.map(a=>[a.id,{qty:0,last:null}]));
+  for(const m of S.mouvements.slice().sort(byOrder)){
+    const s=st.get(m.article); if(!s)continue; const q=+m.qte||0;
+    if(m.type==="inventaire")s.qty=q; else s.qty=round2(s.qty+(MVT[m.type]?MVT[m.type][2]:0)*q);
+    s.last=m.date;
+  }
+  return st;
+}
+const artStatus=(a,q)=>q<=0?["Épuisé","bad"]:(+a.seuil>0&&q<+a.seuil)?["Bas","warn"]:["OK","good"];
+const artSort=(a,b)=>(CATS.indexOf(a.categorie)-CATS.indexOf(b.categorie))||String(a.nom).localeCompare(String(b.nom),"fr");
+function consoOf(name){
+  const per=new Map();
+  for(const m of S.mouvements){
+    if(!m.evenement||eventKey(m.evenement).parent!==name)continue;
+    const a=per.get(m.article)||{out:0,ret:0,loss:0}, q=+m.qte||0;
+    if(m.type==="sortie")a.out+=q; else if(m.type==="retour")a.ret+=q; else if(m.type==="perte")a.loss+=q;
+    per.set(m.article,a);
+  }
+  per.forEach(a=>{a.conso=round2(a.out-a.ret+a.loss);});
+  return per;
+}
+function renderStock(){
+  const st=stockState(), all=S.articles.slice().sort(artSort), act=all.filter(a=>a.actif!==false);
+  const qty=a=>st.get(a.id).qty;
+  const val=sumOf(act,a=>Math.max(0,qty(a))*(+a.prixAchat||0));
+  const low=act.filter(a=>qty(a)>0&&+a.seuil>0&&qty(a)<+a.seuil), out=act.filter(a=>qty(a)<=0);
+  $("stTiles").innerHTML=`
+    <div class="tile acc"><h3>Valeur du stock</h3><div class="v">${fm(val)}</div><div class="s">au prix d'achat</div></div>
+    <div class="tile"><h3>Articles suivis</h3><div class="v">${act.length}</div><div class="s">${all.length-act.length} inactif(s)</div></div>
+    <div class="tile ${low.length?"bad":""}"><h3>Sous le seuil</h3><div class="v">${low.length}</div><div class="s">à racheter</div></div>
+    <div class="tile ${out.length?"bad":""}"><h3>Épuisés</h3><div class="v">${out.length}</div><div class="s">stock nul ou négatif</div></div>`;
+  const cnt=k=>k==="all"?act.length:k==="alerte"?low.length+out.length:k==="inactif"?all.length-act.length:act.filter(a=>a.categorie===k).length;
+  $("stCats").innerHTML=[["all","Tous"],["alerte","À racheter"],...CATS.map(c=>[c,c]),["inactif","Inactifs"]].filter(([k])=>k==="all"||cnt(k)>0).map(([k,l])=>`<button type="button" class="chip ${stCat===k?"on":""}" data-stc="${esc(k)}">${esc(l)} · ${cnt(k)}</button>`).join("");
+  const q=strip($("stQ").value), ws=canStock();
+  const rows=(stCat==="inactif"?all.filter(a=>a.actif===false):act).filter(a=>(stCat==="all"||stCat==="inactif"||(stCat==="alerte"?(qty(a)<=0||(+a.seuil>0&&qty(a)<+a.seuil)):a.categorie===stCat))&&(!q||strip(a.nom+" "+(a.lieu||"")).includes(q)));
+  $("stCount").textContent=`${rows.length} article(s) affiché(s)`;
+  $("stTable").innerHTML=`<thead><tr><th>Article</th><th>Catégorie</th><th class="r">Stock</th><th class="r">Seuil</th><th class="r">Prix d'achat</th><th class="r">Valeur</th><th>Dernier mouvement</th><th>État</th>${ws?"<th></th>":""}</tr></thead><tbody>${rows.length?rows.map(a=>{
+    const s=st.get(a.id), [l,c]=artStatus(a,s.qty);
+    return `<tr><td><b>${esc(a.nom)}</b>${a.lieu?`<div class="small muted">${esc(a.lieu)}</div>`:""}</td><td class="small">${esc(a.categorie||"")}</td><td class="r num"><b>${qfmt(s.qty)}</b> <span class="small muted">${esc(a.unite||"")}</span></td><td class="r num">${+a.seuil?qfmt(a.seuil):"·"}</td><td class="r num">${+a.prixAchat?fm(+a.prixAchat):"·"}</td><td class="r num">${fm(Math.max(0,s.qty)*(+a.prixAchat||0))}</td><td class="small num">${s.last?fdate(s.last):"·"}</td><td><span class="pill ${c}">${l}</span></td>${ws?`<td><button type="button" class="mini" data-artmv="${esc(a.id)}">Mouvement</button><button type="button" class="mini" data-arted="${esc(a.id)}">Modifier</button></td>`:""}</tr>`;
+  }).join(""):`<tr><td colspan="9" class="muted">${S.articles.length?"Aucun article pour ce filtre.":"Aucun article. Créez-les un par un, ou importez votre liste depuis Excel (bouton « Modèle d'import » pour le format)."}</td></tr>`}</tbody>`;
+}
+function renderMvts(){
+  const nm=id=>(S.articles.find(a=>a.id===id)||{}).nom;
+  fillSelect($("mvArt"),"Tous les articles",[...new Set(S.mouvements.map(m=>nm(m.article)||m.articleNom||"?"))].sort((a,b)=>a.localeCompare(b,"fr")));
+  fillSelect($("mvEv"),"Tous les événements",[...new Set(S.mouvements.map(m=>m.evenement?eventKey(m.evenement).parent:"").filter(Boolean))].sort());
+  const fa=$("mvArt").value, fe=$("mvEv").value, ft=$("mvType").value, ws=canStock();
+  const ls=S.mouvements.filter(m=>(!fa||(nm(m.article)||m.articleNom)===fa)&&(!fe||(m.evenement&&eventKey(m.evenement).parent===fe))&&(!ft||m.type===ft)).sort(byOrder).reverse();
+  $("mvCount").textContent=`${ls.length} mouvement(s)`;
+  $("mvTable").innerHTML=`<thead><tr><th>Date</th><th>Opération</th><th>Article</th><th class="r">Quantité</th><th class="r">Prix unit.</th><th class="r">Valeur</th><th>Événement</th><th>Note</th><th>Saisi par</th>${ws?"<th></th>":""}</tr></thead><tbody>${ls.length?ls.map(m=>{
+    const t=MVT[m.type]||["?","neutral",0], a=S.articles.find(x=>x.id===m.article)||{}, q=+m.qte||0;
+    const qs=m.type==="inventaire"?`= ${qfmt(q)}${m.ecart!=null&&Math.abs(m.ecart)>0.005?` <span class="small ${m.ecart<0?"neg":"pos"}">(${m.ecart>0?"+":""}${qfmt(m.ecart)})</span>`:""}`:`<span class="${t[2]<0?"neg":"pos"}">${t[2]<0?"−":"+"}${qfmt(q)}</span>`;
+    return `<tr><td class="num small">${fdate(m.date)}</td><td><span class="pill ${t[1]}">${t[0]}</span></td><td>${esc(a.nom||m.articleNom||"")} <span class="small muted">${esc(a.unite||"")}</span></td><td class="r num">${qs}</td><td class="r num">${+m.pu?fm(+m.pu):"·"}</td><td class="r num">${+m.pu?fm(q*(+m.pu)):"·"}</td><td class="small">${esc(m.evenement||"")}</td><td class="small muted">${esc(m.note||"")}</td><td class="small muted">${esc(m.par||"")}</td>${ws?`<td><button type="button" class="mini danger" data-mvdel="${esc(m.id)}">Supprimer</button></td>`:""}</tr>`;
+  }).join(""):`<tr><td colspan="10" class="muted">Aucun mouvement.</td></tr>`}</tbody>`;
+}
+function prevEditionWithStock(name){
+  const fam=famOf(name), y=yearOf(name)||9999;
+  const cands=[...new Set(S.mouvements.map(m=>m.evenement?eventKey(m.evenement).parent:"").filter(n=>n&&famOf(n)===fam&&(yearOf(n)||0)<y))];
+  return cands.sort((a,b)=>(yearOf(b)||0)-(yearOf(a)||0))[0]||null;
+}
+function renderStockEv(){
+  const names=[...new Set([...pvNames(),...S.mouvements.map(m=>m.evenement?eventKey(m.evenement).parent:"").filter(Boolean),...M.events.map(e=>e.name)])].sort((a,b)=>(yearOf(b)||0)-(yearOf(a)||0)||a.localeCompare(b));
+  if(!seEv||!names.includes(seEv))seEv=pvNames()[0]||names[0]||null;
+  $("seSel").innerHTML=names.map(n=>`<option ${n===seEv?"selected":""}>${esc(n)}</option>`).join("");
+  if(!seEv)return;
+  const per=consoOf(seEv), st=stockState(), A=new Map(S.articles.map(a=>[a.id,a]));
+  const rows=[...per.entries()].map(([id,c])=>({a:A.get(id)||{nom:"(article supprimé)"},c})).sort((x,y)=>artSort(x.a,y.a));
+  const cost=r=>r.c.conso*(+r.a.prixAchat||0), theo=r=>+r.a.prixVente>0?r.c.conso*(+r.a.prixVente):0;
+  const ev=M.events.find(e=>e.name===seEv), buv=ev?(ev.recCat["Buvette & caisse"]||0):0;
+  const cB=sumOf(rows.filter(r=>r.a.categorie==="Boissons"),cost), cT=sumOf(rows,cost), th=sumOf(rows,theo), loss=sumOf(rows,r=>r.c.loss*(+r.a.prixAchat||0));
+  $("seTiles").innerHTML=`
+    <div class="tile"><h3>Coût des produits consommés</h3><div class="v">${fm(cT)}</div><div class="s">dont pertes ${fm(loss)}</div></div>
+    <div class="tile"><h3>Recettes buvette (cahier)</h3><div class="v">${fm(buv)}</div><div class="s">${seEv}</div></div>
+    <div class="tile ${buv&&cB?tone(buv-cB):""}"><h3>Marge sur boissons</h3><div class="v ${buv&&cB?cls(buv-cB):""}">${buv&&cB?sg(buv-cB):"·"}</div><div class="s">${buv&&cB?`recettes buvette − boissons consommées (${fm(cB)})`:"nécessite sorties et recettes"}</div></div>
+    <div class="tile ${th&&buv?(buv<th-0.005?"bad":"good"):""}"><h3>Recette attendue d'après le stock</h3><div class="v">${th?fm(th):"·"}</div><div class="s">${th?(buv?`caisse ${sg(buv-th)} par rapport au stock vendu`:"consommé × prix de vente"):"renseignez les prix de vente"}</div></div>`;
+  const ws=canStock();
+  $("seTable").innerHTML=`<thead><tr><th>Article</th><th class="r">Sorti</th><th class="r">Revenu</th><th class="r">Perte</th><th class="r">Consommé</th><th class="r">Coût</th><th class="r">Recette attendue</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td>${esc(r.a.nom)} <span class="small muted">${esc(r.a.unite||"")}</span></td><td class="r num">${qfmt(r.c.out)}</td><td class="r num">${r.c.ret?qfmt(r.c.ret):"·"}</td><td class="r num">${r.c.loss?qfmt(r.c.loss):"·"}</td><td class="r num"><b>${qfmt(r.c.conso)}</b></td><td class="r num">${fm(cost(r))}</td><td class="r num">${theo(r)?fm(theo(r)):"·"}</td></tr>`).join("")+`<tr class="total"><td>Total</td><td></td><td></td><td></td><td></td><td class="r num">${fm(cT)}</td><td class="r num">${th?fm(th):""}</td></tr>`:`<tr><td colspan="7" class="muted">Aucun mouvement de stock pour cet événement.${ws?" Utilisez « Sortie vers l'événement » avant, puis « Retour » après.":""}</td></tr>`}</tbody>`;
+  const ref=prevEditionWithStock(seEv), refPer=ref?consoOf(ref):null;
+  let prep;
+  if(refPer&&refPer.size){
+    $("sePrepTxt").textContent=`Quantités consommées à ${ref}, comparées au stock actuel. À acheter = consommé à ${ref} − stock actuel.`;
+    prep=[...refPer.entries()].map(([id,c])=>{const a=A.get(id);if(!a)return null;const s=st.get(id).qty;return {a,s,ref:c.conso,buy:Math.max(0,Math.ceil(c.conso-s))};}).filter(Boolean);
+  } else {
+    $("sePrepTxt").textContent="Aucune édition précédente avec des mouvements de stock : la liste reprend les articles sous leur seuil (à acheter = seuil − stock actuel).";
+    prep=S.articles.filter(a=>a.actif!==false&&+a.seuil>0&&st.get(a.id).qty<+a.seuil).map(a=>{const s=st.get(a.id).qty;return {a,s,ref:null,buy:Math.max(0,Math.ceil(+a.seuil-s))};});
+  }
+  prep.sort((x,y)=>artSort(x.a,y.a)); SE_PREP=prep;
+  $("sePrep").innerHTML=`<thead><tr><th>Article</th><th class="r">Stock actuel</th><th class="r">${ref?`Consommé à ${esc(ref)}`:"Seuil"}</th><th class="r">À acheter</th><th class="r">Coût estimé</th></tr></thead><tbody>${prep.length?prep.map(p=>`<tr><td>${esc(p.a.nom)} <span class="small muted">${esc(p.a.unite||"")}</span></td><td class="r num">${qfmt(p.s)}</td><td class="r num">${qfmt(p.ref!=null?p.ref:p.a.seuil)}</td><td class="r num"><b>${p.buy?qfmt(p.buy):"·"}</b></td><td class="r num">${p.buy&&+p.a.prixAchat?fm(p.buy*(+p.a.prixAchat)):"·"}</td></tr>`).join("")+`<tr class="total"><td colspan="4">Total estimé</td><td class="r num">${fm(sumOf(prep,p=>p.buy*(+p.a.prixAchat||0)))}</td></tr>`:`<tr><td colspan="5" class="muted">Rien à acheter d'après les données disponibles.</td></tr>`}</tbody>`;
+  $("seRef").textContent=ref?`Référence : ${ref}`:"";
+}
+let SE_PREP=[];
+
+/* ---------- mouvements (fenêtre multi-articles) ---------- */
+function sModeUI(){
+  const m=$("sMode").value;
+  $("sTitle").textContent=MODE_LBL[m]; $("sEvtF").hidden=m==="inventaire"; $("sCahier").hidden=m!=="entree"||!canWrite();
+  $("sEvtL").textContent=m==="entree"?"Événement (pour la dépense au cahier)":m==="perte"||m==="retfour"?"Événement (facultatif)":"Événement";
+}
+function sRowUpdate(id){
+  const m=$("sMode").value, a=S.articles.find(x=>x.id===id); if(!a)return;
+  const st=stockState().get(id).qty, v=String(SM.qty[id]==null?"":SM.qty[id]).trim(), q=parseNum(v);
+  const after=v===""?null:m==="inventaire"?q:round2(st+(MVT[m][2])*q);
+  const cA=document.querySelector(`[data-safter="${id}"]`); if(cA)cA.innerHTML=after==null?"·":`<span class="${after<0?"neg":""}">${qfmt(after)}</span>${m==="inventaire"&&Math.abs(after-st)>0.005?` <span class="small ${after<st?"neg":"pos"}">(${after>st?"+":""}${qfmt(after-st)})</span>`:""}`;
+  const cM=document.querySelector(`[data-smont="${id}"]`); if(cM){const pu=SM.pu[id]!=null?parseNum(SM.pu[id]):(+a.prixAchat||0);cM.textContent=v!==""&&q>0?fm(q*pu):"·";}
+}
+function sSum(){
+  const m=$("sMode").value, items=S.articles.filter(a=>String(SM.qty[a.id]==null?"":SM.qty[a.id]).trim()!=="");
+  const val=sumOf(items,a=>{const q=parseNum(SM.qty[a.id]);const pu=m==="entree"&&SM.pu[a.id]!=null?parseNum(SM.pu[a.id]):(+a.prixAchat||0);return m==="inventaire"?0:q*pu;});
+  $("sSum").textContent=`${items.length} article(s) saisi(s)${m!=="inventaire"?` · valeur ${fm(val)}`:""}`;
+}
+function renderMvtTable(){
+  const m=$("sMode").value, st=stockState(), q=strip($("sQ").value);
+  const cnt=c=>S.articles.filter(a=>a.actif!==false&&(c==="all"||a.categorie===c)).length;
+  $("sCats").innerHTML=[["all","Tous"],...CATS.map(c=>[c,c])].filter(([k])=>cnt(k)>0).map(([k,l])=>`<button type="button" class="chip ${SM.cat===k?"on":""}" data-scat="${esc(k)}">${esc(l)}</button>`).join("");
+  const arts=S.articles.filter(a=>a.actif!==false&&(SM.cat==="all"||a.categorie===SM.cat)&&(!q||strip(a.nom).includes(q))).sort(artSort);
+  const ent=m==="entree"||m==="retfour";
+  $("sTable").innerHTML=`<thead><tr><th>Article</th><th class="r">Stock actuel</th><th>${m==="inventaire"?"Quantité comptée":"Quantité"}</th>${ent?"<th>Prix d'achat unitaire (€)</th><th class=\"r\">Montant</th>":""}<th class="r">${m==="inventaire"?"Nouveau stock (écart)":"Stock après"}</th></tr></thead><tbody>${arts.length?arts.map(a=>`<tr><td>${esc(a.nom)} <span class="small muted">${esc(a.unite||"")}</span></td><td class="r num">${qfmt(st.get(a.id).qty)}</td><td><input type="text" inputmode="decimal" data-sq="${esc(a.id)}" value="${esc(SM.qty[a.id]==null?"":SM.qty[a.id])}" aria-label="Quantité ${esc(a.nom)}" style="width:110px"></td>${ent?`<td><input type="text" inputmode="decimal" data-spu="${esc(a.id)}" value="${esc(SM.pu[a.id]!=null?SM.pu[a.id]:dec(a.prixAchat))}" aria-label="Prix d'achat ${esc(a.nom)}" style="width:110px"></td><td class="r num" data-smont="${esc(a.id)}">·</td>`:""}<td class="r num" data-safter="${esc(a.id)}">·</td></tr>`).join(""):`<tr><td colspan="6" class="muted">${S.articles.length?"Aucun article pour ce filtre.":"Créez d'abord vos articles dans l'onglet État du stock."}</td></tr>`}</tbody>`;
+  arts.forEach(a=>sRowUpdate(a.id)); sSum();
+}
+function openMvt(mode,opt){
+  opt=opt||{}; SM={qty:{},pu:{},cat:"all"};
+  $("sMode").value=mode; $("sDate").value=today(); setEv($("sEvt"),opt.evt||"",today()); $("sNote").value=""; $("sQ").value=opt.q||"";
+  $("sType").innerHTML=typeOptions("Virement"); $("sAcc").value="CC"; $("sDes").value=""; $("sEcr").checked=true; $("sErr").hidden=true;
+  sModeUI(); renderMvtTable(); $("dlgS").showModal();
+}
+$("sMode").addEventListener("change",()=>{sModeUI();renderMvtTable();});
+$("sQ").addEventListener("input",renderMvtTable);
+$("sTable").addEventListener("input",e=>{const t=e.target;if(t.dataset.sq){SM.qty[t.dataset.sq]=t.value;sRowUpdate(t.dataset.sq);sSum();}if(t.dataset.spu){SM.pu[t.dataset.spu]=t.value;sRowUpdate(t.dataset.spu);sSum();}});
+$("fS").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const m=$("sMode").value, date=$("sDate").value, evtRaw=$("sEvt").value, evt=evtRaw&&evtRaw!=="__new"?evtRaw:"", note=$("sNote").value.trim(), st=stockState(), err=$("sErr");
+  const fail=t=>{err.textContent=t;err.hidden=false;};
+  const items=S.articles.filter(a=>String(SM.qty[a.id]==null?"":SM.qty[a.id]).trim()!=="").map(a=>({a,q:round2(parseNum(SM.qty[a.id])),pu:m==="entree"&&SM.pu[a.id]!=null&&String(SM.pu[a.id]).trim()!==""?round2(parseNum(SM.pu[a.id])):round2(+a.prixAchat||0)})).filter(x=>m==="inventaire"?x.q>=0:x.q>0);
+  if(!items.length)return fail("Saisissez au moins une quantité.");
+  if((m==="sortie"||m==="retour")&&!evt)return fail("Choisissez l'événement.");
+  const mkEcr=m==="entree"&&canWrite()&&$("sEcr").checked;
+  if(mkEcr&&!evt)return fail("Pour créer la dépense dans le cahier, choisissez l'événement auquel elle se rattache, ou décochez la case.");
+  const ops=items.map((x,i)=>({t:"set",col:"mouvements",id:store.newId("mouvements"),data:{date,type:m,article:x.a.id,articleNom:x.a.nom,qte:x.q,pu:x.pu,evenement:m==="inventaire"?"":evt,note,fournisseur:m==="entree"||m==="retfour"?note:"",ecart:m==="inventaire"?round2(x.q-st.get(x.a.id).qty):null,ordre:Date.now()+i,par:S.user.nom}}));
+  if(m==="entree")items.filter(x=>x.pu>0&&Math.abs(x.pu-(+x.a.prixAchat||0))>0.0001).forEach(x=>ops.push({t:"update",col:"articles",id:x.a.id,data:{prixAchat:x.pu}}));
+  const jr=[{action:"Stock",texte:`${MODE_LBL[m]} du ${fdate(date)}${evt?" · "+evt:""}${note?" · "+note:""} : `+items.slice(0,15).map(x=>`${x.a.nom} ${qfmt(x.q)}`).join(", ")+(items.length>15?"…":"")}];
+  if(mkEcr){
+    const groups=new Map(); items.forEach(x=>{const p=CAT_POSTE[x.a.categorie]||"Divers";if(!groups.has(p))groups.set(p,[]);groups.get(p).push(x);});
+    let i=0;
+    for(const [poste,xs] of groups){
+      const tot=round2(sumOf(xs,x=>x.q*x.pu)); if(!(tot>0))continue;
+      const d={compte:$("sAcc").value,date,evenement:evt,designation:($("sDes").value.trim()||("Achat "+(note||"stock")))+(groups.size>1?" – "+poste:""),recette:0,depense:tot,type:$("sType").value,commentaire:("Réception de stock : "+xs.map(x=>`${x.a.nom} ${qfmt(x.q)}`).join(", ")).slice(0,240),pointe:false,poste};
+      ops.push(opNewEcr(d,i++)); jr.push({action:"Création",texte:resume(d)});
+    }
+  }
+  if(await run(store.commit(ops,jr),`${MODE_LBL[m]} enregistrée : ${items.length} article(s).`))$("dlgS").close();
+});
+$("stIn").onclick=()=>openMvt("entree"); $("stOut").onclick=()=>openMvt("sortie"); $("stRet").onclick=()=>openMvt("retour"); $("stInv").onclick=()=>openMvt("inventaire"); $("stLoss").onclick=()=>openMvt("perte");
+$("seOut").onclick=()=>openMvt("sortie",{evt:seEv}); $("seRet").onclick=()=>openMvt("retour",{evt:seEv});
+$("stQ").addEventListener("input",renderStock);
+$("seSel").addEventListener("change",e=>{seEv=e.target.value;renderStockEv();});
+for(const id of ["mvArt","mvEv","mvType"])$(id).addEventListener("change",renderMvts);
+
+/* ---------- articles ---------- */
+function openArt(id){
+  arEditing=id?S.articles.find(a=>a.id===id):null;
+  const a=arEditing||{nom:"",categorie:"Boissons",unite:"",seuil:"",prixAchat:"",prixVente:"",lieu:"",note:"",actif:true};
+  $("arTitle").textContent=arEditing?"Modifier l'article":"Nouvel article";
+  $("arNom").value=a.nom||""; $("arCat").innerHTML=CATS.map(c=>`<option ${c===a.categorie?"selected":""}>${esc(c)}</option>`).join("");
+  $("arUnite").value=a.unite||""; $("arSeuil").value=a.seuil?String(a.seuil).replace(".",","):""; $("arPA").value=dec(a.prixAchat); $("arPV").value=dec(a.prixVente);
+  $("arLieu").value=a.lieu||""; $("arNote").value=a.note||""; $("arTarif").innerHTML=tarifOptions(a.tarif||""); $("arRend").value=a.rendement?String(a.rendement).replace(".",","):""; $("arAct").checked=a.actif!==false; $("arInit").value="";
+  $("arInitF").hidden=!!arEditing; $("arActL").hidden=!arEditing; $("arDel").hidden=!arEditing; $("arErr").hidden=true;
+  $("dlgArt").showModal(); $("arNom").focus();
+}
+$("stNew").onclick=()=>openArt(null);
+$("fArt").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const nom=$("arNom").value.trim(), err=$("arErr");
+  if(!nom){err.textContent="Saisissez le nom de l'article.";err.hidden=false;return;}
+  if(S.articles.some(a=>strip(a.nom)===strip(nom)&&(!arEditing||a.id!==arEditing.id))){err.textContent="Un article porte déjà ce nom.";err.hidden=false;return;}
+  const id=arEditing?arEditing.id:store.newId("articles");
+  const data={nom,categorie:$("arCat").value,unite:$("arUnite").value.trim(),seuil:round2(parseNum($("arSeuil").value)),prixAchat:round2(parseNum($("arPA").value)),prixVente:round2(parseNum($("arPV").value)),lieu:$("arLieu").value.trim(),note:$("arNote").value.trim(),actif:arEditing?$("arAct").checked:true,tarif:$("arTarif").value,rendement:parseNum($("arRend").value)};
+  const ops=[{t:"set",col:"articles",id,data}], init=$("arInit").value.trim();
+  if(!arEditing&&init!=="")ops.push({t:"set",col:"mouvements",id:store.newId("mouvements"),data:{date:today(),type:"inventaire",article:id,articleNom:nom,qte:round2(parseNum(init)),pu:data.prixAchat,evenement:"",note:"Stock initial",ecart:round2(parseNum(init)),ordre:Date.now(),par:S.user.nom}});
+  if(await run(store.commit(ops,{action:"Stock",texte:`Article « ${nom} » ${arEditing?"modifié":"créé"}${!arEditing&&init!==""?`, stock initial ${qfmt(parseNum(init))}`:""}`}),"Article enregistré."))$("dlgArt").close();
+});
+$("arDel").onclick=async()=>{
+  const a=arEditing; $("dlgArt").close(); if(!a)return;
+  const mv=S.mouvements.filter(m=>m.article===a.id);
+  if(await ask(`Supprimer l'article « ${a.nom} »${mv.length?` et ses ${mv.length} mouvement(s)`:""} ? Pour le garder dans l'historique, décochez plutôt « Article actif ».`,"Supprimer"))
+    await run(store.commit([{t:"delete",col:"articles",id:a.id},...mv.map(m=>({t:"delete",col:"mouvements",id:m.id}))],{action:"Stock",texte:`Article « ${a.nom} » supprimé (${mv.length} mouvements)`}),"Article supprimé.");
+};
+$("stTpl").onclick=()=>{
+  if(typeof XLSX==="undefined"){flash("La bibliothèque Excel n'a pas pu se charger.",true);return;}
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([["Article","Catégorie","Unité","Stock","Seuil","Prix d'achat","Prix de vente","Lieu de stockage"],["Bière pression fût 30 L","Boissons","fût",4,2,95,"","Local du comité"],["Coca-Cola 33 cl","Boissons","canette",120,48,0.45,2,"Local du comité"],["Gobelet réutilisable","Consommables","pièce",500,200,0.6,"",""],["Bandana fête","Goodies & textile","pièce",80,20,2.5,5,""]]);
+  ws["!cols"]=[{wch:28},{wch:18},{wch:10},{wch:8},{wch:8},{wch:12},{wch:12},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,ws,"Articles");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Catégories possibles"],...CATS.map(c=>[c])]),"Catégories");
+  download(new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),"Modele_import_articles.xlsx");
+};
+$("stFile").addEventListener("change",async e=>{
+  const f=e.target.files[0]; e.target.value=""; if(!f)return;
+  try{
+    const rows=await readTable(f);
+    let h=-1; for(let i=0;i<Math.min(rows.length,20);i++){if((rows[i]||[]).some(c=>/^(article|designation|produit|nom)/.test(strip(c)))){h=i;break;}}
+    if(h<0)throw new Error("Colonne « Article » introuvable : partez du modèle d'import.");
+    const H=rows[h].map(c=>strip(c)), col=re=>H.findIndex(c=>re.test(c));
+    const c={nom:col(/^(article|designation|produit|nom)/),cat:col(/categ/),un:col(/unite/),st:col(/stock|quantit|^qte/),se:col(/seuil|mini/),pa:col(/achat|cout/),pv:col(/vente/),li:col(/lieu|emplacement|rangement/)};
+    const get=(r,i)=>i>=0&&r[i]!=null?String(r[i]).trim():"";
+    const items=rows.slice(h+1).filter(r=>r&&get(r,c.nom)).map(r=>({nom:get(r,c.nom),cat:get(r,c.cat),un:get(r,c.un),st:get(r,c.st),se:get(r,c.se),pa:get(r,c.pa),pv:get(r,c.pv),li:get(r,c.li)}));
+    if(!items.length)throw new Error("Aucun article trouvé sous la ligne des titres.");
+    const isNew=it=>!S.articles.some(a=>strip(a.nom)===strip(it.nom));
+    const withStock=items.filter(it=>it.st!=="").length;
+    if(!await ask(`Importer ${items.length} article(s), dont ${items.filter(isNew).length} nouveau(x) ?${withStock?`\nLes ${withStock} stock(s) indiqué(s) sont enregistrés comme inventaire du ${fdate(today())}.`:""}`,"Importer"))return;
+    const ops=[]; let i=0;
+    for(const it of items){
+      const ex=S.articles.find(a=>strip(a.nom)===strip(it.nom)), id=ex?ex.id:store.newId("articles");
+      const catN=CATS.find(x=>strip(x)===strip(it.cat))||(ex?ex.categorie:"Autre");
+      const data=Object.assign({},ex?{nom:ex.nom,categorie:ex.categorie,unite:ex.unite||"",seuil:+ex.seuil||0,prixAchat:+ex.prixAchat||0,prixVente:+ex.prixVente||0,lieu:ex.lieu||"",note:ex.note||"",actif:ex.actif!==false,tarif:ex.tarif||"",rendement:+ex.rendement||0}:{nom:it.nom,unite:"",seuil:0,prixAchat:0,prixVente:0,lieu:"",note:"",actif:true,tarif:"",rendement:0},{categorie:catN});
+      if(it.un)data.unite=it.un; if(it.se!=="")data.seuil=round2(parseNum(it.se)); if(it.pa!=="")data.prixAchat=round2(parseNum(it.pa)); if(it.pv!=="")data.prixVente=round2(parseNum(it.pv)); if(it.li)data.lieu=it.li;
+      ops.push({t:"set",col:"articles",id,data});
+      if(it.st!=="")ops.push({t:"set",col:"mouvements",id:store.newId("mouvements"),data:{date:today(),type:"inventaire",article:id,articleNom:data.nom,qte:round2(parseNum(it.st)),pu:data.prixAchat,evenement:"",note:"Import "+f.name,ecart:null,ordre:Date.now()+(i++),par:S.user.nom}});
+    }
+    await run(store.commit(ops,{action:"Stock",texte:`${f.name} : ${items.length} articles importés`}),`${items.length} article(s) importé(s).`);
+  }catch(err){flash(err.message||"Fichier illisible.",true);}
+});
+async function copyText(txt,ok){try{await navigator.clipboard.writeText(txt);flash(ok);}catch(e){flash("La copie a été refusée par le navigateur.",true);}}
+$("stShop").onclick=()=>{
+  const st=stockState(), l=S.articles.filter(a=>a.actif!==false&&+a.seuil>0&&st.get(a.id).qty<+a.seuil).sort(artSort);
+  if(!l.length){flash("Aucun article sous son seuil.");return;}
+  copyText(`Liste de courses (${fdate(today())})\n`+l.map(a=>`- ${a.nom} : ${qfmt(Math.ceil(+a.seuil-st.get(a.id).qty))} ${a.unite||""}`.trim()).join("\n"),`${l.length} article(s) copié(s).`);
+};
+$("seCopy").onclick=()=>{
+  const l=SE_PREP.filter(p=>p.buy>0);
+  if(!l.length){flash("Rien à acheter.");return;}
+  copyText(`Achats pour ${seEv}\n`+l.map(p=>`- ${p.a.nom} : ${qfmt(p.buy)} ${p.a.unite||""}`.trim()).join("\n"),`${l.length} article(s) copié(s).`);
+};
+
+/* ---------- clics de la partie stock et prévisionnel ---------- */
+document.addEventListener("click",async e=>{
+  let t;
+  if((t=e.target.closest("[data-pvl]"))){openLine(t.dataset.pvl);return;}
+  if((t=e.target.closest("[data-stc]"))){stCat=t.dataset.stc;renderStock();return;}
+  if((t=e.target.closest("[data-scat]"))){SM.cat=t.dataset.scat;renderMvtTable();return;}
+  if((t=e.target.closest("[data-arted]"))){openArt(t.dataset.arted);return;}
+  if((t=e.target.closest("[data-artmv]"))){const a=S.articles.find(x=>x.id===t.dataset.artmv);openMvt("entree",{q:a?a.nom:""});return;}
+  if((t=e.target.closest("[data-mvdel]"))){
+    const m=S.mouvements.find(x=>x.id===t.dataset.mvdel); if(!m)return;
+    const a=S.articles.find(x=>x.id===m.article)||{nom:m.articleNom};
+    if(await ask(`Supprimer ce mouvement : ${(MVT[m.type]||["?"])[0]} de ${qfmt(m.qte)} « ${a.nom} » du ${fdate(m.date)} ? Le stock sera recalculé.`,"Supprimer"))
+      await run(store.commit([{t:"delete",col:"mouvements",id:m.id}],{action:"Stock",texte:`Mouvement supprimé : ${(MVT[m.type]||["?"])[0]} ${qfmt(m.qte)} ${a.nom} du ${fdate(m.date)}`}),"Mouvement supprimé.");
+  }
+});
+
+/* ================= analyse buvette ================= */
+const DEFAULT_TARIFS=[
+  {id:"pression-verre",nom:"Bière pression – verre",famille:"Bière pression",prix:2.5},
+  {id:"pression-pichet",nom:"Bière pression – pichet 1,5 L",famille:"Bière pression",prix:14},
+  {id:"panache",nom:"Panaché",famille:"Bière pression",prix:2.5},
+  {id:"heineken",nom:"Heineken bouteille",famille:"Bière bouteille",prix:2.5},
+  {id:"heineken-caisse",nom:"Heineken caisse de 20",famille:"Bière bouteille",prix:45},
+  {id:"desperados",nom:"Desperados",famille:"Bière bouteille",prix:3.5},
+  {id:"get-bouteille",nom:"GET 27 bouteille + Perrier",famille:"GET 27",prix:35},
+  {id:"get-verre",nom:"GET 27 verre + Perrier",famille:"GET 27",prix:3.5},
+  {id:"sangria-verre",nom:"Sangria – verre",famille:"Sangria",prix:2},
+  {id:"sangria-pichet",nom:"Sangria – pichet 1,5 L",famille:"Sangria",prix:10},
+  {id:"vin-verre",nom:"Muscat, vins, blanquette – verre",famille:"Vins & blanquette",prix:2},
+  {id:"vin-bouteille",nom:"Muscat, vins, blanquette – bouteille",famille:"Vins & blanquette",prix:12},
+  {id:"soft",nom:"Softs – verre",famille:"Softs",prix:2},
+  {id:"sirop",nom:"Sirop à l'eau – verre",famille:"Softs",prix:2},
+  {id:"eau-50",nom:"Eau 50 cl",famille:"Eau",prix:1},
+  {id:"eau-150",nom:"Eau 1,5 L",famille:"Eau",prix:2}
+];
+const FAMILLES=["Bière pression","Bière bouteille","GET 27","Sangria","Vins & blanquette","Softs","Eau","Autre"];
+const tarifs=()=>(P().tarifs&&P().tarifs.length?P().tarifs:DEFAULT_TARIFS);
+const tarifOf=id=>tarifs().find(t=>t.id===id)||null;
+function tarifOptions(cur){return `<option value="">Non vendu à la buvette (repas, usage interne…)</option>`+FAMILLES.map(f=>{const ts=tarifs().filter(t=>(t.famille||"Autre")===f);return ts.length?`<optgroup label="${esc(f)}">${ts.map(t=>`<option value="${esc(t.id)}" ${t.id===cur?"selected":""}>${esc(t.nom)} · ${fm(+t.prix||0)}</option>`).join("")}</optgroup>`:"";}).join("");}
+let bvEv=null, TG=null;
+function bvEvents(){
+  const s=new Set(S.mouvements.filter(m=>m.evenement&&(m.type==="sortie"||m.type==="entree")).map(m=>eventKey(m.evenement).parent));
+  return [...s].sort((a,b)=>(yearOf(b)||0)-(yearOf(a)||0)||a.localeCompare(b));
+}
+function bvData(name){
+  // par article : consommé pour l'événement, valorisé au prix d'achat net de l'événement (achats − avoirs)
+  const per=consoOf(name), A=new Map(S.articles.map(a=>[a.id,a])), buy=new Map();
+  for(const m of S.mouvements){
+    if(!m.evenement||eventKey(m.evenement).parent!==name)continue;
+    if(m.type!=="entree"&&m.type!=="retfour")continue;
+    const b=buy.get(m.article)||{q:0,v:0,f:new Set()}, s=m.type==="entree"?1:-1;
+    b.q+=s*(+m.qte||0); b.v+=s*(+m.qte||0)*(+m.pu||0); if(m.fournisseur)b.f.add(m.fournisseur); buy.set(m.article,b);
+  }
+  const rows=[];
+  per.forEach((c,id)=>{
+    const a=A.get(id); if(!a||!(Math.abs(c.conso)>0.0001))return;
+    const b=buy.get(id), pu=b&&Math.abs(b.q)>0.0001?b.v/b.q:(+a.prixAchat||0);
+    rows.push({a,conso:c.conso,pu,cost:c.conso*pu,units:c.conso*(+a.rendement||0),t:tarifOf(a.tarif),four:b?[...b.f].join(", "):""});
+  });
+  const stockOnly=[...buy.entries()].filter(([id,b])=>b.q>0.0001&&!per.has(id)).length;
+  return {rows,stockOnly};
+}
+function renderBuvette(){
+  const evs=bvEvents();
+  if(!bvEv||!evs.includes(bvEv))bvEv=evs[0]||null;
+  $("bvSel").innerHTML=evs.length?evs.map(n=>`<option ${n===bvEv?"selected":""}>${esc(n)}</option>`).join(""):`<option value="">Aucun achat rattaché à un événement</option>`;
+  renderGrille(); renderPrixAchat();
+  if(!bvEv){$("bvTiles").innerHTML="";$("bvTable").innerHTML=`<tbody><tr><td class="muted">Importez les factures d'un événement (bouton « Importer des factures ») ou enregistrez des sorties de stock vers un événement.</td></tr></tbody>`;$("bvOther").innerHTML="";$("bvNote").textContent="";return;}
+  const d=bvData(bvEv), cible=(+P().margeCible||65)/100, ws=canStock();
+  const groups=new Map();
+  for(const r of d.rows){if(!r.t)continue;const g=groups.get(r.t.id)||{t:r.t,cost:0,units:0,arts:[]};g.cost+=r.cost;g.units+=r.units;g.arts.push(r);groups.set(r.t.id,g);}
+  const G=[...groups.values()].map(g=>Object.assign(g,{cu:g.units>0?g.cost/g.units:null,pot:g.units*(+g.t.prix||0)})).sort((a,b)=>b.pot-a.pot||b.cost-a.cost);
+  const cost=sumOf(G,g=>g.cost), pot=sumOf(G,g=>g.pot), ev=M.events.find(e=>e.name===bvEv), caisse=ev?(ev.recCat["Buvette & caisse"]||0):0;
+  const taux=pot>0?caisse/pot:NaN;
+  $("bvTiles").innerHTML=`
+    <div class="tile"><h3>Coût des boissons</h3><div class="v">${fm(cost)}</div><div class="s">achats nets consommés, rattachés à la grille</div></div>
+    <div class="tile acc"><h3>Recette potentielle</h3><div class="v">${fm(pot)}</div><div class="s">si tout est vendu au tarif · marge ${pot>0?pct(1-cost/pot):"n/a"}</div></div>
+    <div class="tile"><h3>Recette buvette au cahier</h3><div class="v">${fm(caisse)}</div><div class="s">${caisse?`${pct(taux)} de la recette potentielle`:"poste « Buvette & caisse »"}</div></div>
+    <div class="tile ${caisse?tone(caisse-cost):""}"><h3>Marge brute réelle</h3><div class="v ${caisse?cls(caisse-cost):""}">${caisse?sg(caisse-cost):"·"}</div><div class="s">recette au cahier − coût des boissons</div></div>`;
+  $("bvNote").textContent=(caisse&&taux<0.9?`La caisse représente ${pct(taux)} de la recette potentielle : l'écart vient des invendus restés en stock, des verres offerts (bénévoles, musiciens), des pichets vendus moins cher que les verres, des pertes à la tireuse ou d'erreurs de caisse. `:"")+(d.stockOnly?`${d.stockOnly} article(s) achetés pour cet événement sont restés en stock (pas de sortie) et ne sont pas comptés. `:"")+"La caisse peut aussi inclure d'autres ventes que la buvette.";
+  const nc=ws?11:10;
+  $("bvTable").innerHTML=`<thead><tr><th>Produit vendu</th><th>Articles achetés</th><th class="r">Unités</th><th class="r">Coût</th><th class="r">Coût unitaire</th><th class="r">Prix</th><th class="r">Marge unitaire</th><th class="r">Taux de marge</th><th class="r">Prix pour ${pct(cible)}</th><th class="r">Recette potentielle</th>${ws?"<th></th>":""}</tr></thead><tbody>${G.length?FAMILLES.map(f=>{
+    const gs=G.filter(g=>(g.t.famille||"Autre")===f); if(!gs.length)return "";
+    return `<tr class="grp"><td colspan="${nc}">${esc(f)}</td></tr>`+gs.map(g=>{
+      const pv=+g.t.prix||0, m=g.cu!=null?pv-g.cu:null, tx=m!=null&&pv>0?m/pv:null, conseil=g.cu!=null?g.cu/(1-cible):null;
+      return `<tr><td><b>${esc(g.t.nom)}</b></td><td class="small">${g.arts.map(r=>`${esc(r.a.nom)} <span class="muted">(${qfmt(r.conso)} ${esc(r.a.unite||"")} × ${qfmt(+r.a.rendement||0)})</span>`).join("<br>")}</td><td class="r num">${qfmt(Math.round(g.units))}</td><td class="r num">${fm(g.cost)}</td><td class="r num"><b>${g.cu!=null?fm(g.cu):"·"}</b></td><td class="r num">${fm(pv)}</td><td class="r num ${m!=null?cls(m):""}">${m!=null?fm(m):"·"}</td><td class="r">${tx!=null?`<span class="pill ${tx>=cible?"good":tx>=cible-0.15?"warn":"bad"}">${pct(tx)}</span>`:"·"}</td><td class="r num ${conseil!=null&&conseil>pv+0.005?"neg":""}">${conseil!=null?fm(Math.ceil(conseil*10)/10):"·"}</td><td class="r num">${fm(g.pot)}</td>${ws?`<td>${g.arts.map(r=>`<button type="button" class="mini" data-arted="${esc(r.a.id)}" title="${esc(r.a.nom)}">Modifier</button>`).slice(0,1).join("")}</td>`:""}</tr>`;
+    }).join("");
+  }).join("")+`<tr class="total"><td colspan="3">Total</td><td class="r num">${fm(cost)}</td><td colspan="5"></td><td class="r num">${fm(pot)}</td>${ws?"<td></td>":""}</tr>`:`<tr><td colspan="${nc}" class="muted">Aucun article consommé n'est rattaché à la grille de prix : indiquez « Vendu comme » dans la fiche des articles.</td></tr>`}</tbody>`;
+  const other=d.rows.filter(r=>!r.t).sort((a,b)=>b.cost-a.cost);
+  $("bvOther").innerHTML=other.length?`<thead><tr><th>Article</th><th class="r">Quantité</th><th class="r">Coût</th><th>Note</th>${ws?"<th></th>":""}</tr></thead><tbody>${other.map(r=>`<tr><td>${esc(r.a.nom)}</td><td class="r num">${qfmt(r.conso)} <span class="small muted">${esc(r.a.unite||"")}</span></td><td class="r num">${fm(r.cost)}</td><td class="small muted">${esc(r.a.note||"")}</td>${ws?`<td><button type="button" class="mini" data-arted="${esc(r.a.id)}">Rattacher</button></td>`:""}</tr>`).join("")}<tr class="total"><td>Total</td><td></td><td class="r num">${fm(sumOf(other,r=>r.cost))}</td><td></td>${ws?"<td></td>":""}</tr></tbody>`:`<tbody><tr><td class="muted">Tous les achats consommés sont rattachés à la grille.</td></tr></tbody>`;
+}
+function renderPrixAchat(){
+  // prix d'achat moyen de chaque article, par événement et par fournisseur
+  const evs=bvEvents().slice().reverse(), A=new Map(S.articles.map(a=>[a.id,a])), map=new Map();
+  for(const m of S.mouvements){
+    if(m.type!=="entree"||!m.evenement||!(+m.pu>0))continue;
+    const e=eventKey(m.evenement).parent, k=m.article, x=map.get(k)||{};
+    const c=x[e]||{q:0,v:0,f:new Set()}; c.q+=+m.qte||0; c.v+=(+m.qte||0)*(+m.pu); if(m.fournisseur)c.f.add(m.fournisseur); x[e]=c; map.set(k,x);
+  }
+  const rows=[...map.entries()].map(([id,x])=>({a:A.get(id),x})).filter(r=>r.a).sort((a,b)=>artSort(a.a,b.a));
+  $("bvPrix").innerHTML=rows.length?`<thead><tr><th>Article</th>${evs.map(e=>`<th class="r">${esc(e)}</th>`).join("")}<th class="r">Évolution</th></tr></thead><tbody>${rows.map(r=>{
+    const vals=evs.map(e=>r.x[e]&&r.x[e].q>0?r.x[e].v/r.x[e].q:null), known=vals.filter(v=>v!=null);
+    const ev=known.length>1?known[known.length-1]/known[known.length-2]-1:null;
+    return `<tr><td>${esc(r.a.nom)} <span class="small muted">${esc(r.a.unite||"")}</span></td>${evs.map((e,i)=>`<td class="r num">${vals[i]!=null?fm(vals[i]):"·"}${r.x[e]&&r.x[e].f.size?`<div class="small muted">${esc([...r.x[e].f].join(", "))}</div>`:""}</td>`).join("")}<td class="r">${ev!=null?`<span class="pill ${ev>0.03?"bad":ev<-0.03?"good":"neutral"}">${ev>0?"+":""}${(ev*100).toFixed(0)} %</span>`:"·"}</td></tr>`;
+  }).join("")}</tbody>`:`<tbody><tr><td class="muted">Aucun achat avec prix.</td></tr></tbody>`;
+}
+function renderGrille(){
+  if(!TG)TG=tarifs().map(t=>Object.assign({},t));
+  const w=canWrite();
+  $("tgCible").value=String(+P().margeCible||65); $("tgCible").disabled=!w;
+  $("tgTable").innerHTML=`<thead><tr><th>Produit vendu</th><th>Famille</th><th class="r">Prix (€)</th>${w?"<th></th>":""}</tr></thead><tbody>${TG.map((t,i)=>w?`<tr><td><input type="text" data-tg="${i}" data-tk="nom" value="${esc(t.nom)}" aria-label="Produit" style="width:100%;min-width:220px"></td><td><select data-tg="${i}" data-tk="famille" aria-label="Famille">${FAMILLES.map(f=>`<option ${f===(t.famille||"Autre")?"selected":""}>${esc(f)}</option>`).join("")}</select></td><td class="r"><input type="text" inputmode="decimal" data-tg="${i}" data-tk="prix" value="${esc(dec(t.prix))}" aria-label="Prix" style="width:90px;text-align:right"></td><td><button type="button" class="mini danger" data-tgdel="${i}">Retirer</button></td></tr>`:`<tr><td>${esc(t.nom)}</td><td class="small">${esc(t.famille||"")}</td><td class="r num">${fm(+t.prix||0)}</td></tr>`).join("")}</tbody>`;
+}
+$("bvSel").addEventListener("change",e=>{bvEv=e.target.value;renderBuvette();});
+$("tgTable").addEventListener("input",e=>{const t=e.target,i=t.dataset.tg;if(i==null)return;TG[+i][t.dataset.tk]=t.dataset.tk==="prix"?parseNum(t.value):t.value;});
+$("tgTable").addEventListener("change",e=>{const t=e.target,i=t.dataset.tg;if(i==null)return;TG[+i][t.dataset.tk]=t.dataset.tk==="prix"?parseNum(t.value):t.value;});
+$("tgAdd").onclick=()=>{TG.push({id:"t"+Date.now().toString(36),nom:"",famille:"Softs",prix:2});renderGrille();};
+$("tgReset").onclick=()=>{TG=null;renderBuvette();};
+$("tgSave").onclick=async()=>{
+  const list=TG.filter(t=>String(t.nom).trim()).map(t=>({id:t.id,nom:String(t.nom).trim(),famille:t.famille||"Autre",prix:round2(+t.prix||0)}));
+  const cible=Math.min(95,Math.max(0,parseNum($("tgCible").value)||65));
+  if(await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{tarifs:list,margeCible:cible}}],{action:"Réglages",texte:`Grille de prix de la buvette : ${list.length} produits, marge visée ${cible} %`}),"Grille de prix enregistrée.")){TG=null;}
+};
+
+/* ---------- import des factures ---------- */
+let BVI=null;
+const BV_HEAD=["Date","Fournisseur","Facture","Événement","Article","Catégorie","Unité","Quantité","Prix unitaire TTC","Vendu comme","Unités vendues par article","Note"];
+$("bvTpl").onclick=()=>{
+  if(typeof XLSX==="undefined"){flash("La bibliothèque Excel n'a pas pu se charger.",true);return;}
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([BV_HEAD,["24/07/2026","ABD","26008431","FETE 2027","Bière blonde fût 30 L","Boissons","fût",40,110.51,"Bière pression – verre",120,"une ligne négative = fût rendu"],["24/07/2026","Super U","68194","FETE 2027","Sangria 1,5 L","Boissons","bouteille",50,2.95,"Sangria – verre",6,""]]);
+  ws["!cols"]=BV_HEAD.map((h,i)=>({wch:[11,14,12,12,34,12,10,9,14,32,12,30][i]}));
+  XLSX.utils.book_append_sheet(wb,ws,"Achats");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Vendu comme (copier exactement)","Famille","Prix"],...tarifs().map(t=>[t.nom,t.famille,+t.prix])]),"Grille buvette");
+  download(new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),"Modele_import_factures_buvette.xlsx");
+};
+$("bvFile").addEventListener("change",async e=>{
+  const f=e.target.files[0]; e.target.value=""; if(!f)return;
+  try{
+    const rows=await readTable(f);
+    let h=-1; for(let i=0;i<Math.min(rows.length,15);i++){const r=(rows[i]||[]).map(strip);if(r.includes("article")&&r.some(c=>/^quantit/.test(c))){h=i;break;}}
+    if(h<0)throw new Error("Colonnes « Article » et « Quantité » introuvables : partez du modèle d'import.");
+    const H=rows[h].map(strip), col=re=>H.findIndex(c=>re.test(c));
+    const c={d:col(/^date/),f:col(/fournisseur/),fa:col(/facture/),e:col(/evenement/),a:col(/^article/),cat:col(/categ/),u:col(/^unite$/),q:col(/^quantit/),pu:col(/prix/),t:col(/vendu comme/),r:col(/unites vendues/),n:col(/^note/)};
+    const g=(r,i)=>i>=0&&r[i]!=null?String(r[i]).trim():"";
+    const items=rows.slice(h+1).filter(r=>r&&g(r,c.a)&&g(r,c.q)!=="").map(r=>({date:parseDate(r[c.d])||today(),four:g(r,c.f),fac:g(r,c.fa),evt:normEv(g(r,c.e)),art:g(r,c.a),cat:g(r,c.cat),un:g(r,c.u),q:parseNum(r[c.q]),pu:round2(parseNum(r[c.pu])*10000)/10000,tar:g(r,c.t),rend:g(r,c.r),note:g(r,c.n)})).filter(x=>x.q);
+    if(!items.length)throw new Error("Aucune ligne d'achat trouvée.");
+    BVI={name:f.name,items};
+    const evs=[...new Set(items.map(x=>x.evt).filter(Boolean))], noEv=items.filter(x=>!x.evt).length;
+    const unknownT=[...new Set(items.filter(x=>x.tar&&!tarifs().some(t=>t.id===x.tar||strip(t.nom)===strip(x.tar))).map(x=>x.tar))];
+    const tot=sumOf(items,x=>x.q*x.pu);
+    $("bviInfo").innerHTML=`<b>${esc(f.name)}</b> : ${items.length} ligne(s), ${new Set(items.map(x=>strip(x.art))).size} article(s), total ${fm(tot)}${evs.length?` · ${esc(evs.join(", "))}`:""}.`
+      +(noEv?`<br><span class="neg">${noEv} ligne(s) sans événement : elles entreront dans le stock.</span>`:"")
+      +(unknownT.length?`<br><span class="neg">« Vendu comme » inconnu dans la grille : ${esc(unknownT.join(", "))}. Ces articles seront « non vendus » jusqu'à correction.</span>`:"");
+    document.querySelector("input[name=bviMode][value=conso]").checked=true;
+    $("dlgBV").showModal();
+  }catch(err){flash(err.message||"Fichier illisible.",true);}
+});
+$("fBV").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const X=BVI; if(!X)return;
+  const conso=document.querySelector("input[name=bviMode]:checked").value==="conso";
+  const ops=[], arts=new Map(S.articles.map(a=>[strip(a.nom),Object.assign({},a)])), touched=new Set(); let o=Date.now();
+  for(const x of X.items){
+    const k=strip(x.art); let a=arts.get(k);
+    if(!a){a={id:store.newId("articles"),nom:x.art,categorie:"Autre",unite:"",seuil:0,prixAchat:0,prixVente:0,lieu:"",note:"",actif:true,tarif:"",rendement:0};arts.set(k,a);}
+    const t=x.tar?tarifs().find(t=>t.id===x.tar||strip(t.nom)===strip(x.tar)):null;
+    if(x.cat)a.categorie=CATS.find(c=>strip(c)===strip(x.cat))||a.categorie||"Autre";
+    if(x.un)a.unite=x.un; if(x.tar)a.tarif=t?t.id:""; if(x.rend!=="")a.rendement=parseNum(x.rend); if(x.q>0&&x.pu>0)a.prixAchat=x.pu; if(x.note&&!a.note)a.note=x.note;
+    touched.add(k);
+    const base={date:x.date,article:a.id,articleNom:a.nom,pu:x.pu,fournisseur:x.four,facture:x.fac,note:[x.fac?"Facture "+x.fac:"",x.note].filter(Boolean).join(" · "),ecart:null,par:S.user.nom};
+    const q=Math.abs(x.q), evt=x.evt||"";
+    const mv=(type,ev2)=>ops.push({t:"set",col:"mouvements",id:store.newId("mouvements"),data:Object.assign({},base,{type,qte:q,evenement:ev2,ordre:o++})});
+    if(x.q>0){mv("entree",evt);if(conso&&evt)mv("sortie",evt);}
+    else{if(conso&&evt)mv("retour",evt);mv("retfour",evt);}
+  }
+  for(const k of touched){const a=arts.get(k);const {id,...data}=a;ops.unshift({t:"set",col:"articles",id,data:{nom:data.nom,categorie:data.categorie,unite:data.unite||"",seuil:+data.seuil||0,prixAchat:+data.prixAchat||0,prixVente:+data.prixVente||0,lieu:data.lieu||"",note:data.note||"",actif:data.actif!==false,tarif:data.tarif||"",rendement:+data.rendement||0}});}
+  if(await run(store.commit(ops,{action:"Stock",texte:`${X.name} : ${X.items.length} lignes de factures importées${conso?" (consommées pendant l'événement)":" (entrées en stock)"}`}),`${X.items.length} ligne(s) importée(s).`)){
+    $("dlgBV").close(); const e1=X.items.find(x=>x.evt); if(e1){bvEv=e1.evt;} BVI=null;
+  }
+});
 
 /* ================= connexion ================= */
 let signup=false;
