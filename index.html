@@ -1533,7 +1533,7 @@ function renderRap(){
 function renderControles(){
   const sum=f=>M.lines.filter(f).reduce((s,l)=>s+l.rec-l.dep,0);
   const cc=sum(l=>l.acc==="CC"), la=sum(l=>l.acc==="LA");
-  const open=sum(l=>l.kind==="interne"&&/solde du compte|recuperation du compte/.test(strip(l.des)));
+  const open=sum(l=>l.kind==="interne"&&/solde du compte|recuperation du compte|apres changement de bureau/.test(strip(l.des+" "+l.evt)));
   const transf=sum(l=>l.kind==="interne")-open, ev=M.events.reduce((s,e)=>s+e.res,0), fon=sum(l=>l.kind==="fonct"), inv=sum(l=>l.kind==="invest"), ok=Math.abs(transf)<0.01;
   $("ctlRecon").innerHTML=`<tbody>
     <tr><td>Soldes repris à l'ouverture (ancien bureau)</td><td class="r num">${fm(open)}</td><td></td></tr>
