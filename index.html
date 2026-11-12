@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cahier des comptes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -274,9 +274,86 @@ dialog.drawer[open]{animation:drw .18s ease-out}
 }
 @media print{.side,.topbar,.botnav,#subnav,#evHead{display:none !important}.shell{display:block}}
 #cText{white-space:pre-line}
+
+/* ================= v7 : téléphone, carte de trésorerie, messages ================= */
+#flash{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:90;max-width:min(560px,calc(100vw - 24px));width:max-content;background:var(--ink);color:var(--bg);box-shadow:0 10px 30px rgba(0,0,0,.28);display:flex;gap:12px;align-items:center;border-radius:12px;padding:11px 16px}
+#flash.err{background:var(--bad);color:#fff}
+#flash button{background:transparent;color:inherit;border-color:currentColor}
+.hero{position:relative;overflow:hidden;border-radius:18px;padding:22px 24px;color:#fff;background:linear-gradient(135deg,#163a66 0%,#1d4e89 55%,#2f74b5 100%);display:flex;min-height:150px}
+.hero-main{position:relative;z-index:1;display:flex;flex-direction:column;gap:4px}
+.hero .hl{font-size:12px;text-transform:uppercase;letter-spacing:.09em;opacity:.8}
+.hero-main>b{font-size:clamp(30px,6vw,42px);font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.hero .hd{font-size:13px;opacity:.9}
+.hacc{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.hacc span{background:rgba(255,255,255,.14);border-radius:10px;padding:7px 12px;font-size:12px;display:flex;flex-direction:column;gap:1px}
+.hacc b{font-size:15px;font-weight:600}
+.hero .spark{position:absolute;right:0;bottom:0;width:62%;height:70%;opacity:.38;color:#fff}
+.quick{display:flex;gap:10px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.quick::-webkit-scrollbar{display:none}
+.quick button{flex:1 0 auto;min-width:86px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 10px;border-radius:14px;font-size:13px;position:relative}
+.quick .ic,.sheet .ic{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:19px;font-weight:600}
+.quick .due{border-color:var(--warn)}
+.quick i{position:absolute;top:6px;right:8px;font-style:normal;font-size:10.5px;background:var(--warn-soft);color:var(--warn);border-radius:999px;padding:1px 6px}
+.hnext button{width:100%;display:flex;align-items:center;gap:14px;text-align:left;padding:12px 16px;border-radius:14px}
+.hnext .jj{background:var(--accent);color:var(--surface);border-radius:10px;padding:8px 12px;font-weight:600;white-space:nowrap}
+.hnext .nx{flex:1;display:flex;flex-direction:column}.hnext .small{color:var(--muted)}
+kbd.k{font:11.5px var(--body);color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:1px 6px;background:var(--bg);margin-left:auto}
+.pop .sub+kbd.k{margin-left:10px}
+dialog.sheet{margin:auto auto 0;width:min(520px,100vw);max-width:100vw;border-radius:20px 20px 0 0;border-width:1px 1px 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+dialog.sheet[open]{animation:sht .2s ease-out}
+@keyframes sht{from{transform:translateY(60px);opacity:.4}}
+.sheet .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sheet .grid button{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 6px;border-radius:14px;font-size:13px}
+.sheet h2{margin-bottom:12px}
+#dlgKeys table td{padding:5px 8px}
+.dq{display:flex;gap:8px;margin-top:2px}
+.fabw{display:none}
+dialog.drawer form>.row.between:last-child{position:sticky;bottom:-22px;background:var(--surface);padding:12px 0 22px;margin-bottom:-22px;border-top:1px solid var(--line)}
+tr[data-row]{cursor:default}
+@media (max-width:880px){
+  #flash{bottom:calc(84px + env(safe-area-inset-bottom))}
+  #newMenuWrap{display:none !important}
+  .topbar{padding-top:max(12px,env(safe-area-inset-top))}
+  .botnav{align-items:flex-end}
+  .fabw{display:block;position:relative;width:64px}
+  #fab{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);width:58px;height:58px;border-radius:50%;background:var(--accent);color:var(--surface);border:4px solid var(--surface);font-size:30px;line-height:1;padding:0;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+  input,select,textarea{font-size:16px !important}
+  button,.btn{min-height:42px}
+  button.mini,.chip{min-height:34px}
+  .tiles{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .tile .v{font-size:20px}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}.chip{white-space:nowrap;flex:none}
+  .hero{padding:18px}
+}
+@media (max-width:700px){
+  table:has(tr.lr),table:has(tr.lr) tbody{display:block}
+  table:has(tr.lr) thead{display:none}
+  tr.lr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:10px;row-gap:1px;padding:10px 2px;border-bottom:1px solid var(--line);align-items:center}
+  tr.lr td{border:0;padding:0;background:none !important}
+  tr.lr.picked{background:var(--accent-soft)}
+  tr.lr .sel,tr.lr .c-ptc{grid-column:1;grid-row:1 / span 3;width:auto;padding-right:2px}
+  tr.lr .sel input,tr.lr .c-ptc input{width:22px;height:22px}
+  tr.lr .c-des{grid-column:2;grid-row:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  tr.lr .c-rec,tr.lr .c-dep{grid-column:3;grid-row:1;font-weight:600}
+  tr.lr .c-rec:empty,tr.lr .c-dep:empty,tr.lr .c-type,tr.lr .c-com,tr.lr .c-act{display:none}
+  tr.lr .c-evt{grid-column:2;grid-row:2;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  tr.lr .c-date{grid-column:3;grid-row:2;font-size:12.5px;color:var(--muted);text-align:right}
+  tr.lr .c-cat{grid-column:2;grid-row:3;font-size:12px}
+  tr.lr .c-pt{grid-column:3;grid-row:3;text-align:right;color:var(--good)}
+  tr.lr .c-rec::before{content:"+"}tr.lr .c-dep::before{content:"−"}
+}
+@media (max-width:700px){
+  .hero .spark{top:14px;bottom:auto;width:46%;height:38%}
+  #v-ecritures #q{min-width:0 !important;flex:1 1 100%}
+  #v-ecritures .card>p.small{display:none}
+  #lastSave{display:none}
+}
+@media (display-mode:standalone){.side{padding-top:max(18px,env(safe-area-inset-top))}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#1d4e89">
+<meta name="theme-color" content="#f4f6f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1513" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -344,16 +421,18 @@ dialog.drawer[open]{animation:drw .18s ease-out}
       <details class="menu" id="newMenuWrap">
         <summary class="btn primary">+ Nouveau</summary>
         <div class="pop" id="newMenu">
-          <button type="button" class="w" id="bNew">Opération<span class="sub">recette ou dépense</span></button>
-          <button type="button" class="w" id="bTransfer">Virement interne<span class="sub">compte ↔ Livret A</span></button>
-          <button type="button" class="w" id="bNewEv">Événement</button>
+          <button type="button" class="w" id="bNew">Dépense<kbd class="k">N</kbd></button>
+          <button type="button" class="w" data-quick="recette">Recette<kbd class="k">R</kbd></button>
+          <button type="button" class="w" id="bTransfer">Virement interne<kbd class="k">V</kbd></button>
+          <button type="button" class="w" id="bNewEv">Événement<kbd class="k">E</kbd></button>
           <button type="button" class="w" id="bNewAnn">Annonceur</button>
           <div class="grp ws">Stock</div>
-          <button type="button" class="ws" id="bNewIn">Réception d'achat</button>
+          <button type="button" class="ws" id="bNewIn">Réception d'achat<kbd class="k">S</kbd></button>
           <button type="button" class="ws" id="bNewOut">Sortie vers un événement</button>
           <button type="button" class="ws" id="bNewArt">Article</button>
           <div class="grp w">Fichiers</div>
           <button type="button" class="w" id="bNewImp">Importer un fichier…</button>
+          <button type="button" onclick="document.getElementById('dlgKeys').showModal()">Raccourcis clavier<kbd class="k">?</kbd></button>
         </div>
       </details>
     </header>
@@ -366,6 +445,9 @@ dialog.drawer[open]{animation:drw .18s ease-out}
     <div class="card" id="ficheEmpty" hidden></div>
 
     <section class="view" id="v-accueil">
+      <div class="hero" id="hero"></div>
+      <div class="quick" id="hQuick"></div>
+      <div class="hnext" id="hNext" hidden></div>
       <div class="tiles" id="hTiles"></div>
       <div class="two">
         <div class="card"><div class="row between"><h2>À faire</h2><span class="small muted" id="hTodoN"></span></div><ul class="todo" id="hTodo"></ul></div>
@@ -643,12 +725,31 @@ dialog.drawer[open]{animation:drw .18s ease-out}
   <nav class="botnav" aria-label="Menu">
     <a href="#accueil" data-sec="accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Accueil</a>
     <a href="#operations" data-sec="operations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Opérations</a>
+    <div class="fabw ws"><button type="button" id="fab" aria-label="Nouveau">+</button></div>
     <a href="#evenements" data-sec="evenements"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Événements</a>
-    <a href="#stock" data-sec="stock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Stock</a>
     <details class="menu"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg>Plus</summary>
-      <div class="pop"><a href="#encarts">Encarts</a><a href="#synthese">Rapports</a><a href="#reglages">Réglages</a><button type="button" data-signout="1">Se déconnecter</button></div></details>
+      <div class="pop"><a href="#stock">Stock</a><a href="#encarts">Encarts</a><a href="#synthese">Rapports</a><a href="#reglages">Réglages</a><button type="button" data-signout="1">Se déconnecter</button></div></details>
   </nav>
 </div>
+<dialog id="dlgNew" class="sheet"><h2>Nouveau</h2><div class="grid">
+  <button type="button" class="w" data-quick="depense"><span class="ic">−</span>Dépense</button>
+  <button type="button" class="w" data-quick="recette"><span class="ic">+</span>Recette</button>
+  <button type="button" class="w" data-quick="virement"><span class="ic">⇄</span>Virement</button>
+  <button type="button" class="ws" data-quick="reception"><span class="ic">↓</span>Réception</button>
+  <button type="button" class="ws" data-quick="sortie"><span class="ic">↑</span>Sortie stock</button>
+  <button type="button" class="ws" data-quick="inventaire"><span class="ic">≡</span>Inventaire</button>
+  <button type="button" class="w" data-quick="evenement"><span class="ic">★</span>Événement</button>
+  <button type="button" class="w" data-quick="annonceur"><span class="ic">@</span>Annonceur</button>
+  <button type="button" class="w" data-quick="releve"><span class="ic">✓</span>Pointer</button>
+</div></dialog>
+<dialog id="dlgKeys"><h2>Raccourcis clavier</h2><table><tbody>
+  <tr><td><kbd class="k">N</kbd></td><td>Nouvelle dépense</td><td><kbd class="k">R</kbd></td><td>Nouvelle recette</td></tr>
+  <tr><td><kbd class="k">V</kbd></td><td>Virement interne</td><td><kbd class="k">E</kbd></td><td>Nouvel événement</td></tr>
+  <tr><td><kbd class="k">S</kbd></td><td>Réception de stock</td><td><kbd class="k">/</kbd></td><td>Rechercher (ou Ctrl K)</td></tr>
+  <tr><td><kbd class="k">1</kbd>…<kbd class="k">6</kbd></td><td>Rubriques du menu</td><td><kbd class="k">?</kbd></td><td>Cette aide</td></tr>
+  <tr><td><kbd class="k">Ctrl Entrée</kbd></td><td>Enregistrer</td><td><kbd class="k">Ctrl Maj Entrée</kbd></td><td>Enregistrer et nouvelle</td></tr>
+  <tr><td colspan="4" class="small muted">Double-clic sur une ligne : modifier l'opération. Dans un montant, un calcul est accepté : 12,50+8 ou 3*4,20.</td></tr>
+</tbody></table><div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" data-close>Fermer</button></div></dialog>
 <div id="show" hidden><div id="showSlide"></div><div class="showbar"><button type="button" id="shPrev" aria-label="Diapositive précédente">‹</button><span id="showPos"></span><button type="button" id="shNext" aria-label="Diapositive suivante">›</button><button type="button" id="shClose">Quitter</button></div></div>
 <div id="printDeck"></div>
 
@@ -657,7 +758,7 @@ dialog.drawer[open]{animation:drw .18s ease-out}
   <h2 id="eTitle">Nouvelle écriture</h2>
   <div class="grid2">
     <div class="field"><label for="eAcc">Compte</label><select id="eAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
-    <div class="field"><label for="eDate">Date</label><input type="date" id="eDate" required></div>
+    <div class="field"><label for="eDate">Date</label><input type="date" id="eDate" required><div class="dq"><button type="button" class="link small" data-dset="0">Aujourd'hui</button><button type="button" class="link small" data-dset="-1">Hier</button></div></div>
   </div>
   <div class="field"><label for="eEvt">Événement</label><select id="eEvt" class="evsel" required></select></div>
   <div class="field"><label for="eDes">Désignation</label><input type="text" id="eDes" list="desList" required autocomplete="off" placeholder="ex. ABD - Boissons - Facture 2600123"><datalist id="desList"></datalist></div>
@@ -1038,7 +1139,9 @@ function parseDate(v){
 function parseNum(v){
   if(v==null||v==="")return 0;
   if(typeof v==="number")return isFinite(v)?v:0;
-  const n=parseFloat(String(v).replace(/[€\s  ]/g,"").replace(/\.(?=\d{3}(\D|$))/g,"").replace(",","."));
+  const raw=String(v).replace(/[€\s  ]/g,"");
+  if(/^[\d.,()]+([+\-*x×\/][\d.,()]+)+$/.test(raw)){try{const r=Function('"use strict";return ('+raw.replace(/,/g,".").replace(/[x×]/g,"*")+")")();if(isFinite(r))return Math.round(r*100)/100;}catch(e){}}
+  const n=parseFloat(raw.replace(/\.(?=\d{3}(\D|$))/g,"").replace(",","."));
   return isFinite(n)?n:0;
 }
 
@@ -1342,9 +1445,9 @@ function linesTable(ls,opt){
   const rows=ls.map(l=>{
     const u=/https?:\/\/\S+/.exec(l.com);
     const com=u?(esc(l.com.replace(u[0],"").replace(/[:\s]+$/,""))+` <a href="${esc(u[0])}" target="_blank" rel="noopener">pièce</a>`):esc(l.com);
-    const chk=opt.check?`<td><input type="checkbox" data-pt="${esc(l.id)}" ${l.pointe?"checked":""} ${w?"":"disabled"} aria-label="Pointer"></td>`:"";
+    const chk=opt.check?`<td class="c-ptc"><input type="checkbox" data-pt="${esc(l.id)}" ${l.pointe?"checked":""} ${w?"":"disabled"} aria-label="Pointer"></td>`:"";
     const s=sel?`<td class="sel"><input type="checkbox" data-sel="${esc(l.id)}" ${SEL.has(l.id)?"checked":""} aria-label="Sélectionner"></td>`:"";
-    return `<tr class="${sel&&SEL.has(l.id)?"picked":""}">${s}${chk}<td class="num">${fdate(l.iso)}</td><td class="small">${l.acc==="LA"?"Livret A · ":""}${esc(l.evt.trim())}</td><td>${esc(l.des)}</td><td class="small ${l.poste?"":"muted"}">${esc(l.cat)}</td><td class="r num pos">${l.rec?fm(l.rec):""}</td><td class="r num neg">${l.dep?fm(l.dep):""}</td><td class="small">${esc(l.type)}</td><td class="small muted">${com}</td>${opt.check?"":`<td class="small">${l.pointe?"✓":""}</td>`}${w?`<td><button type="button" class="mini" data-edit="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
+    return `<tr class="lr ${sel&&SEL.has(l.id)?"picked":""}" data-row="${esc(l.id)}">${s}${chk}<td class="num c-date">${fdate(l.iso)}</td><td class="small c-evt">${l.acc==="LA"?"Livret A · ":""}${esc(l.evt.trim())}</td><td class="c-des">${esc(l.des)}</td><td class="small c-cat ${l.poste?"":"muted"}">${esc(l.cat)}</td><td class="r num pos c-rec">${l.rec?fm(l.rec):""}</td><td class="r num neg c-dep">${l.dep?fm(l.dep):""}</td><td class="small c-type">${esc(l.type)}</td><td class="small muted c-com">${com}</td>${opt.check?"":`<td class="small c-pt">${l.pointe?"✓ pointé":""}</td>`}${w?`<td class="c-act"><button type="button" class="mini" data-edit="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
   }).join("");
   return head+`<tbody>${rows||`<tr><td colspan="12" class="muted">Aucune écriture.</td></tr>`}</tbody>`;
 }
@@ -1902,6 +2005,7 @@ function allEventNames(){return [...new Set([...evList().map(x=>x.name),...(FICH
 function showView(v){for(const k in VIEWS)$("v-"+k).classList.toggle("on",k===v);}
 function show(){
   let h=decodeURIComponent(location.hash.replace("#",""));
+  if(h.startsWith("action=")){const a=h.slice(7);history.replaceState(null,"","#accueil");h="accueil";setTimeout(()=>quick(a),80);}
   const b=document.body; b.classList.remove("fiche"); delete b.dataset.tab; b.dataset.route="";
   $("evHead").hidden=true; $("ficheEmpty").hidden=true;
   if(h.startsWith("fiche/")){
@@ -2048,7 +2152,10 @@ $("eDel").onclick=async()=>{
   const e=editing; if(!e)return;
   $("dlgE").close();
   if(await ask(`Supprimer définitivement cette écriture ?\n${resume(e)}`,"Supprimer"))
-    await run(store.commit([{t:"delete",col:"ecritures",id:e.id}],{action:"Suppression",texte:resume(e)}),"Écriture supprimée. L'opération reste visible dans le journal.");
+    if(await run(store.commit([{t:"delete",col:"ecritures",id:e.id}],{action:"Suppression",texte:resume(e)}))){
+      const data=Object.assign({},e); delete data.id;
+      flashUndo("Écriture supprimée.",()=>run(store.commit([{t:"set",col:"ecritures",id:e.id,data}],{action:"Création",texte:"Suppression annulée : "+resume(e)}),"Écriture rétablie."));
+    }
 };
 $("bNew").onclick=()=>openEcriture(null);
 $("bTransfer").onclick=()=>{$("tDate").value=today();$("tAmt").value="";$("tErr").hidden=true;$("dlgT").showModal();};
@@ -3266,9 +3373,8 @@ function renderAccueil(){
   const cc=sumOf(M.lines.filter(l=>l.acc==="CC"),l=>l.rec-l.dep), la=sumOf(M.lines.filter(l=>l.acc==="LA"),l=>l.rec-l.dep);
   const y=+today().slice(0,4), evY=M.events.filter(e=>e.year===y&&!e.upcoming), resY=sumOf(evY,e=>e.res);
   const up=M.events.filter(e=>e.upcoming), acompte=sumOf(up,e=>e.rec-e.dep);
+  renderHero(cc,la);
   $("hTiles").innerHTML=`
-    <div class="tile"><h3>Trésorerie totale</h3><div class="v">${fm(cc+la)}</div><div class="s">${M.maxIso?"au "+fdate(M.maxIso):"aucune opération"}</div></div>
-    <div class="tile"><h3>Compte courant</h3><div class="v">${fm(cc)}</div><div class="s">Livret A ${fm(la)}</div></div>
     <div class="tile"><h3>Résultat des événements ${y}</h3><div class="v ${cls(resY)}">${sg(resY)}</div><div class="s">${evY.length} événement(s) passé(s)</div></div>
     <div class="tile"><h3>Événements à venir</h3><div class="v ${cls(acompte)}">${sg(acompte)}</div><div class="s">${up.length?"déjà au cahier pour "+up.map(e=>e.name).join(", "):"aucun événement à venir"}</div></div>`;
   // À faire
@@ -3377,6 +3483,91 @@ document.addEventListener("keydown",e=>{
 });
 // fenêtres de saisie en panneau latéral
 ["dlgE","dlgT","dlgV","dlgA","dlgArt","dlgL","dlgU"].forEach(id=>{const d=$(id);if(d)d.classList.add("drawer");});
+
+/* ================= v7 : confort d'utilisation (téléphone et clavier) ================= */
+// message en bas d'écran, avec annulation possible
+function flashUndo(text,fn){
+  flash(text); const f=$("flash"), b=document.createElement("button");
+  b.type="button"; b.className="mini"; b.textContent="Annuler";
+  b.onclick=async()=>{f.hidden=true;await fn();}; f.appendChild(b);
+}
+// actions rapides (menu +, raccourcis de l'icône, clavier)
+function quick(a){
+  if(document.querySelector("dialog[open]"))document.querySelectorAll("dialog[open]").forEach(d=>d.close());
+  const w=canWrite(), s=canStock();
+  if((a==="depense"||a==="recette")&&w){openEcriture(null,lastEntry());if(a==="recette"){$("eRec").checked=true;eTouched.add("sens");eAuto();}}
+  else if(a==="virement"&&w)$("bTransfer").click();
+  else if(a==="evenement"&&w)newEvent();
+  else if(a==="annonceur"&&w)openAnn(null);
+  else if(a==="reception"&&s)$("stIn").click();
+  else if(a==="sortie"&&s)$("stOut").click();
+  else if(a==="inventaire"&&s)$("stInv").click();
+  else if(a==="sauvegarde")$("xXlsx").click();
+  else if(a==="releve"&&w){location.hash="rapprochement";}
+  else if(a==="recherche"){$("gq").focus();}
+}
+// reprend compte, événement et type de la saisie précédente si elle date de moins de 30 minutes
+function lastEntry(){
+  try{const l=JSON.parse(localStorage.getItem("cahier-derniere-saisie")||"null");
+    if(l&&Date.now()-l.at<30*6e4&&evList().some(x=>x.name===eventKey(l.evenement).parent&&isOpen(x)))return {compte:l.compte,evenement:l.evenement,type:l.type};}catch(e){}
+  return null;
+}
+$("fE").addEventListener("submit",()=>{try{localStorage.setItem("cahier-derniere-saisie",JSON.stringify({at:Date.now(),compte:$("eAcc").value,evenement:$("eEvt").value,type:$("eType").value}));}catch(e){}},true);
+$("bNew").onclick=()=>quick("depense");
+$("fab").onclick=()=>$("dlgNew").showModal();
+document.addEventListener("click",e=>{
+  let t;
+  if((t=e.target.closest("[data-quick]"))){const d=t.closest("dialog");if(d)d.close();quick(t.dataset.quick);return;}
+  if((t=e.target.closest("[data-dset]"))){const d=new Date(Date.now()+(+t.dataset.dset)*864e5);$("eDate").value=new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);return;}
+  if(e.target===e.target.closest("dialog.sheet"))e.target.close();
+  // sur téléphone, toucher une ligne ouvre l'opération
+  if(canWrite()&&matchMedia("(max-width:700px)").matches&&(t=e.target.closest("tr[data-row]"))&&!e.target.closest("input,a,button,label"))openEcriture(t.dataset.row);
+});
+document.addEventListener("dblclick",e=>{const t=e.target.closest("tr[data-row]");if(t&&canWrite()&&!e.target.closest("input,a,button,label"))openEcriture(t.dataset.row);});
+// raccourcis clavier
+const QKEYS={n:"depense",r:"recette",v:"virement",e:"evenement",s:"reception","/":"recherche"};
+const NAVK=["accueil","operations","evenements","stock","encarts","synthese"];
+document.addEventListener("keydown",e=>{
+  const dlg=document.querySelector("dialog[open]");
+  if(dlg){
+    if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();if(dlg.id==="dlgE"&&e.shiftKey&&!$("eNext").hidden)$("eNext").click();else{const f=dlg.querySelector("form");if(f)f.requestSubmit();}}
+    return;
+  }
+  if(e.ctrlKey||e.metaKey||e.altKey||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+  const k=e.key.toLowerCase();
+  if(QKEYS[k]){e.preventDefault();quick(QKEYS[k]);}
+  else if(/^[1-6]$/.test(k)){location.hash=NAVK[+k-1];}
+  else if(k==="?"){$("dlgKeys").showModal();}
+});
+// accueil : carte de trésorerie et prochain événement
+function sparkPath(W,H){
+  const ls=M.lines.filter(l=>l.iso).slice().sort((a,b)=>a.iso.localeCompare(b.iso)); if(ls.length<2)return "";
+  const end=today(), d0=new Date(Date.now()-365*864e5).toISOString().slice(0,10); let bal=0,i=0; const pts=[];
+  while(i<ls.length&&ls[i].iso<d0){bal+=ls[i].rec-ls[i].dep;i++;}
+  pts.push([d0,bal]); for(;i<ls.length;i++){bal+=ls[i].rec-ls[i].dep;pts.push([ls[i].iso,bal]);} pts.push([end,bal]);
+  const t=s=>Date.parse(s), x0=t(d0), x1=Math.max(t(end),t(pts[pts.length-1][0])), lo=Math.min(...pts.map(p=>p[1])), hi=Math.max(...pts.map(p=>p[1]));
+  const X=s=>((t(s)-x0)/(x1-x0||1))*W, Y=v=>H-4-((v-lo)/(hi-lo||1))*(H-8);
+  let d=""; pts.forEach((p,j)=>{d+=(j?"L":"M")+X(p[0]).toFixed(1)+" "+Y(p[1]).toFixed(1);if(j<pts.length-1)d+="L"+X(pts[j+1][0]).toFixed(1)+" "+Y(p[1]).toFixed(1);});
+  return d;
+}
+function renderHero(cc,la){
+  const w=canWrite(), s=canStock(), t=today(), d30=new Date(Date.now()-30*864e5).toISOString().slice(0,10);
+  const delta=sumOf(M.lines.filter(l=>l.iso&&l.iso>d30),l=>l.rec-l.dep), sp=sparkPath(600,90);
+  let sv=null; try{sv=localStorage.getItem("cahier-derniere-sauvegarde");}catch(e){}
+  const old=!sv||(Date.now()-Date.parse(sv))>30*864e5;
+  $("hero").innerHTML=`<div class="hero-main"><span class="hl">Trésorerie</span><b class="num">${fm(cc+la)}</b><span class="hd">${delta>=0?"▲":"▼"} ${sg(delta)} sur 30 jours</span>
+      <div class="hacc"><span>Compte courant<b class="num">${fm(cc)}</b></span><span>Livret A<b class="num">${fm(la)}</b></span></div></div>
+    ${sp?`<svg class="spark" viewBox="0 0 600 90" preserveAspectRatio="none" aria-hidden="true"><path d="${sp}" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`:""}`;
+  const qa=(k,l,ic)=>`<button type="button" data-quick="${k}"><span class="ic" aria-hidden="true">${ic}</span>${l}</button>`;
+  $("hQuick").innerHTML=(w?qa("depense","Dépense","−")+qa("recette","Recette","+")+qa("virement","Virement","⇄")+qa("releve","Pointer","✓"):"")+(s?qa("reception","Réception","↓")+qa("sortie","Sortie stock","↑"):"")+(w?`<button type="button" data-quick="sauvegarde" class="${old?"due":""}"><span class="ic" aria-hidden="true">⤓</span>Sauvegarde${old?`<i>${sv?"+30 j":"jamais"}</i>`:""}</button>`:"");
+  $("hQuick").hidden=!w&&!s;
+  // prochain événement
+  const nx=evList().filter(x=>x.managed&&x.managed.debut&&(x.managed.fin||x.managed.debut)>=t&&!dateSuspecte(x)).sort((a,b)=>a.managed.debut.localeCompare(b.managed.debut))[0];
+  if(nx){const j=Math.round((Date.parse(nx.managed.debut)-Date.parse(t))/864e5), L=pvLines(nx.name);
+    $("hNext").hidden=false;
+    $("hNext").innerHTML=`<button type="button" data-ev="${esc(nx.name)}"><span class="jj">${j>0?"J−"+j:"Jour J"}</span><span class="nx"><b>${esc(nx.name)}</b><span class="small">${fdate(nx.managed.debut)}${L.length?" · budget prêt":" · budget à préparer"}</span></span><span aria-hidden="true">›</span></button>`;
+  } else $("hNext").hidden=true;
+}
 
 /* ================= connexion ================= */
 let signup=false;
