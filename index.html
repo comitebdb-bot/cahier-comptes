@@ -139,6 +139,24 @@ table.st{font-size:1.6cqw} table.st th{font-size:1.15cqw;padding:.6cqw 1cqw} tab
   body>#printDeck{display:block !important}
   #printDeck .slide{width:297mm;height:167.06mm;aspect-ratio:auto;border:0;border-radius:0;break-after:page;page-break-after:always}
 }
+/* sélection multiple, dialogues larges, caisse */
+.bulk{position:sticky;bottom:8px;z-index:5;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.12)}
+dialog.wide{width:min(1150px,calc(100vw - 24px))}
+.grid5{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.denoms{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.denoms label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted)}
+.denoms input{width:100%}
+.kf{display:grid;grid-template-columns:150px 1fr;gap:8px;align-items:center}
+.kf>label{font-weight:500;font-size:14px;display:flex;gap:6px;align-items:center}
+th.sel,td.sel{width:30px;padding-right:0}
+tr.picked td{background:var(--accent-soft)}
+.req{outline:2px solid var(--bad);outline-offset:-1px}
+.mini+.mini{margin-left:6px}
+td .mini{white-space:nowrap}
+#r2Table select,#r2Table input[type=text]{font-size:13px;padding:5px 7px}
+#r2Table select{max-width:230px}
+input[type=number],input[type=month]{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);max-width:100%}
+@media (max-width:520px){.kf{grid-template-columns:1fr}}
 /* connexion */
 .auth{max-width:420px;margin:8vh auto 0;display:flex;flex-direction:column;gap:14px}
 .field{display:flex;flex-direction:column;gap:4px}
@@ -163,6 +181,13 @@ body:not(.can-write) .w{display:none !important}
   .grid2{grid-template-columns:1fr}
 }
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1d4e89">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Comptes">
 </head>
 <body>
 
@@ -206,24 +231,27 @@ body:not(.can-write) .w{display:none !important}
     <div class="actions">
       <button type="button" class="primary w" id="bNew">+ Nouvelle écriture</button>
       <button type="button" class="w" id="bTransfer">Virement interne</button>
+      <button type="button" id="bInstall" hidden>Installer l'application</button>
       <span class="small muted" id="who"></span>
       <button type="button" id="bOut">Se déconnecter</button>
     </div>
   </header>
   <div id="demo" class="msg warn" hidden>Mode démonstration : aucune connexion n'est configurée, les données restent sur cet appareil. Renseignez <b>config.js</b> pour activer les comptes et le partage (voir le guide d'installation).</div>
+  <div id="net" class="msg warn" hidden></div>
   <div id="flash" class="msg" hidden></div>
 
   <nav class="tabs" id="tabs">
     <a href="#synthese">Synthèse</a>
-    <a href="#evenement">Événement</a>
-    <a href="#editions">Éditions</a>
     <a href="#ecritures">Écritures</a>
-    <a href="#budget">Budget</a>
+    <a href="#evenements">Événements</a>
+    <a href="#evenement">Bilan d'un événement</a>
+    <a href="#editions">Éditions</a>
+    <a href="#encarts">Encarts</a>
     <a href="#rapprochement">Rapprochement</a>
     <a href="#presentation">Présentation</a>
     <a href="#controles">Contrôles</a>
     <a href="#journal">Journal</a>
-    <a href="#acces" class="w">Accès</a>
+    <a href="#reglages">Réglages</a>
   </nav>
 
   <div class="card" id="empty" hidden>
@@ -234,6 +262,7 @@ body:not(.can-write) .w{display:none !important}
   <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
 
   <section class="view" id="v-synthese">
+    <div id="recBanner2" class="msg" hidden></div>
     <div class="tiles" id="treso"></div>
     <div class="card">
       <div class="row between"><h2>Résultat par événement</h2><div class="chips" id="seasons"></div></div>
@@ -262,6 +291,13 @@ body:not(.can-write) .w{display:none !important}
         <p class="small muted" style="margin:0">Ratios indicatifs : ils dépendent du libellé des écritures (une facture de courses peut mélanger repas et buvette).</p></div>
       <div class="card"><h2>Moyens d'encaissement</h2><div class="hb" id="evPay"></div><div id="evSubs"></div></div>
     </div>
+    <div class="card" id="caisseCard" hidden>
+      <div class="row between"><h2>Caisse de l'événement</h2>
+        <div class="row w"><button type="button" id="cFond">Sortir un fond de caisse</button><button type="button" id="cCompt">Ajouter un comptage</button><button type="button" class="primary" id="cDepot">Déposer en banque</button></div></div>
+      <div class="tiles" id="cTiles"></div>
+      <div class="scroll"><table id="cTable"></table></div>
+      <p class="small muted" style="margin:0">Le déposé comprend tous les dépôts d'espèces de l'événement : ajoutez un comptage pour chaque caisse (buvette, repas…) pour que l'écart soit juste.</p>
+    </div>
     <div class="card"><h2>Écritures de l'événement</h2><div class="scroll"><table id="evLines"></table></div></div>
   </section>
 
@@ -274,30 +310,63 @@ body:not(.can-write) .w{display:none !important}
   </section>
 
   <section class="view" id="v-ecritures">
+    <div id="recBanner" class="msg" hidden></div>
     <div class="card">
       <div class="row">
-        <input type="search" id="q" placeholder="Rechercher (désignation, commentaire…)" aria-label="Rechercher">
+        <input type="search" id="q" placeholder="Rechercher (désignation, commentaire, poste…)" aria-label="Rechercher">
         <select id="fAcc" aria-label="Filtrer par compte"><option value="">Tous les comptes</option><option value="CC">Compte courant</option><option value="LA">Livret A</option></select>
         <select id="fEv" aria-label="Filtrer par événement"></select>
         <select id="fCat" aria-label="Filtrer par poste"></select>
+        <select id="fPt" aria-label="Filtrer par pointage"><option value="">Pointées ou non</option><option value="oui">Pointées</option><option value="non">Non pointées</option></select>
+        <label class="small muted" for="fDu">du</label><input type="date" id="fDu">
+        <label class="small muted" for="fAu">au</label><input type="date" id="fAu">
+        <button type="button" id="fClear">Effacer les filtres</button>
       </div>
       <div class="row between">
-        <span class="muted small" id="lnCount"></span>
+        <span class="muted small"><span id="lnCount"></span><span id="lastSave"></span></span>
         <div class="row">
           <label class="btn w" for="file">Importer (.xlsx)</label>
-          <button type="button" id="xXlsx">Exporter en Excel</button>
+          <button type="button" id="xXlsx">Sauvegarde Excel (format Google Sheet)</button>
           <button type="button" id="xCsv">Exporter en CSV</button>
         </div>
       </div>
+      <p class="small muted w" style="margin:0">Cochez des écritures pour les modifier en une fois. Maj + clic coche toute une plage.</p>
       <div class="scroll"><table id="lnTable"></table></div>
+    </div>
+    <div class="bulk" id="bulk" hidden>
+      <span id="bulkInfo" class="small"></span>
+      <div class="row">
+        <button type="button" class="primary" id="bkEdit">Modifier…</button>
+        <button type="button" id="bkPt">Pointer</button>
+        <button type="button" id="bkUnpt">Dépointer</button>
+        <button type="button" id="bkDup">Dupliquer</button>
+        <button type="button" id="bkCsv">Exporter</button>
+        <button type="button" class="danger" id="bkDel">Supprimer</button>
+        <button type="button" id="bkNone">Tout désélectionner</button>
+      </div>
     </div>
   </section>
 
-  <section class="view" id="v-budget">
+  <section class="view" id="v-evenements">
     <div class="card">
-      <div class="row between"><h2>Budget prévisionnel et réalisé</h2><button type="button" class="primary w" id="bBudget">+ Budget d'un événement</button></div>
+      <div class="row between"><h2>Événements et budgets</h2>
+        <div class="row w"><button type="button" id="evAll">Ajouter les événements du cahier</button><button type="button" class="primary" id="evNew">+ Nouvel événement</button></div></div>
+      <div class="chips" id="evFilt"></div>
       <div class="scroll"><table id="bgTable"></table></div>
-      <p class="small muted" style="margin:0">Le réalisé neutralise les fonds de caisse, comme dans la synthèse. Un écart positif sur le résultat signifie que l'événement fait mieux que prévu.</p>
+      <p class="small muted" style="margin:0">Seuls les événements « en cours » sont proposés à la saisie, avec leurs sous-rubriques. Le réalisé neutralise les fonds de caisse. Un écart positif signifie que l'événement fait mieux que prévu. Changer le nom d'un événement renomme toutes ses écritures ; choisir le nom d'un autre événement les fusionne.</p>
+    </div>
+  </section>
+
+  <section class="view" id="v-encarts">
+    <div class="card">
+      <div class="row between">
+        <div class="row"><h2>Encarts publicitaires</h2><select id="aYear" aria-label="Année"></select></div>
+        <div class="row w"><button type="button" id="aSeed">Reprendre les annonceurs du cahier</button><button type="button" id="aRenew">Reconduire</button><button type="button" class="primary" id="aNew">+ Annonceur</button></div>
+      </div>
+      <div class="tiles" id="aTiles"></div>
+      <div class="row between"><div class="chips" id="aFilt"></div>
+        <div class="row"><input type="search" id="aQ" placeholder="Rechercher un annonceur" aria-label="Rechercher un annonceur"><button type="button" id="aCopy">Copier la liste à relancer</button></div></div>
+      <div class="scroll"><table id="aTable"></table></div>
     </div>
   </section>
 
@@ -307,6 +376,7 @@ body:not(.can-write) .w{display:none !important}
         <select id="rAcc" aria-label="Compte"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select>
         <div class="field" style="flex-direction:row;align-items:center;gap:8px"><label for="rRel">Solde du relevé bancaire</label><input type="text" inputmode="decimal" id="rRel" placeholder="ex. 2 053,18" style="width:140px"></div>
       </div>
+      <div class="row w"><label class="btn primary" for="relFile">Importer un relevé bancaire (CSV)</label><input type="file" id="relFile" accept=".csv,.txt,.xlsx,.xls" hidden><span class="small muted">Les opérations déjà saisies sont pointées, les nouvelles sont ajoutées au cahier.</span></div>
       <div class="tiles" id="rTiles"></div>
     </div>
     <div class="card">
@@ -358,11 +428,21 @@ body:not(.can-write) .w{display:none !important}
       <div class="scroll"><table id="jTable"></table></div></div>
   </section>
 
-  <section class="view" id="v-acces">
-    <div class="card"><h2>Demandes d'accès</h2><div class="scroll"><table id="dTable"></table></div></div>
-    <div class="card"><h2>Membres</h2>
-      <p class="small muted" style="margin:0">Un lecteur consulte tout sans rien modifier. Un trésorier saisit, pointe, gère le budget et les accès.</p>
+  <section class="view" id="v-reglages">
+    <div class="card w"><h2>Demandes d'accès</h2><div class="scroll"><table id="dTable"></table></div></div>
+    <div class="card w"><h2>Membres</h2>
+      <p class="small muted" style="margin:0">Un lecteur consulte tout sans rien modifier. Un trésorier saisit, pointe, gère les événements, les encarts et les accès.</p>
       <div class="scroll"><table id="mTable"></table></div></div>
+    <div class="card w"><h2>Saisie</h2>
+      <div class="row"><div class="field" style="max-width:260px"><label for="sFrais">Frais bancaires par virement (€)</label><input type="text" inputmode="decimal" id="sFrais"></div><button type="button" id="sFraisOk">Enregistrer</button></div>
+      <p class="small muted" style="margin:0">Montant proposé par la case « Ajouter aussi les frais de virement ». Mettez 0 pour masquer la case.</p></div>
+    <div class="card w"><div class="row between"><h2>Écritures récurrentes</h2><button type="button" class="primary" id="uNew">+ Écriture récurrente</button></div>
+      <p class="small muted" style="margin:0">Chaque mois, l'application propose de créer ces écritures (frais de tenue de compte, cotisation carte…).</p>
+      <div class="scroll"><table id="uTable"></table></div></div>
+    <div class="card"><h2>Application sur téléphone</h2>
+      <p style="margin:0" id="instTxt"></p>
+      <p class="small muted" style="margin:0" id="offTxt"></p>
+      <div class="row"><button type="button" class="primary" id="instBtn" hidden>Installer l'application</button></div></div>
   </section>
 </div>
 
@@ -376,21 +456,23 @@ body:not(.can-write) .w{display:none !important}
     <div class="field"><label for="eAcc">Compte</label><select id="eAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
     <div class="field"><label for="eDate">Date</label><input type="date" id="eDate" required></div>
   </div>
-  <div class="field"><label for="eEvt">Événement</label><input type="text" id="eEvt" list="evList" required placeholder="ex. FETE 2027, CASSOULET 2026, AUTRE"><datalist id="evList"></datalist></div>
-  <div class="field"><label for="eDes">Désignation</label><input type="text" id="eDes" required placeholder="ex. ABD - Boissons - Facture 2600123"></div>
+  <div class="field"><label for="eEvt">Événement</label><select id="eEvt" class="evsel" required></select></div>
+  <div class="field"><label for="eDes">Désignation</label><input type="text" id="eDes" list="desList" required autocomplete="off" placeholder="ex. ABD - Boissons - Facture 2600123"><datalist id="desList"></datalist></div>
   <div class="grid2">
     <div class="field"><label>Sens</label><div class="seg"><label><input type="radio" name="eSens" value="rec" id="eRec"><span>Recette</span></label><label><input type="radio" name="eSens" value="dep" id="eDep" checked><span>Dépense</span></label></div></div>
     <div class="field"><label for="eAmt">Montant (€)</label><input type="text" inputmode="decimal" id="eAmt" required placeholder="0,00"></div>
   </div>
   <div class="grid2">
-    <div class="field"><label for="eType">Type de paiement</label><select id="eType"><option>Virement</option><option>Prélevement</option><option>Cheques</option><option>Dépôt</option><option>CB</option><option>Retrait</option><option>Espece</option><option>SEPA</option><option>Autre</option></select></div>
-    <div class="field"><label for="eCom">Commentaire, n° de chèque, lien de la pièce</label><input type="text" id="eCom"></div>
+    <div class="field"><label for="ePoste">Poste</label><select id="ePoste"></select></div>
+    <div class="field"><label for="eType">Type de paiement</label><select id="eType"></select></div>
   </div>
+  <div class="field"><label for="eCom">Commentaire, n° de chèque, lien de la pièce</label><input type="text" id="eCom"></div>
   <label class="small"><input type="checkbox" id="ePt"> Écriture pointée (vue sur le relevé bancaire)</label>
+  <label class="small" id="eFraisL"><input type="checkbox" id="eFrais" checked> Ajouter aussi les frais de virement (<span id="eFraisM"></span>)</label>
   <div id="eErr" class="msg err" hidden></div>
   <div class="row between">
-    <button type="button" class="danger" id="eDel">Supprimer</button>
-    <div class="row"><button type="button" id="eCancel">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+    <div class="row"><button type="button" class="danger" id="eDel">Supprimer</button><button type="button" id="eDup">Dupliquer</button></div>
+    <div class="row"><button type="button" data-close>Annuler</button><button type="button" id="eNext">Enregistrer et nouvelle</button><button type="submit" class="primary">Enregistrer</button></div>
   </div>
 </form></dialog>
 
@@ -404,22 +486,207 @@ body:not(.can-write) .w{display:none !important}
   </div>
   <p class="small muted" style="margin:0">Deux écritures sont créées, une par compte. Elles n'entrent dans le résultat d'aucun événement.</p>
   <div id="tErr" class="msg err" hidden></div>
-  <div class="row" style="justify-content:flex-end"><button type="button" id="tCancel">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
 </form></dialog>
 
-<!-- budget -->
-<dialog id="dlgB"><form id="fB">
-  <h2>Budget d'un événement</h2>
-  <div class="field"><label for="bEvt">Événement</label><input type="text" id="bEvt" list="evList" required placeholder="ex. FETE 2027"></div>
+<!-- événement -->
+<dialog id="dlgV"><form id="fV">
+  <h2 id="vTitle">Événement</h2>
+  <div class="field"><label for="vNom">Nom, avec l'année</label><input type="text" id="vNom" required placeholder="ex. FETE 2027"></div>
   <div class="grid2">
-    <div class="field"><label for="bRec">Recettes prévues (€)</label><input type="text" inputmode="decimal" id="bRec" required></div>
-    <div class="field"><label for="bDep">Dépenses prévues (€)</label><input type="text" inputmode="decimal" id="bDep" required></div>
+    <div class="field"><label for="vDeb">Début</label><input type="date" id="vDeb"></div>
+    <div class="field"><label for="vFin">Fin</label><input type="date" id="vFin"></div>
   </div>
-  <div class="field"><label for="bNote">Note (hypothèses : nombre de repas, cachets, subvention…)</label><textarea id="bNote" rows="3"></textarea></div>
-  <div class="row between">
-    <button type="button" class="danger" id="bDel">Supprimer ce budget</button>
-    <div class="row"><button type="button" id="bCancel">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+  <div class="grid2">
+    <div class="field"><label for="vStat">Statut</label><select id="vStat"><option value="ouvert">En cours (proposé à la saisie)</option><option value="clos">Clos</option></select></div>
+    <div class="field"><label for="vSous">Sous-rubriques, séparées par des virgules</label><input type="text" id="vSous" placeholder="ex. REPAS, GOODIES"></div>
   </div>
+  <h3>Budget prévisionnel</h3>
+  <div class="grid2">
+    <div class="field"><label for="vRec">Recettes prévues (€)</label><input type="text" inputmode="decimal" id="vRec"></div>
+    <div class="field"><label for="vDep">Dépenses prévues (€)</label><input type="text" inputmode="decimal" id="vDep"></div>
+  </div>
+  <div class="field"><label for="vNote">Note (hypothèses : nombre de repas, cachets, subvention…)</label><textarea id="vNote" rows="2"></textarea></div>
+  <div id="vErr" class="msg err" hidden></div>
+  <div class="row between"><button type="button" class="danger" id="vDel">Retirer de la liste</button><div class="row"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div></div>
+</form></dialog>
+
+<!-- modification de masse -->
+<dialog id="dlgK"><form id="fK">
+  <h2 id="kTitle">Modifier les écritures</h2>
+  <p class="small muted" style="margin:0">Cochez les champs à modifier. Les autres restent inchangés.</p>
+  <div class="kf"><label><input type="checkbox" id="kOnEvt"> Événement</label><select id="kEvt" class="evsel" aria-label="Événement"></select></div>
+  <div class="kf"><label><input type="checkbox" id="kOnPoste"> Poste</label><select id="kPoste" aria-label="Poste"></select></div>
+  <div class="kf"><label><input type="checkbox" id="kOnType"> Paiement</label><select id="kType" aria-label="Type de paiement"></select></div>
+  <div class="kf"><label><input type="checkbox" id="kOnAcc"> Compte</label><select id="kAcc" aria-label="Compte"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
+  <div class="kf"><label><input type="checkbox" id="kOnDate"> Date</label><input type="date" id="kDate" aria-label="Date"></div>
+  <div class="kf"><label><input type="checkbox" id="kOnPt"> Pointage</label><select id="kPt" aria-label="Pointage"><option value="oui">Pointées</option><option value="non">Non pointées</option></select></div>
+  <div class="kf"><label><input type="checkbox" id="kOnCom"> Commentaire</label><div class="row"><select id="kComMode" aria-label="Mode"><option value="add">Ajouter à la fin</option><option value="set">Remplacer par</option></select><input type="text" id="kCom" aria-label="Commentaire" style="flex:1"></div></div>
+  <div class="kf"><label><input type="checkbox" id="kOnDes"> Désignation</label><div class="row"><input type="text" id="kFind" placeholder="Remplacer…" aria-label="Texte à remplacer" style="flex:1"><input type="text" id="kRepl" placeholder="par…" aria-label="Remplacer par" style="flex:1"></div></div>
+  <div id="kErr" class="msg err" hidden></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Appliquer</button></div>
+</form></dialog>
+
+<!-- écriture récurrente -->
+<dialog id="dlgU"><form id="fU">
+  <h2>Écriture récurrente</h2>
+  <div class="field"><label for="uDes">Désignation</label><input type="text" id="uDes" required placeholder="ex. Tenue de compte"></div>
+  <div class="grid2">
+    <div class="field"><label for="uAcc">Compte</label><select id="uAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
+    <div class="field"><label for="uEvt">Événement</label><select id="uEvt" class="evsel" required></select></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>Sens</label><div class="seg"><label><input type="radio" name="uSens" value="rec" id="uRec"><span>Recette</span></label><label><input type="radio" name="uSens" value="dep" id="uDep" checked><span>Dépense</span></label></div></div>
+    <div class="field"><label for="uAmt">Montant (€)</label><input type="text" inputmode="decimal" id="uAmt" required></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="uType">Type de paiement</label><select id="uType"></select></div>
+    <div class="field"><label for="uPoste">Poste</label><select id="uPoste"></select></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="uJour">Jour du mois (1 à 28)</label><input type="number" id="uJour" min="1" max="28" step="1" required></div>
+    <div class="field"><label for="uDepuis">À partir du mois</label><input type="month" id="uDepuis" required placeholder="2026-11"></div>
+  </div>
+  <div id="uErr" class="msg err" hidden></div>
+  <div class="row between"><button type="button" class="danger" id="uDel">Supprimer</button><div class="row"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div></div>
+</form></dialog>
+
+<!-- génération des récurrentes -->
+<dialog id="dlgG"><form id="fG">
+  <h2>Écritures récurrentes à créer</h2>
+  <p class="small muted" style="margin:0">Les lignes décochées sont ignorées et ne seront plus proposées.</p>
+  <div class="scroll" style="max-height:50vh;overflow-y:auto"><table id="gTable"></table></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Plus tard</button><button type="submit" class="primary">Créer les écritures cochées</button></div>
+</form></dialog>
+
+<!-- relevé : colonnes -->
+<dialog id="dlgR1" class="wide"><form id="fR1">
+  <h2>Importer un relevé bancaire</h2>
+  <p class="small muted" style="margin:0"><span id="rmFile"></span> · <span id="rmCount"></span></p>
+  <div class="grid2">
+    <div class="field"><label for="rmAcc">Compte du relevé</label><select id="rmAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
+    <div class="field"><label for="rmHead">N° de la ligne des titres de colonnes (0 s'il n'y en a pas)</label><input type="number" id="rmHead" min="0" step="1"></div>
+  </div>
+  <div class="grid5">
+    <div class="field"><label for="rmDate">Date</label><select id="rmDate"></select></div>
+    <div class="field"><label for="rmLib">Libellé</label><select id="rmLib"></select></div>
+    <div class="field"><label for="rmDeb">Débit</label><select id="rmDeb"></select></div>
+    <div class="field"><label for="rmCre">Crédit</label><select id="rmCre"></select></div>
+    <div class="field"><label for="rmMnt">Ou montant signé</label><select id="rmMnt"></select></div>
+  </div>
+  <p class="small muted" style="margin:0">Crédit Agricole : colonnes « Date », « Libellé », « Débit euros », « Crédit euros ». Si le relevé n'a qu'une colonne de montant, négative pour les dépenses, choisissez-la dans « Ou montant signé ».</p>
+  <div class="scroll"><table id="rmPrev"></table></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary" id="rmGo">Continuer</button></div>
+</form></dialog>
+
+<!-- relevé : opérations -->
+<dialog id="dlgR2" class="wide"><form id="fR2">
+  <h2>Opérations du relevé</h2>
+  <div class="row between"><span class="small muted" id="r2Head"></span><span id="r2Tiles"></span></div>
+  <div class="row">
+    <label for="r2Evt" class="small">Événement des nouvelles lignes cochées</label>
+    <select id="r2Evt" class="evsel"></select><button type="button" id="r2Apply">Appliquer</button>
+    <label class="small"><input type="checkbox" id="r2Hide" checked> Masquer les opérations déjà pointées</label>
+  </div>
+  <div class="scroll" style="max-height:56vh;overflow-y:auto"><table id="r2Table"></table></div>
+  <div id="r2Err" class="msg err" hidden></div>
+  <div class="row between"><span class="small" id="r2Sum"></span><div class="row"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div></div>
+</form></dialog>
+
+<!-- caisse : fond -->
+<dialog id="dlgF"><form id="fF">
+  <h2>Sortir un fond de caisse</h2>
+  <p class="small muted" style="margin:0">Événement : <b id="fdEvt"></b>. Le retrait n'est pas compté comme une dépense.</p>
+  <div class="grid2">
+    <div class="field"><label for="fdAmt">Montant retiré (€)</label><input type="text" inputmode="decimal" id="fdAmt" required></div>
+    <div class="field"><label for="fdDate">Date</label><input type="date" id="fdDate" required></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="fdAcc">Compte</label><select id="fdAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
+    <div class="field"><label for="fdDes">Désignation</label><input type="text" id="fdDes" required></div>
+  </div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer le retrait</button></div>
+</form></dialog>
+
+<!-- caisse : comptage -->
+<dialog id="dlgQ" style="width:min(720px,calc(100vw - 24px))"><form id="fQ">
+  <h2>Comptage de caisse</h2>
+  <div class="grid2">
+    <div class="field"><label for="qLib">Caisse et moment</label><input type="text" id="qLib" required placeholder="ex. Buvette vendredi soir"></div>
+    <div class="field"><label for="qDate">Date</label><input type="date" id="qDate" required></div>
+  </div>
+  <div class="field"><label for="qAct">Activité</label><select id="qAct"></select></div>
+  <h3>Billets et pièces comptés (nombre)</h3>
+  <div class="denoms" id="qGrid"></div>
+  <div class="grid2">
+    <div class="field"><label>Total compté</label><b id="qTot" class="num" style="font-size:20px">0,00 €</b></div>
+    <div class="field"><label for="qFond">Dont fond de caisse, à déduire (€)</label><input type="text" inputmode="decimal" id="qFond" placeholder="0,00"></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="qMont">Recette en espèces (€)</label><input type="text" inputmode="decimal" id="qMont" required></div>
+    <div class="field"><label for="qCb">Encaissé par carte (€), pour information</label><input type="text" inputmode="decimal" id="qCb"></div>
+  </div>
+  <p class="small muted" style="margin:0">Sans détail des billets, saisissez directement la recette en espèces.</p>
+  <div id="qErr" class="msg err" hidden></div>
+  <div class="row between"><button type="button" class="danger" id="qDel">Supprimer</button><div class="row"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div></div>
+</form></dialog>
+
+<!-- caisse : dépôt -->
+<dialog id="dlgP"><form id="fP">
+  <h2>Dépôt d'espèces en banque</h2>
+  <p class="small muted" style="margin:0">Événement : <b id="pdEvt"></b></p>
+  <div class="grid2">
+    <div class="field"><label for="pdAmt">Montant total déposé (€)</label><input type="text" inputmode="decimal" id="pdAmt" required></div>
+    <div class="field"><label for="pdDate">Date</label><input type="date" id="pdDate" required></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="pdFond">Dont retour du fond de caisse (€)</label><input type="text" inputmode="decimal" id="pdFond"><span class="small muted" id="pdFondInfo"></span></div>
+    <div class="field"><label for="pdPoste">Poste de la recette</label><select id="pdPoste"></select></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="pdAcc">Compte</label><select id="pdAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
+    <div class="field"><label for="pdDes">Désignation de la recette</label><input type="text" id="pdDes" required></div>
+  </div>
+  <p class="small" style="margin:0" id="pdRest"></p>
+  <div id="pdErr" class="msg err" hidden></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer le dépôt</button></div>
+</form></dialog>
+
+<!-- annonceur -->
+<dialog id="dlgA"><form id="fA">
+  <h2 id="anTitle">Annonceur</h2>
+  <div class="field"><label for="anNom">Nom de l'annonceur</label><input type="text" id="anNom" required></div>
+  <div class="grid2">
+    <div class="field"><label for="anContact">Contact</label><input type="text" id="anContact"></div>
+    <div class="field"><label for="anTel">Téléphone</label><input type="text" id="anTel" inputmode="tel"></div>
+  </div>
+  <div class="field"><label for="anMail">E-mail</label><input type="email" id="anMail"></div>
+  <div class="grid2">
+    <div class="field"><label for="anMont">Montant de l'encart <span id="anYearL"></span> (€)</label><input type="text" inputmode="decimal" id="anMont"></div>
+    <div class="field"><label for="anStat">Statut <span id="anYearL2"></span></label><select id="anStat"><option value="">Pas d'encart</option><option value="relancer">À relancer</option><option value="promis">Promis</option><option value="paye">Payé</option><option value="refuse">Refusé</option></select></div>
+  </div>
+  <div class="field"><label for="anNote">Note</label><textarea id="anNote" rows="2"></textarea></div>
+  <p class="small muted" style="margin:0">Pour enregistrer un paiement dans le cahier, utilisez plutôt « Encaisser ».</p>
+  <div id="anErr" class="msg err" hidden></div>
+  <div class="row between"><button type="button" class="danger" id="anDel">Supprimer</button><div class="row"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div></div>
+</form></dialog>
+
+<!-- encaissement d'un encart -->
+<dialog id="dlgA2"><form id="fA2">
+  <h2>Encaisser un encart</h2>
+  <p style="margin:0"><b id="apNom"></b></p>
+  <div class="grid2">
+    <div class="field"><label for="apAmt">Montant (€)</label><input type="text" inputmode="decimal" id="apAmt" required></div>
+    <div class="field"><label for="apDate">Date</label><input type="date" id="apDate" required></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="apType">Paiement</label><select id="apType"></select></div>
+    <div class="field"><label for="apAcc">Compte</label><select id="apAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
+  </div>
+  <div class="field"><label for="apCom">Commentaire, n° de chèque</label><input type="text" id="apCom"></div>
+  <label class="small"><input type="checkbox" id="apCreate" checked> Créer l'écriture dans le cahier (<span id="apEvt"></span>)</label>
+  <div id="apErr" class="msg err" hidden></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
 </form></dialog>
 
 <!-- import -->
@@ -428,8 +695,9 @@ body:not(.can-write) .w{display:none !important}
   <p id="iInfo" style="margin:0"></p>
   <div class="field" id="iModeF"><label>Le cahier contient déjà des écritures</label>
     <div class="seg"><label><input type="radio" name="iMode" value="add" checked><span>Ajouter à la suite</span></label><label><input type="radio" name="iMode" value="replace"><span>Tout remplacer</span></label></div></div>
+  <label class="small" id="iExtraL" hidden><input type="checkbox" id="iExtra" checked> <span id="iExtraT"></span></label>
   <label class="small"><input type="checkbox" id="iPt" checked> Marquer les écritures importées comme pointées (elles viennent des relevés bancaires)</label>
-  <div class="row" style="justify-content:flex-end"><button type="button" id="iCancel">Annuler</button><button type="submit" class="primary" id="iGo">Importer</button></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary" id="iGo">Importer</button></div>
 </form></dialog>
 
 <!-- confirmation -->
@@ -508,14 +776,23 @@ function eventKey(name){
   if(m){sub=m[1];parent="FETE "+m[2];}
   return {parent,sub};
 }
+const POSTES_REC=["Buvette & caisse","Réservations (repas, emplacements)","Encarts publicitaires","Tour du village","Goodies & textile","Subvention","Dons","Intérêts","Autres produits"];
+const POSTES_DEP=DEP_RULES.map(r=>r[0]).concat(["Divers"]);
+const POSTES_SPE=["Fond de caisse","Mouvement interne"];
+const POSTES_ALL=POSTES_REC.concat(POSTES_DEP,POSTES_SPE);
+function kindOf(acc,e,d,interne){
+  if(acc==="LA") return /interet/.test(e+" "+d)?"fonct":interne?"interne":"fonct";
+  if(e==="transfert compte") return interne?"interne":"fonct";
+  if(e==="autre"||e==="") return interne&&/livret|solde du compte|recuperation du compte/.test(d)?"interne":"fonct";
+  if(/^investissement/.test(e)) return "invest";
+  if(/^reunion|^ag\b|assemblee/.test(e)) return "fonct";
+  return "event";
+}
 function classify(l){
-  const d=strip(l.des), t=strip(l.type), e=strip(l.evt);
-  if(l.acc==="LA"){ l.kind=/interet/.test(e+" "+d)?"fonct":"interne"; }
-  else if(e==="transfert compte") l.kind="interne";
-  else if(e==="autre"||e===""){ l.kind=/livret|solde du compte|recuperation du compte/.test(d)?"interne":"fonct"; }
-  else if(/^investissement/.test(e)) l.kind="invest";
-  else if(/^reunion|^ag\b|assemblee/.test(e)) l.kind="fonct";
-  else l.kind="event";
+  const d=strip(l.des), t=strip(l.type), e=strip(l.evt), manual=!!l.poste&&POSTES_ALL.includes(l.poste);
+  l.kind=kindOf(l.acc,e,d,true);
+  if(manual&&l.poste==="Mouvement interne") l.kind="interne";
+  else if(manual&&l.kind==="interne") l.kind=kindOf(l.acc,e,d,false);
   const k=eventKey(l.evt); l.parent=k.parent; l.sub=k.sub;
   const m=/(\d{4})/.exec(l.parent);
   l.year=l.kind==="event"&&m?+m[1]:(l.iso?+l.iso.slice(0,4):null);
@@ -547,11 +824,16 @@ function classify(l){
     else l.cat="Autres produits";
   }
   if(l.rec>0) l.pay=/hello ?asso/.test(d)?"HelloAsso":t==="cb"?"Carte bancaire":/cheque/.test(t)||/cheque/.test(d)?"Chèques":/depot|espece/.test(t)?"Espèces":"Virement";
+  l.autoCat=l.cat;
+  if(manual&&l.poste!=="Mouvement interne"){
+    l.fdc=l.poste==="Fond de caisse"&&l.kind==="event";
+    l.cat=l.poste==="Fond de caisse"&&!l.fdc?"Divers":l.poste;
+  }
   return l;
 }
 function build(ecr){
   const sorted=[...ecr].sort((a,b)=>(a.date||"")<(b.date||"")?-1:(a.date||"")>(b.date||"")?1:(a.ordre||0)-(b.ordre||0));
-  const lines=sorted.map((e,i)=>classify({n:i,id:e.id,acc:e.compte==="LA"?"LA":"CC",iso:e.date||null,evt:String(e.evenement||""),des:String(e.designation||""),rec:+e.recette||0,dep:+e.depense||0,type:String(e.type||""),com:String(e.commentaire||""),pointe:!!e.pointe}));
+  const lines=sorted.map((e,i)=>classify({n:i,id:e.id,acc:e.compte==="LA"?"LA":"CC",iso:e.date||null,evt:String(e.evenement||""),des:String(e.designation||""),rec:+e.recette||0,dep:+e.depense||0,type:String(e.type||""),com:String(e.commentaire||""),pointe:!!e.pointe,poste:String(e.poste||""),ref:e.releveRef||""}));
   const evs=new Map();
   for(const l of lines){
     if(l.kind!=="event")continue;
@@ -579,112 +861,161 @@ function build(ecr){
 }
 
 /* ================= stockage : Firebase ou démonstration ================= */
-const S={ready:false,user:null,role:null,ecr:[],budgets:[],journal:[],membres:[],demandes:[]};
+// Toutes les écritures en base passent par commit(ops, journal) : une liste d'opérations
+// {t:"set"|"update"|"merge"|"delete", col, id, data} appliquées par lots, plus les lignes du journal.
+const S={ready:false,user:null,role:null,ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},pending:0};
 let onData=()=>{};
 const slug=s=>strip(s).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"sans-nom";
-const resume=e=>`${fdate(e.date)} · ${e.compte==="LA"?"Livret A":"Compte courant"} · ${e.evenement} · ${e.designation} · ${e.recette?"+"+fm(e.recette):"−"+fm(e.depense)}`;
+const resume=e=>`${fdate(e.date)} · ${e.compte==="LA"?"Livret A":"Compte courant"} · ${e.evenement} · ${e.designation} · ${(+e.recette||0)>0?"+"+fm(+e.recette):"−"+fm(+e.depense||0)}`;
+const P=()=>Object.assign({fraisVirement:0.3,recurrentes:[]},S.params);
+const KEYS={ecritures:"ecr",budgets:"budgets",evenements:"evenements",caisses:"caisses",annonceurs:"annonceurs",parametres:"paramsList",journal:"journal",membres:"membres",demandes:"demandes"};
+const afterData=()=>{S.params=S.paramsList.find(x=>x.id==="general")||{};};
+const asList=j=>Array.isArray(j)?j:j?[j]:[];
 
 function firebaseStore(){
   firebase.initializeApp(CFG);
-  const auth=firebase.auth(), db=firebase.firestore(), now=()=>firebase.firestore.FieldValue.serverTimestamp();
-  let unsub=[], pendingName="";
+  const auth=firebase.auth(), db=firebase.firestore();
+  try{db.enablePersistence({synchronizeTabs:true}).catch(()=>{});}catch(e){}
+  const now=()=>firebase.firestore.FieldValue.serverTimestamp();
+  const pend={}; let unsub=[], pendingName="";
   const me=()=>({uid:S.user.uid,nom:S.user.nom});
-  const jr=(b,action,texte)=>b.set(db.collection("journal").doc(),{at:now(),uid:S.user.uid,nom:S.user.nom,action,texte:String(texte).slice(0,600)});
   const stop=()=>{unsub.forEach(f=>f());unsub=[];};
+  const within=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej({code:"timeout"}),ms))]);
   async function role(u){
-    try{const d=await db.doc("membres/"+u.uid).get(); if(d.exists)return d.data().role||"lecteur";}catch(e){}
+    // le rôle est gardé sur l'appareil pour pouvoir ouvrir l'application hors connexion
+    const key="cahier-role-"+u.uid; let cached=null; try{cached=localStorage.getItem(key);}catch(e){}
+    const keep=r=>{try{if(r)localStorage.setItem(key,r);else localStorage.removeItem(key);}catch(e){}return r;};
+    let d;
+    try{d=await within(db.doc("membres/"+u.uid).get(),8000);}catch(e){return cached;}
+    if(d.exists) return keep(d.data().role==="tresorier"?"tresorier":"lecteur");
+    if(!navigator.onLine) return cached;
     // le premier trésorier est désigné par son identifiant dans les règles de sécurité
-    try{await db.doc("membres/"+u.uid).set({email:u.email,nom:S.user.nom,role:"tresorier",at:now()});return "tresorier";}catch(e){}
-    try{await db.doc("demandes/"+u.uid).set({email:u.email,nom:S.user.nom,at:now()});}catch(e){}
-    return null;
+    try{await within(db.doc("membres/"+u.uid).set({email:u.email,nom:S.user.nom,role:"tresorier",at:now()}),8000);return keep("tresorier");}catch(e){}
+    try{await within(db.doc("demandes/"+u.uid).set({email:u.email,nom:S.user.nom,at:now()}),8000);}catch(e){}
+    return keep(null);
   }
   function listen(){
-    const err=e=>flash("Lecture impossible : "+(e.message||e.code),true);
-    const col=(q,key)=>unsub.push(q.onSnapshot(s=>{S[key]=s.docs.map(d=>Object.assign({id:d.id},d.data()));onData();},err));
-    col(db.collection("ecritures"),"ecr");
-    col(db.collection("budgets"),"budgets");
-    col(db.collection("journal").orderBy("at","desc").limit(300),"journal");
-    if(S.role==="tresorier"){ col(db.collection("membres"),"membres"); col(db.collection("demandes"),"demandes"); }
+    const err=e=>flash("Lecture impossible : "+fbErr(e),true);
+    const col=(q,key,count)=>unsub.push(q.onSnapshot({includeMetadataChanges:true},s=>{
+      S[key]=s.docs.map(d=>Object.assign({id:d.id},d.data()));
+      if(count){pend[key]=s.docs.filter(d=>d.metadata.hasPendingWrites).length;S.pending=Object.values(pend).reduce((a,b)=>a+b,0);}
+      afterData();onData();
+    },err));
+    for(const c of ["ecritures","budgets","evenements","caisses","annonceurs","parametres"]) col(db.collection(c),KEYS[c],true);
+    col(db.collection("journal").orderBy("at","desc").limit(300),"journal",false);
+    if(S.role==="tresorier"){col(db.collection("membres"),"membres",true);col(db.collection("demandes"),"demandes",false);}
   }
   auth.onAuthStateChanged(async u=>{
-    stop(); Object.assign(S,{ecr:[],budgets:[],journal:[],membres:[],demandes:[],role:null});
+    stop(); Object.assign(S,{ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},role:null,pending:0});
     if(!u){S.user=null;S.ready=true;onData();return;}
     S.user={uid:u.uid,email:u.email,nom:pendingName||u.displayName||u.email};
     S.role=await role(u); S.ready=true; onData();
     if(S.role)listen();
   });
-  async function chunks(ops){ // ops : fonctions (batch)=>void, 400 par lot
-    for(let i=0;i<ops.length;i+=400){const b=db.batch();ops.slice(i,i+400).forEach(f=>f(b));await b.commit();}
+  const newId=c=>db.collection(c).doc().id;
+  async function commit(ops,journal){
+    const jl=asList(journal).map(j=>({t:"set",col:"journal",id:newId("journal"),data:{at:now(),uid:S.user.uid,nom:S.user.nom,action:j.action,texte:String(j.texte).slice(0,1500)}}));
+    const all=ops.concat(jl), ps=[];
+    for(let i=0;i<all.length;i+=450){
+      const b=db.batch();
+      for(const o of all.slice(i,i+450)){
+        const ref=o.id?db.collection(o.col).doc(o.id):db.collection(o.col).doc();
+        const data=Object.assign({},o.data||{});
+        if(o.col==="ecritures"){ if(o.t==="set")Object.assign(data,{creeLe:now(),creePar:me()}); else if(o.t==="update")Object.assign(data,{modifieLe:now(),modifiePar:me()}); }
+        if(o.t==="delete")b.delete(ref); else if(o.t==="update")b.update(ref,data); else if(o.t==="merge")b.set(ref,data,{merge:true}); else b.set(ref,data);
+      }
+      ps.push(b.commit());
+    }
+    const done=Promise.all(ps);
+    // hors connexion, Firestore applique la modification sur l'appareil et l'envoie au retour du réseau
+    if(!navigator.onLine){done.catch(e=>flash(fbErr(e),true));return;}
+    await done;
   }
   return {
+    now, newId, commit,
     signIn:(m,p)=>auth.signInWithEmailAndPassword(m,p),
     async signUp(nom,m,p){pendingName=nom;const c=await auth.createUserWithEmailAndPassword(m,p);try{await c.user.updateProfile({displayName:nom});}catch(e){}},
     reset:m=>auth.sendPasswordResetEmail(m),
-    signOut:()=>auth.signOut(),
-    async saveEcriture(id,data,before){
-      const b=db.batch(), ref=id?db.doc("ecritures/"+id):db.collection("ecritures").doc();
-      if(id){b.update(ref,Object.assign({},data,{modifieLe:now(),modifiePar:me()}));jr(b,"Modification",resume(before)+"  →  "+resume(data));}
-      else{b.set(ref,Object.assign({},data,{ordre:Date.now(),creeLe:now(),creePar:me()}));jr(b,"Création",resume(data));}
-      await b.commit();
-    },
-    async saveMany(list,texte){
-      const b=db.batch(); list.forEach((d,i)=>b.set(db.collection("ecritures").doc(),Object.assign({},d,{ordre:Date.now()+i,creeLe:now(),creePar:me()})));
-      jr(b,"Création",texte); await b.commit();
-    },
-    async removeEcriture(e){const b=db.batch();b.delete(db.doc("ecritures/"+e.id));jr(b,"Suppression",resume(e));await b.commit();},
-    async setPointe(ids,val,texte){
-      await chunks(ids.map(id=>b=>b.update(db.doc("ecritures/"+id),{pointe:val})));
-      const b=db.batch();jr(b,val?"Pointage":"Dépointage",texte);await b.commit();
-    },
-    async importRows(rows,replace,texte){
-      const ops=[]; if(replace)S.ecr.forEach(e=>ops.push(b=>b.delete(db.doc("ecritures/"+e.id))));
-      const t=Date.now(); rows.forEach((r,i)=>ops.push(b=>b.set(db.collection("ecritures").doc(),Object.assign({},r,{ordre:t+i,creeLe:now(),creePar:me()}))));
-      await chunks(ops); const b=db.batch();jr(b,"Import",texte);await b.commit();
-    },
-    async saveBudget(data){const b=db.batch();b.set(db.doc("budgets/"+slug(data.evenement)),data);jr(b,"Budget",`${data.evenement} : recettes ${fm(data.recettes)}, dépenses ${fm(data.depenses)}`);await b.commit();},
-    async removeBudget(bg){const b=db.batch();b.delete(db.doc("budgets/"+bg.id));jr(b,"Budget",`${bg.evenement} : budget supprimé`);await b.commit();},
-    async setMembre(uid,data){const b=db.batch();b.set(db.doc("membres/"+uid),Object.assign({},data,{at:now()}));b.delete(db.doc("demandes/"+uid));jr(b,"Accès",`${data.nom||data.email} : ${data.role==="tresorier"?"trésorier":"lecteur"}`);await b.commit();},
-    async removeMembre(m){const b=db.batch();b.delete(db.doc("membres/"+m.id));jr(b,"Accès",`${m.nom||m.email} : accès retiré`);await b.commit();},
-    refuse:d=>db.doc("demandes/"+d.id).delete()
+    signOut:()=>auth.signOut()
   };
 }
 
 function demoStore(){
-  const KEY="cahier-comptes-demo-v2";
-  let D={ecr:[],budgets:[],journal:[]};
-  try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&Array.isArray(s.ecr))D=s;}catch(e){}
-  const uid=()=>Math.random().toString(36).slice(2,12)+Date.now().toString(36);
-  const sync=()=>{try{localStorage.setItem(KEY,JSON.stringify(D));}catch(e){} S.ecr=D.ecr.slice();S.budgets=D.budgets.slice();S.journal=D.journal.slice(0,300);onData();};
-  const jr=(action,texte)=>D.journal.unshift({id:uid(),at:new Date().toISOString(),nom:"Démonstration",action,texte:String(texte).slice(0,600)});
+  const KEY="cahier-comptes-demo-v2", LIST=["ecr","budgets","journal","evenements","caisses","annonceurs","paramsList"];
+  let D={};
+  try{D=JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){D={};}
+  for(const k of LIST) if(!Array.isArray(D[k]))D[k]=[];
+  const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+  const sync=()=>{try{localStorage.setItem(KEY,JSON.stringify(D));}catch(e){} for(const k of LIST)S[k]=D[k].slice(); S.journal=D.journal.slice(0,300); afterData(); onData();};
   S.user={uid:"demo",email:"",nom:"Démonstration"};S.role="tresorier";S.ready=true;
   setTimeout(sync,0);
   return {
-    signIn:async()=>{},signUp:async()=>{},reset:async()=>{},signOut:async()=>{flash("En mode démonstration, il n'y a pas de compte à déconnecter.");},
-    async saveEcriture(id,data,before){
-      if(id){const i=D.ecr.findIndex(e=>e.id===id);D.ecr[i]=Object.assign({},D.ecr[i],data);jr("Modification",resume(before)+"  →  "+resume(data));}
-      else{D.ecr.push(Object.assign({id:uid(),ordre:Date.now()},data));jr("Création",resume(data));}
-      sync();
+    now:()=>new Date().toISOString(), newId:()=>uid(),
+    async commit(ops,journal){
+      for(const o of ops){
+        const k=KEYS[o.col]; if(!k||!D[k])continue;
+        const arr=D[k], i=o.id?arr.findIndex(x=>x.id===o.id):-1;
+        if(o.t==="delete"){if(i>=0)arr.splice(i,1);}
+        else if(o.t==="update"){if(i>=0)arr[i]=Object.assign({},arr[i],o.data);}
+        else if(o.t==="merge"){if(i>=0)arr[i]=Object.assign({},arr[i],o.data);else arr.push(Object.assign({},o.data,{id:o.id||uid()}));}
+        else{const v=Object.assign({},o.data,{id:o.id||uid()});if(i>=0)arr[i]=v;else arr.push(v);}
+      }
+      for(const j of asList(journal)) D.journal.unshift({id:uid(),at:new Date().toISOString(),nom:"Démonstration",action:j.action,texte:String(j.texte).slice(0,1500)});
+      D.journal=D.journal.slice(0,1000); sync();
     },
-    async saveMany(list,texte){list.forEach((d,i)=>D.ecr.push(Object.assign({id:uid(),ordre:Date.now()+i},d)));jr("Création",texte);sync();},
-    async removeEcriture(e){D.ecr=D.ecr.filter(x=>x.id!==e.id);jr("Suppression",resume(e));sync();},
-    async setPointe(ids,val,texte){const s=new Set(ids);D.ecr.forEach(e=>{if(s.has(e.id))e.pointe=val;});jr(val?"Pointage":"Dépointage",texte);sync();},
-    async importRows(rows,replace,texte){if(replace)D.ecr=[];const t=Date.now();rows.forEach((r,i)=>D.ecr.push(Object.assign({id:uid(),ordre:t+i},r)));jr("Import",texte);sync();},
-    async saveBudget(data){const id=slug(data.evenement);D.budgets=D.budgets.filter(b=>b.id!==id);D.budgets.push(Object.assign({id},data));jr("Budget",`${data.evenement} : recettes ${fm(data.recettes)}, dépenses ${fm(data.depenses)}`);sync();},
-    async removeBudget(bg){D.budgets=D.budgets.filter(b=>b.id!==bg.id);jr("Budget",`${bg.evenement} : budget supprimé`);sync();},
-    async setMembre(){},async removeMembre(){},async refuse(){}
+    signIn:async()=>{},signUp:async()=>{},reset:async()=>{},
+    signOut:async()=>{flash("En mode démonstration, il n'y a pas de compte à déconnecter.");}
   };
 }
 
 /* ================= état d'affichage ================= */
-let store, M=build([]), season="all", curEv=null, curFam=null, editing=null, pendingImport=null, editBudget=null;
+let store, M=build([]), season="all", curEv=null, curFam=null, editing=null, pendingImport=null;
+const SEL=new Set(); let lastPick=null, shownIds=[];
 const canWrite=()=>S.role==="tresorier";
 const seasonsOf=()=>[...new Set(M.events.map(e=>e.year).filter(Boolean))].sort();
 const inSeason=e=>season==="all"||e.year===+season;
 const lineInSeason=l=>season==="all"||l.year===+season;
-function flash(t,err){const f=$("flash");if(!f)return;f.textContent=t||"";f.hidden=!t;f.classList.toggle("err",!!err);if(t&&!err){clearTimeout(flash.t);flash.t=setTimeout(()=>{f.hidden=true;},7000);}}
-const fbErr=e=>({"auth/invalid-credential":"E-mail ou mot de passe incorrect.","auth/wrong-password":"E-mail ou mot de passe incorrect.","auth/user-not-found":"Aucun compte avec cette adresse.","auth/email-already-in-use":"Un compte existe déjà avec cette adresse.","auth/weak-password":"Mot de passe trop court (6 caractères minimum).","auth/invalid-email":"Adresse e-mail invalide.","auth/too-many-requests":"Trop d'essais. Réessayez dans quelques minutes.","auth/network-request-failed":"Connexion Internet indisponible.","permission-denied":"Action refusée : votre compte n'a pas ce droit."}[e&&e.code]||(e&&e.message)||"Erreur inconnue.");
-async function run(p,okMsg){try{await p;if(okMsg)flash(okMsg);return true;}catch(e){flash(fbErr(e),true);return false;}}
+const sumOf=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+const dec=v=>v?String(round2(+v)).replace(".",","):"";
+function flash(t,err){const f=$("flash");if(!f)return;f.textContent=t||"";f.hidden=!t;f.classList.toggle("err",!!err);if(t&&!err){clearTimeout(flash.t);flash.t=setTimeout(()=>{f.hidden=true;},8000);}}
+const fbErr=e=>({"auth/invalid-credential":"E-mail ou mot de passe incorrect.","auth/wrong-password":"E-mail ou mot de passe incorrect.","auth/user-not-found":"Aucun compte avec cette adresse.","auth/email-already-in-use":"Un compte existe déjà avec cette adresse.","auth/weak-password":"Mot de passe trop court (6 caractères minimum).","auth/invalid-email":"Adresse e-mail invalide.","auth/too-many-requests":"Trop d'essais. Réessayez dans quelques minutes.","auth/network-request-failed":"Connexion Internet indisponible.","permission-denied":"Action refusée : votre compte n'a pas ce droit.","unavailable":"Service injoignable : vérifiez la connexion.","timeout":"Le serveur ne répond pas : vérifiez la connexion."}[e&&e.code]||(e&&e.message)||"Erreur inconnue.");
+async function run(p,okMsg){try{await p;if(okMsg)flash(okMsg+(navigator.onLine||DEMO?"":" Hors connexion : envoi automatique au retour du réseau."));return true;}catch(e){flash(fbErr(e),true);return false;}}
 function ask(text,yes){return new Promise(res=>{$("cText").textContent=text;$("cYes").textContent=yes||"Confirmer";const d=$("dlgC");const done=v=>{d.close();$("fC").onsubmit=null;$("cNo").onclick=null;res(v);};$("fC").onsubmit=e=>{e.preventDefault();done(true);};$("cNo").onclick=()=>done(false);d.showModal();});}
+function opNewEcr(data,i){return {t:"set",col:"ecritures",id:store.newId("ecritures"),data:Object.assign({compte:"CC",date:today(),evenement:"",designation:"",recette:0,depense:0,type:"",commentaire:"",pointe:false,poste:""},data,{ordre:Date.now()+(i||0)})};}
+const addMonth=(ym,n)=>{let [y,m]=ym.split("-").map(Number);m+=n;y+=Math.floor((m-1)/12);m=((m-1)%12+12)%12+1;return y+"-"+String(m).padStart(2,"0");};
+const ymOf=v=>{if(v==null||v==="")return null;const s=String(v).trim();let m=/^(\d{4})-(\d{1,2})/.exec(s);if(m)return m[1]+"-"+m[2].padStart(2,"0");m=/^(\d{1,2})\/(\d{4})$/.exec(s);if(m)return m[2]+"-"+m[1].padStart(2,"0");const d=parseDate(v);return d?d.slice(0,7):null;};
+const MOIS=["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+const monthLabel=ym=>{if(!ym)return "·";const [y,m]=ym.split("-");return (MOIS[+m-1]||m)+" "+y;};
+const TYPES=["Virement","Prélevement","Cheques","Dépôt","CB","Retrait","Espece","SEPA","Autre"];
+function typeOptions(cur){const l=TYPES.slice();if(cur&&!l.includes(cur))l.push(cur);return l.map(v=>`<option ${v===cur?"selected":""}>${esc(v)}</option>`).join("");}
+function posteOptions(auto,cur){
+  const o=v=>`<option value="${esc(v)}" ${v===cur?"selected":""}>${esc(v)}</option>`;
+  return `<option value="" ${!cur?"selected":""}>Automatique${auto?" : "+esc(auto):""}</option><optgroup label="Recettes">${POSTES_REC.map(o).join("")}</optgroup><optgroup label="Dépenses">${POSTES_DEP.map(o).join("")}</optgroup><optgroup label="Cas particuliers">${POSTES_SPE.map(o).join("")}</optgroup>`;
+}
+const normEv=s=>String(s||"").replace(/\s+/g," ").trim().toUpperCase();
+const HORS_RE=/^(AUTRE|TRANSFERT COMPTE|REUNION AG|INVESTISSEMENT \d{4})$/;
+function evList(){
+  const map=new Map();
+  for(const m of S.evenements){const n=eventKey(m.nom).parent;if(n)map.set(n,{name:n,managed:m,ev:null});}
+  for(const e of M.events){const x=map.get(e.name)||{name:e.name,managed:null,ev:null};x.ev=e;map.set(e.name,x);}
+  return [...map.values()];
+}
+const isOpen=x=>!!(x.managed&&x.managed.statut!=="clos");
+function eventOptions(cur,date){
+  const yr=String(date||today()).slice(0,4), vals=new Set();
+  const o=(v,l)=>{vals.add(v);return `<option value="${esc(v)}">${esc(l||v)}</option>`;};
+  const all=evList(), open=all.filter(isOpen).sort((a,b)=>String(a.managed.debut||a.name).localeCompare(String(b.managed.debut||b.name)));
+  let h="";
+  if(open.length) h+=`<optgroup label="Événements en cours">${open.map(x=>o(x.name)+(x.managed.sous||[]).map(s=>o(x.name+" - "+s,"↳ "+x.name+" - "+s)).join("")).join("")}</optgroup>`;
+  h+=`<optgroup label="Hors événement">${["AUTRE","INVESTISSEMENT "+yr,"REUNION AG","TRANSFERT COMPTE"].map(v=>o(v)).join("")}</optgroup>`;
+  const others=all.filter(x=>!isOpen(x)&&!HORS_RE.test(x.name)).sort((a,b)=>((b.ev&&b.ev.last)||"").localeCompare((a.ev&&a.ev.last)||""));
+  if(others.length) h+=`<optgroup label="Clos ou non listés">${others.map(x=>o(x.name)).join("")}</optgroup>`;
+  const c=normEv(cur);
+  let top=`<option value="">Choisir un événement…</option>`;
+  if(c&&!vals.has(c)) top+=`<option value="${esc(c)}">${esc(c)}</option>`;
+  return top+h+`<option value="__new">+ Créer un événement…</option>`;
+}
+function setEv(sel,cur,date){sel.innerHTML=eventOptions(cur,date);sel.value=normEv(cur);if(sel.value!==normEv(cur))sel.value="";sel.dataset.prev=sel.value;}
 
 /* ================= rendus ================= */
 function hbars(el,obj,kind){
@@ -699,14 +1030,16 @@ function statusPill(e){
   return `<span class="pill neutral">À l'équilibre</span>`;
 }
 function linesTable(ls,opt){
-  opt=opt||{}; const w=canWrite();
-  return `<thead><tr>${opt.check?"<th>Pointé</th>":""}<th>Date</th><th>Événement</th><th>Désignation</th><th>Poste</th><th class="r">Recette</th><th class="r">Dépense</th><th>Paiement</th><th>Commentaire</th>${opt.check?"":"<th>Pointé</th>"}${w?"<th></th>":""}</tr></thead><tbody>`+
-  (ls.length?ls.map(l=>{
+  opt=opt||{}; const w=canWrite(), sel=!!opt.sel&&w;
+  const head=`<thead><tr>${sel?`<th class="sel"><input type="checkbox" id="selAll" aria-label="Tout sélectionner"></th>`:""}${opt.check?"<th>Pointé</th>":""}<th>Date</th><th>Événement</th><th>Désignation</th><th>Poste</th><th class="r">Recette</th><th class="r">Dépense</th><th>Paiement</th><th>Commentaire</th>${opt.check?"":"<th>Pointé</th>"}${w?"<th></th>":""}</tr></thead>`;
+  const rows=ls.map(l=>{
     const u=/https?:\/\/\S+/.exec(l.com);
     const com=u?(esc(l.com.replace(u[0],"").replace(/[:\s]+$/,""))+` <a href="${esc(u[0])}" target="_blank" rel="noopener">pièce</a>`):esc(l.com);
     const chk=opt.check?`<td><input type="checkbox" data-pt="${esc(l.id)}" ${l.pointe?"checked":""} ${w?"":"disabled"} aria-label="Pointer"></td>`:"";
-    return `<tr>${chk}<td class="num">${fdate(l.iso)}</td><td class="small">${l.acc==="LA"?"Livret A · ":""}${esc(l.evt.trim())}</td><td>${esc(l.des)}</td><td class="small muted">${esc(l.cat)}</td><td class="r num pos">${l.rec?fm(l.rec):""}</td><td class="r num neg">${l.dep?fm(l.dep):""}</td><td class="small">${esc(l.type)}</td><td class="small muted">${com}</td>${opt.check?"":`<td class="small">${l.pointe?"✓":""}</td>`}${w?`<td><button type="button" class="mini" data-edit="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
-  }).join(""):`<tr><td colspan="11" class="muted">Aucune écriture.</td></tr>`)+`</tbody>`;
+    const s=sel?`<td class="sel"><input type="checkbox" data-sel="${esc(l.id)}" ${SEL.has(l.id)?"checked":""} aria-label="Sélectionner"></td>`:"";
+    return `<tr class="${sel&&SEL.has(l.id)?"picked":""}">${s}${chk}<td class="num">${fdate(l.iso)}</td><td class="small">${l.acc==="LA"?"Livret A · ":""}${esc(l.evt.trim())}</td><td>${esc(l.des)}</td><td class="small ${l.poste?"":"muted"}">${esc(l.cat)}</td><td class="r num pos">${l.rec?fm(l.rec):""}</td><td class="r num neg">${l.dep?fm(l.dep):""}</td><td class="small">${esc(l.type)}</td><td class="small muted">${com}</td>${opt.check?"":`<td class="small">${l.pointe?"✓":""}</td>`}${w?`<td><button type="button" class="mini" data-edit="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
+  }).join("");
+  return head+`<tbody>${rows||`<tr><td colspan="12" class="muted">Aucune écriture.</td></tr>`}</tbody>`;
 }
 function renderSynthese(){
   const cc=M.lines.filter(l=>l.acc==="CC").reduce((s,l)=>s+l.rec-l.dep,0), la=M.lines.filter(l=>l.acc==="LA").reduce((s,l)=>s+l.rec-l.dep,0);
@@ -787,7 +1120,7 @@ function renderEvent(){
   sel.innerHTML=[...M.events].reverse().map(e=>`<option value="${esc(e.name)}">${esc(e.name)}</option>`).join("");
   if(!curEv||!M.events.some(e=>e.name===curEv)){const c=M.events.filter(e=>!e.upcoming);curEv=(c[c.length-1]||M.events[0]||{}).name;}
   const e=M.events.find(x=>x.name===curEv);
-  if(!e){["evTiles","evRec","evDep","evPay","evSubs","evRatios","evLines","evStatus"].forEach(i=>$(i).innerHTML="");return;}
+  if(!e){["evTiles","evRec","evDep","evPay","evSubs","evRatios","evLines","evStatus"].forEach(i=>$(i).innerHTML="");$("caisseCard").hidden=true;return;}
   sel.value=curEv;
   const bg=S.budgets.find(b=>eventKey(b.evenement).parent===e.name);
   $("evStatus").innerHTML=statusPill(e)+` <span class="muted small">${e.lines.length} écritures, du ${fdate(e.first)} au ${fdate(e.last)}</span>`;
@@ -809,6 +1142,7 @@ function renderEvent(){
   const subs=Object.entries(e.subs);
   $("evSubs").innerHTML=subs.length>1?`<h3 style="margin:8px 0 6px">Sous-rubriques</h3><div class="scroll"><table><thead><tr><th>Rubrique</th><th class="r">Recettes</th><th class="r">Dépenses</th><th class="r">Résultat</th></tr></thead><tbody>${subs.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="r num">${fm(v.rec)}</td><td class="r num">${fm(v.dep)}</td><td class="r num ${cls(v.rec-v.dep)}">${sg(v.rec-v.dep)}</td></tr>`).join("")}</tbody></table></div>`:"";
   $("evLines").innerHTML=linesTable(e.lines);
+  renderCaisse(e);
 }
 function renderEditions(){
   const fam=families(), multi=[...fam.entries()].filter(([,a])=>a.length>1);
@@ -838,21 +1172,54 @@ function fillSelect(sel,first,values){const cur=sel.value;sel.innerHTML=`<option
 function renderLines(){
   fillSelect($("fEv"),"Tous les événements",[...new Set(M.lines.map(groupOf))].sort());
   fillSelect($("fCat"),"Tous les postes",[...new Set(M.lines.map(l=>l.cat))].sort());
-  const q=strip($("q").value), ev=$("fEv").value, cat=$("fCat").value, acc=$("fAcc").value;
-  const ls=M.lines.filter(l=>(!acc||l.acc===acc)&&(!ev||groupOf(l)===ev)&&(!cat||l.cat===cat)&&(!q||strip(l.des+" "+l.com+" "+l.evt+" "+l.type).includes(q))).reverse();
-  $("lnCount").textContent=`${ls.length} écritures · recettes ${fm(ls.reduce((s,l)=>s+l.rec,0))} · dépenses ${fm(ls.reduce((s,l)=>s+l.dep,0))}`;
-  $("lnTable").innerHTML=linesTable(ls);
+  const q=strip($("q").value), acc=$("fAcc").value, ev=$("fEv").value, cat=$("fCat").value, pt=$("fPt").value, du=$("fDu").value, au=$("fAu").value;
+  const ls=M.lines.filter(l=>(!acc||l.acc===acc)&&(!ev||groupOf(l)===ev)&&(!cat||l.cat===cat)&&(!pt||(pt==="oui")===l.pointe)&&(!du||(l.iso&&l.iso>=du))&&(!au||(l.iso&&l.iso<=au))&&(!q||strip(l.des+" "+l.com+" "+l.evt+" "+l.type+" "+l.cat).includes(q))).reverse();
+  shownIds=ls.map(l=>l.id);
+  const ids=new Set(S.ecr.map(e=>e.id)); for(const id of [...SEL]) if(!ids.has(id))SEL.delete(id);
+  $("lnCount").textContent=`${ls.length} écritures · recettes ${fm(sumOf(ls,l=>l.rec))} · dépenses ${fm(sumOf(ls,l=>l.dep))}`;
+  let sv=null; try{sv=localStorage.getItem("cahier-derniere-sauvegarde");}catch(e){}
+  $("lastSave").textContent=sv?` · dernière sauvegarde Excel depuis cet appareil le ${fdate(sv)}`:" · aucune sauvegarde Excel faite depuis cet appareil";
+  $("lnTable").innerHTML=linesTable(ls,{sel:true});
+  syncSel();
 }
-function renderBudget(){
-  const names=[...new Set([...S.budgets.map(b=>eventKey(b.evenement).parent),...M.events.map(e=>e.name)])];
-  const rows=names.map(n=>({n,e:M.events.find(x=>x.name===n),b:S.budgets.find(x=>eventKey(x.evenement).parent===n)})).sort((a,c)=>((c.e&&c.e.first)||"9")<((a.e&&a.e.first)||"9")?-1:1);
-  const w=canWrite();
-  $("bgTable").innerHTML=`<thead><tr><th>Événement</th><th class="r">Recettes prévues</th><th class="r">réalisées</th><th class="r">Dépenses prévues</th><th class="r">réalisées</th><th class="r">Résultat prévu</th><th class="r">réalisé</th><th class="r">Écart</th><th>État</th>${w?"<th></th>":""}</tr></thead><tbody>`+
-  (rows.length?rows.map(({n,e,b})=>{
+function syncSel(){
+  const all=$("selAll");
+  if(all){const n=shownIds.filter(id=>SEL.has(id)).length;all.checked=n>0&&n===shownIds.length;all.indeterminate=n>0&&n<shownIds.length;}
+  const b=$("bulk"); b.hidden=!SEL.size||!canWrite();
+  if(SEL.size){
+    const ls=M.lines.filter(l=>SEL.has(l.id)), shown=new Set(shownIds), hid=ls.filter(l=>!shown.has(l.id)).length;
+    $("bulkInfo").innerHTML=`<b>${SEL.size} écriture(s) sélectionnée(s)</b> · recettes ${fm(sumOf(ls,l=>l.rec))} · dépenses ${fm(sumOf(ls,l=>l.dep))}${hid?` · dont ${hid} hors du filtre affiché`:""}`;
+  }
+  document.querySelectorAll("#lnTable [data-sel]").forEach(c=>{c.checked=SEL.has(c.dataset.sel);c.closest("tr").classList.toggle("picked",c.checked);});
+}
+function pick(t,shift){
+  const id=t.dataset.sel, on=t.checked;
+  if(shift&&lastPick&&shownIds.includes(lastPick)){
+    const a=shownIds.indexOf(lastPick), b=shownIds.indexOf(id), i=Math.min(a,b), j=Math.max(a,b);
+    for(let k=i;k<=j;k++){if(on)SEL.add(shownIds[k]);else SEL.delete(shownIds[k]);}
+  } else if(on)SEL.add(id); else SEL.delete(id);
+  lastPick=id; syncSel();
+}
+let evFilter="all";
+function renderEvenements(){
+  const list=evList(), w=canWrite();
+  for(const b of S.budgets){const n=eventKey(b.evenement).parent;if(n&&!list.some(x=>x.name===n))list.push({name:n,managed:null,ev:null});}
+  const st=x=>x.managed?(x.managed.statut==="clos"?"clos":"ouvert"):"hors";
+  const counts={all:list.length,ouvert:0,clos:0,hors:0}; list.forEach(x=>counts[st(x)]++);
+  $("evFilt").innerHTML=[["all","Tous"],["ouvert","En cours"],["clos","Clos"],["hors","Non listés"]].map(([k,l])=>`<button type="button" class="chip ${evFilter===k?"on":""}" data-evf="${k}">${l} · ${counts[k]}</button>`).join("");
+  const key=x=>(x.managed&&x.managed.debut)||(x.ev&&x.ev.first)||"9999";
+  const rows=list.filter(x=>evFilter==="all"||st(x)===evFilter).sort((a,b)=>key(b).localeCompare(key(a)));
+  const fd=d=>d?fdate(d):"…";
+  $("bgTable").innerHTML=`<thead><tr><th>Événement</th><th>Dates</th><th>Statut</th><th class="r">Recettes prévues</th><th class="r">réalisées</th><th class="r">Dépenses prévues</th><th class="r">réalisées</th><th class="r">Résultat prévu</th><th class="r">réalisé</th><th class="r">Écart</th><th>Budget</th>${w?"<th></th>":""}</tr></thead><tbody>`+(rows.length?rows.map(x=>{
+    const m=x.managed, e=x.ev, b=S.budgets.find(y=>eventKey(y.evenement).parent===x.name);
     const rr=e?e.rec:0, rd=e?e.dep:0, res=rr-rd, pr=b?b.recettes-b.depenses:null;
-    const st=!b?`<span class="pill neutral">Sans budget</span>`:rd>b.depenses+0.005?`<span class="pill bad">Dépenses dépassées</span>`:(e&&!e.upcoming&&res<pr-0.005)?`<span class="pill warn">Résultat sous le prévu</span>`:`<span class="pill good">Dans le budget</span>`;
-    return `<tr><td><b>${esc(n)}</b>${b&&b.note?`<div class="small muted">${esc(b.note)}</div>`:""}</td><td class="r num">${b?fm(b.recettes):"·"}</td><td class="r num">${e?fm(rr):"·"}</td><td class="r num">${b?fm(b.depenses):"·"}</td><td class="r num">${e?fm(rd):"·"}</td><td class="r num">${b?sg(pr):"·"}</td><td class="r num ${cls(res)}">${e?sg(res):"·"}</td><td class="r num ${b&&e?cls(res-pr):""}">${b&&e?sg(res-pr):"·"}</td><td>${st}</td>${w?`<td><button type="button" class="mini" data-bg="${esc(n)}">${b?"Modifier":"Définir"}</button></td>`:""}</tr>`;
-  }).join(""):`<tr><td colspan="10" class="muted">Aucun événement ni budget.</td></tr>`)+`</tbody>`;
+    const bst=!b?`<span class="pill neutral">Sans budget</span>`:rd>b.depenses+0.005?`<span class="pill bad">Dépenses dépassées</span>`:(e&&!e.upcoming&&res<pr-0.005)?`<span class="pill warn">Résultat sous le prévu</span>`:`<span class="pill good">Dans le budget</span>`;
+    const stp=!m?`<span class="pill warn">Non listé</span>`:m.statut==="clos"?`<span class="pill neutral">Clos</span>`:`<span class="pill good">En cours</span>`;
+    const dates=m&&(m.debut||m.fin)?`${fd(m.debut)} → ${fd(m.fin)}`:e?`${fd(e.first)} → ${fd(e.last)}`:"·";
+    const note=(m&&m.note)||(b&&b.note);
+    return `<tr><td>${e?`<button type="button" class="link" data-ev="${esc(x.name)}">${esc(x.name)}</button>`:`<b>${esc(x.name)}</b>`}${m&&m.sous&&m.sous.length?`<div class="small muted">Sous-rubriques : ${esc(m.sous.join(", "))}</div>`:""}${note?`<div class="small muted">${esc(note)}</div>`:""}</td><td class="small num">${dates}</td><td>${stp}</td><td class="r num">${b?fm(b.recettes):"·"}</td><td class="r num">${e?fm(rr):"·"}</td><td class="r num">${b?fm(b.depenses):"·"}</td><td class="r num">${e?fm(rd):"·"}</td><td class="r num">${b?sg(pr):"·"}</td><td class="r num ${cls(res)}">${e?sg(res):"·"}</td><td class="r num ${b&&e?cls(res-pr):""}">${b&&e?sg(res-pr):"·"}</td><td>${bst}</td>${w?`<td><button type="button" class="mini" data-evedit="${esc(x.name)}">${m?"Modifier":"Ajouter à la liste"}</button></td>`:""}</tr>`;
+  }).join(""):`<tr><td colspan="12" class="muted">Aucun événement.</td></tr>`)+`</tbody>`;
+  $("evAll").disabled=!list.some(x=>!x.managed&&x.ev);
 }
 function rapLines(){const acc=$("rAcc").value;return M.lines.filter(l=>l.acc===acc);}
 function renderRap(){
@@ -887,17 +1254,187 @@ function renderControles(){
   g("Nom d'événement avec espaces parasites",M.lines.filter(l=>l.evt!==l.evt.trim()||/\s{2,}/.test(l.evt)),"L'application les regroupe, mais mieux vaut corriger le nom.");
   g("Sans événement",M.lines.filter(l=>l.acc==="CC"&&!l.evt.trim()),"Classées en fonctionnement par défaut.");
   g("Recette et dépense sur la même écriture",M.lines.filter(l=>l.rec>0&&l.dep>0),"Une écriture devrait porter un seul sens.");
-  g("Dépenses classées « Divers »",M.lines.filter(l=>l.cat==="Divers"),"La désignation ne permet pas d'identifier le poste (ex. « Cheque »). Préciser le bénéficiaire améliore l'analyse.");
+  g("Dépenses classées « Divers »",M.lines.filter(l=>l.cat==="Divers"),"La désignation ne permet pas d'identifier le poste (ex. « Cheque »). Choisissez le poste dans la fiche de l'écriture, ou en une fois : onglet Écritures, filtre « Divers », cochez les lignes puis « Modifier… ».");
   $("ctlList").innerHTML=groups.join("")||`<p class="muted">Aucune anomalie détectée.</p>`;
 }
 function tsText(x){const d=x&&x.toDate?x.toDate():x?new Date(x):null;return d&&!isNaN(d)?d.toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"}):"à l'instant";}
 function renderJournal(){
   $("jTable").innerHTML=`<thead><tr><th>Quand</th><th>Qui</th><th>Opération</th><th>Détail</th></tr></thead><tbody>`+(S.journal.length?S.journal.map(j=>`<tr><td class="num small">${esc(tsText(j.at))}</td><td class="small">${esc(j.nom||"")}</td><td><span class="pill ${j.action==="Suppression"?"bad":j.action==="Modification"?"warn":"neutral"}">${esc(j.action)}</span></td><td class="small">${esc(j.texte||"")}</td></tr>`).join(""):`<tr><td colspan="4" class="muted">Aucune opération enregistrée.</td></tr>`)+`</tbody>`;
 }
-function renderAcces(){
+/* ---------- écritures récurrentes ---------- */
+function recPending(){
+  const t=today(), cur=t.slice(0,7), out=[];
+  for(const r of P().recurrentes||[]){
+    let ym=r.derniere?addMonth(r.derniere,1):(r.depuis||cur);
+    if(r.depuis&&ym<r.depuis)ym=r.depuis;
+    for(let g=0;g<36&&ym<=cur;g++,ym=addMonth(ym,1)){
+      const iso=ym+"-"+String(Math.min(Math.max(parseInt(r.jour)||1,1),28)).padStart(2,"0");
+      if(iso<=t)out.push({r,ym,iso});
+    }
+  }
+  return out.sort((a,b)=>a.iso.localeCompare(b.iso));
+}
+function renderRecBanner(id){
+  const el=$(id); if(!el)return;
+  const p=canWrite()?recPending():[];
+  el.hidden=!p.length;
+  if(p.length) el.innerHTML=`${p.length} écriture(s) récurrente(s) à créer : ${esc(p.slice(0,3).map(x=>x.r.designation+" "+monthLabel(x.ym)).join(", "))}${p.length>3?"…":""} <button type="button" class="mini primary" data-gen="1">Voir et créer</button>`;
+}
+
+/* ---------- réglages ---------- */
+function renderReglages(){
+  const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  $("instTxt").innerHTML=standalone?"L'application est installée sur cet appareil.":installEvt?"Installez l'application pour l'ouvrir depuis l'écran d'accueil, comme une application.":ios?"Sur iPhone ou iPad : ouvrez l'adresse dans Safari, touchez <b>Partager</b> puis <b>Sur l'écran d'accueil</b>.":"Dans le menu du navigateur, choisissez <b>Installer l'application</b> ou <b>Ajouter à l'écran d'accueil</b>.";
+  $("instBtn").hidden=!installEvt||standalone;
+  $("offTxt").textContent=DEMO?"En mode démonstration, les données restent sur cet appareil.":"Hors connexion, l'application reste utilisable : les écritures saisies sont gardées sur l'appareil puis envoyées au retour du réseau. Il faut s'être connecté au moins une fois sur l'appareil avec Internet.";
+  if(!canWrite())return;
+  if(document.activeElement!==$("sFrais"))$("sFrais").value=String(P().fraisVirement).replace(".",",");
+  const rs=P().recurrentes||[];
+  $("uTable").innerHTML=`<thead><tr><th>Désignation</th><th>Compte</th><th>Événement</th><th class="r">Montant</th><th>Paiement</th><th>Jour</th><th>Depuis</th><th>Dernière créée</th><th></th></tr></thead><tbody>${rs.length?rs.map(r=>`<tr><td>${esc(r.designation)}</td><td class="small">${r.compte==="LA"?"Livret A":"Compte courant"}</td><td class="small">${esc(r.evenement)}</td><td class="r num ${r.sens==="rec"?"pos":"neg"}">${r.sens==="rec"?"+":"−"}${fm(+r.montant||0)}</td><td class="small">${esc(r.type)}</td><td class="num">${esc(r.jour)}</td><td class="small num">${esc(monthLabel(r.depuis))}</td><td class="small num">${esc(monthLabel(r.derniere))}</td><td><button type="button" class="mini" data-uedit="${esc(r.id)}">Modifier</button></td></tr>`).join(""):`<tr><td colspan="9" class="muted">Aucune écriture récurrente. Exemple : tenue de compte, 5,65 € le 11 de chaque mois.</td></tr>`}</tbody>`;
   if(DEMO){$("dTable").innerHTML=`<tbody><tr><td class="muted">La gestion des accès s'active une fois la connexion configurée.</td></tr></tbody>`;$("mTable").innerHTML="";return;}
-  $("dTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Demandé le</th><th></th></tr></thead><tbody>`+(S.demandes.length?S.demandes.map(d=>`<tr><td>${esc(d.nom||"")}</td><td>${esc(d.email||"")}</td><td class="small num">${esc(tsText(d.at))}</td><td class="row"><button type="button" class="mini primary" data-ok="${esc(d.id)}">Accepter en lecteur</button><button type="button" class="mini" data-no="${esc(d.id)}">Refuser</button></td></tr>`).join(""):`<tr><td colspan="4" class="muted">Aucune demande en attente. Un nouveau membre ouvre l'application, clique sur « Créer mon compte », puis sa demande apparaît ici.</td></tr>`)+`</tbody>`;
+  $("dTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Demandé le</th><th></th></tr></thead><tbody>`+(S.demandes.length?S.demandes.map(d=>`<tr><td>${esc(d.nom||"")}</td><td>${esc(d.email||"")}</td><td class="small num">${esc(tsText(d.at))}</td><td><button type="button" class="mini primary" data-ok="${esc(d.id)}">Accepter en lecteur</button><button type="button" class="mini" data-no="${esc(d.id)}">Refuser</button></td></tr>`).join(""):`<tr><td colspan="4" class="muted">Aucune demande en attente. Un nouveau membre ouvre l'application, clique sur « Créer mon compte », puis sa demande apparaît ici.</td></tr>`)+`</tbody>`;
   $("mTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th><th></th></tr></thead><tbody>`+S.membres.map(m=>{const self=m.id===S.user.uid;return `<tr><td>${esc(m.nom||"")}${self?` <span class="muted small">(vous)</span>`:""}</td><td>${esc(m.email||"")}</td><td><select data-role="${esc(m.id)}" ${self?"disabled":""} aria-label="Rôle"><option value="lecteur" ${m.role!=="tresorier"?"selected":""}>Lecteur</option><option value="tresorier" ${m.role==="tresorier"?"selected":""}>Trésorier</option></select></td><td>${self?"":`<button type="button" class="mini danger" data-rm="${esc(m.id)}">Retirer l'accès</button>`}</td></tr>`;}).join("")+`</tbody>`;
+}
+
+/* ---------- caisse d'un événement ---------- */
+const DENOMS=[500,200,100,50,20,10,5,2,1,0.5,0.2,0.1,0.05,0.02,0.01];
+const CAISSE_ACT=["Buvette & caisse","Réservations (repas, emplacements)","Goodies & textile","Tour du village","Autres produits"];
+function caisseOf(name){
+  const ev=M.events.find(x=>x.name===name), ls=ev?ev.lines:[];
+  const fonds=sumOf(ls.filter(l=>l.fdc&&l.dep>0),l=>l.dep), retours=sumOf(ls.filter(l=>l.fdc&&l.rec>0),l=>l.rec);
+  const depots=sumOf(ls.filter(l=>!l.fdc&&l.rec>0&&/depot|espece/.test(strip(l.type))),l=>l.rec);
+  const doc=S.caisses.find(c=>c.id===slug(name)), sessions=((doc&&doc.sessions)||[]).slice().sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")));
+  const compte=sumOf(sessions,s=>+s.montant||0);
+  return {fonds,retours,depots,sessions,compte,depose:retours+depots,reste:round2(fonds+compte-retours-depots)};
+}
+const detailTxt=d=>Object.entries(d||{}).filter(([,q])=>+q>0).sort((a,b)=>+b[0]-+a[0]).map(([c,q])=>`${q}×${(+c/100).toLocaleString("fr-FR")} €`).join(" · ");
+function parseDetail(s){const d={};String(s||"").replace(/(\d+)\s*×\s*([\d\s.,]+)\s*€/g,(_,q,v)=>{d[String(Math.round(parseNum(v)*100))]=+q;return "";});return d;}
+function renderCaisse(e){
+  $("caisseCard").hidden=false;
+  const c=caisseOf(e.name), ec=c.sessions.length?c.reste:null, w=canWrite();
+  const lab=ec==null?"Écart de caisse":ec>0.005?"Reste à déposer":ec<-0.005?"Déposé en plus du compté":"Caisse soldée";
+  $("cTiles").innerHTML=`
+    <div class="tile"><h3>Fonds de caisse sortis</h3><div class="v">${fm(c.fonds)}</div><div class="s">${c.retours>0?"dont "+fm(c.retours)+" déjà redéposés":"retraits de monnaie"}</div></div>
+    <div class="tile"><h3>Espèces comptées</h3><div class="v">${fm(c.compte)}</div><div class="s">${c.sessions.length} comptage(s), hors fond de caisse</div></div>
+    <div class="tile"><h3>Déposé en banque</h3><div class="v">${fm(c.depose)}</div><div class="s">dépôts d'espèces de l'événement</div></div>
+    <div class="tile ${ec==null?"":Math.abs(ec)<0.005?"good":ec>0?"acc":"bad"}"><h3>${lab}</h3><div class="v ${ec!=null&&ec<-0.005?"neg":""}">${ec==null?"·":fm(Math.abs(ec))}</div><div class="s">${ec==null?"ajoutez vos comptages pour le suivre":"fonds sortis + comptages − déposé"}</div></div>`;
+  $("cTable").innerHTML=c.sessions.length?`<thead><tr><th>Comptage</th><th>Date</th><th>Activité</th><th class="r">Espèces</th><th class="r">Carte</th><th>Détail</th>${w?"<th></th>":""}</tr></thead><tbody>${c.sessions.map(s=>`<tr><td>${esc(s.libelle)}</td><td class="num small">${fdate(s.date)}</td><td class="small">${esc(s.activite)}</td><td class="r num">${fm(+s.montant||0)}</td><td class="r num">${+s.cb?fm(+s.cb):"·"}</td><td class="small muted">${esc(detailTxt(s.detail))}</td>${w?`<td><button type="button" class="mini" data-qedit="${esc(s.id)}">Modifier</button></td>`:""}</tr>`).join("")}<tr class="total"><td>Total</td><td></td><td></td><td class="r num">${fm(c.compte)}</td><td class="r num">${fm(sumOf(c.sessions,s=>+s.cb||0))}</td><td></td>${w?"<td></td>":""}</tr></tbody>`:"";
+}
+
+/* ---------- encarts publicitaires ---------- */
+const ASTAT={relancer:["À relancer","warn"],promis:["Promis","neutral"],paye:["Payé","good"],refuse:["Refusé","bad"]};
+const ast=k=>ASTAT[k]||["?","neutral"];
+let aYear=null, aFilter="all";
+const isEncartLine=l=>l.kind==="event"&&l.family==="ENCART PUB"&&l.rec>0&&l.cat==="Encarts publicitaires";
+function annName(des){
+  const s=String(des||"").replace(/\(.*?\)/g," ").replace(/\b\d+(?:[.,]\d+)?\s*€/g," ").replace(/^\s*encarts?\s*(pub(licitaire)?s?)?\s*(n°\s*\d+)?\s*[-:]?\s*/i,"").replace(/[\s-]+$/,"").replace(/\s{2,}/g," ").trim();
+  return s||String(des||"").trim();
+}
+function encartYears(){
+  const ys=new Set([+today().slice(0,4)]);
+  S.annonceurs.forEach(a=>Object.keys(a.encarts||{}).forEach(y=>ys.add(+y)));
+  M.events.filter(e=>e.family==="ENCART PUB"&&e.year).forEach(e=>ys.add(e.year));
+  ys.add(Math.max(...ys)+1);
+  return [...ys].sort((a,b)=>b-a);
+}
+function renderEncarts(){
+  const ys=encartYears(), cy=+today().slice(0,4);
+  if(!aYear||!ys.includes(aYear)) aYear=S.annonceurs.some(a=>a.encarts&&a.encarts[cy+1])?cy+1:cy;
+  $("aYear").innerHTML=ys.map(y=>`<option ${y===aYear?"selected":""}>${y}</option>`).join("");
+  const y=aYear, py=y-1, en=(a,yy)=>(a.encarts||{})[yy];
+  const all=S.annonceurs.slice().sort((a,b)=>String(a.nom).localeCompare(String(b.nom),"fr"));
+  const by=(k,yy)=>all.filter(a=>en(a,yy||y)&&en(a,yy||y).statut===k);
+  const tot=(k,yy)=>sumOf(by(k,yy),a=>+en(a,yy||y).montant||0);
+  const ev=M.events.find(e=>e.name==="ENCART PUB "+y), cah=ev?(ev.recCat["Encarts publicitaires"]||0):0;
+  $("aTiles").innerHTML=`
+    <div class="tile good"><h3>Payé ${y}</h3><div class="v">${fm(tot("paye"))}</div><div class="s">${by("paye").length} annonceur(s) · au cahier ${fm(cah)}</div></div>
+    <div class="tile"><h3>Promis</h3><div class="v">${fm(tot("promis"))}</div><div class="s">${by("promis").length} annonceur(s) à encaisser</div></div>
+    <div class="tile acc"><h3>À relancer</h3><div class="v">${by("relancer").length}</div><div class="s">${fm(tot("relancer"))} attendus</div></div>
+    <div class="tile"><h3>Payé ${py}</h3><div class="v">${fm(tot("paye",py))}</div><div class="s">${by("paye",py).length} annonceur(s)</div></div>`;
+  const renewable=all.filter(a=>en(a,py)&&["paye","promis"].includes(en(a,py).statut)&&!en(a,y));
+  $("aRenew").textContent=`Reconduire ${renewable.length} annonceur(s) de ${py}`; $("aRenew").disabled=!renewable.length;
+  const cnt=k=>k==="all"?all.length:k==="sans"?all.filter(a=>!en(a,y)).length:by(k).length;
+  $("aFilt").innerHTML=[["all","Tous"],["relancer","À relancer"],["promis","Promis"],["paye","Payés"],["refuse","Refusés"],["sans","Sans encart "+y]].map(([k,l])=>`<button type="button" class="chip ${aFilter===k?"on":""}" data-af="${k}">${l} · ${cnt(k)}</button>`).join("");
+  const q=strip($("aQ").value), w=canWrite();
+  const rows=all.filter(a=>(aFilter==="all"||(aFilter==="sans"?!en(a,y):en(a,y)&&en(a,y).statut===aFilter))&&(!q||strip(a.nom+" "+(a.contact||"")).includes(q)));
+  $("aTable").innerHTML=`<thead><tr><th>Annonceur</th><th class="r">${py}</th><th class="r">${y}</th><th>Statut ${y}</th><th>Payé le</th>${w?"<th></th>":""}</tr></thead><tbody>${rows.length?rows.map(a=>{
+    const c=en(a,y), p=en(a,py), contact=[a.contact,a.tel,a.email].filter(Boolean).join(" · ");
+    const stSel=w?`<select data-astat="${esc(a.id)}" aria-label="Statut ${y}"><option value="">Pas d'encart</option>${Object.entries(ASTAT).map(([k,[l]])=>`<option value="${k}" ${c&&c.statut===k?"selected":""}>${l}</option>`).join("")}</select>`:(c?`<span class="pill ${ast(c.statut)[1]}">${ast(c.statut)[0]}</span>`:"·");
+    return `<tr><td><b>${esc(a.nom)}</b>${contact?`<div class="small muted">${esc(contact)}</div>`:""}${a.note?`<div class="small muted">${esc(a.note)}</div>`:""}</td><td class="r num">${p?fm(+p.montant||0)+(p.statut!=="paye"?` <span class="small muted">${ast(p.statut)[0].toLowerCase()}</span>`:""):"·"}</td><td class="r num">${c?fm(+c.montant||0):"·"}</td><td>${stSel}</td><td class="small num">${c&&c.statut==="paye"&&c.date?fdate(c.date):"·"}</td>${w?`<td>${!c||c.statut!=="paye"?`<button type="button" class="mini primary" data-apay="${esc(a.id)}">Encaisser</button>`:""}<button type="button" class="mini" data-aedit="${esc(a.id)}">Modifier</button></td>`:""}</tr>`;
+  }).join(""):`<tr><td colspan="6" class="muted">${S.annonceurs.length?"Aucun annonceur pour ce filtre.":"Aucun annonceur. « Reprendre les annonceurs du cahier » part des encarts déjà encaissés."}</td></tr>`}</tbody>`;
+  $("aSeed").disabled=!M.lines.some(isEncartLine);
+}
+
+/* ---------- relevé bancaire : lecture ---------- */
+function parseCsv(txt){
+  txt=txt.replace(/^﻿/,"");
+  const head=txt.split(/\r?\n/).slice(0,40).join("\n"), cnt=c=>head.split(c).length-1;
+  const sep=[";","\t",","].sort((a,b)=>cnt(b)-cnt(a))[0];
+  const rows=[]; let row=[], f="", q=false;
+  for(let i=0;i<txt.length;i++){
+    const c=txt[i];
+    if(q){ if(c==='"'){ if(txt[i+1]==='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else if(c==='"') q=true;
+    else if(c===sep){row.push(f);f="";}
+    else if(c==="\n"||c==="\r"){ if(c==="\r"&&txt[i+1]==="\n")i++; row.push(f);rows.push(row);row=[];f=""; }
+    else f+=c;
+  }
+  if(f!==""||row.length){row.push(f);rows.push(row);}
+  return rows.map(r=>r.map(x=>x.replace(/\s+/g," ").trim()));
+}
+async function readTable(file){
+  const buf=await file.arrayBuffer();
+  if(/\.xlsx?$/i.test(file.name)){
+    if(typeof XLSX==="undefined")throw new Error("La bibliothèque Excel n'a pas pu se charger.");
+    const wb=XLSX.read(buf,{type:"array",raw:true});
+    return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:null});
+  }
+  let txt; try{txt=new TextDecoder("utf-8",{fatal:true}).decode(buf);}catch(e){txt=new TextDecoder("windows-1252").decode(buf);}
+  return parseCsv(txt);
+}
+function detectMap(rows){
+  for(let i=0;i<Math.min(rows.length,40);i++){
+    const h=(rows[i]||[]).map(x=>strip(x));
+    const d1=h.findIndex(x=>/^date/.test(x)&&!/valeur/.test(x)), d2=h.findIndex(x=>/^date/.test(x));
+    const li=h.findIndex(x=>/libell|intitul|description|operation|detail/.test(x)&&!/^date/.test(x));
+    const db=h.findIndex(x=>/debit/.test(x)), cr=h.findIndex(x=>/credit/.test(x)), mt=h.findIndex(x=>/montant/.test(x));
+    if((d1>=0||d2>=0)&&li>=0&&(db>=0||cr>=0||mt>=0)) return {head:i,date:d1>=0?d1:d2,lib:li,deb:db,cre:cr,mnt:db<0&&cr<0?mt:-1};
+  }
+  return {head:-1,date:0,lib:1,deb:2,cre:3,mnt:-1};
+}
+function bankLines(rows,m){
+  const out=[], cell=(r,i)=>i>=0?r[i]:null;
+  for(let i=Math.max(0,m.head+1);i<rows.length;i++){
+    const r=rows[i]; if(!r||!r.length)continue;
+    const iso=parseDate(cell(r,m.date)); if(!iso)continue;
+    const amt=m.mnt>=0?parseNum(cell(r,m.mnt)):Math.abs(parseNum(cell(r,m.cre)))-Math.abs(parseNum(cell(r,m.deb)));
+    if(Math.abs(amt)<0.005)continue;
+    out.push({iso,amt:round2(amt),lib:String(cell(r,m.lib)==null?"":cell(r,m.lib)).replace(/\s+/g," ").trim()});
+  }
+  return out;
+}
+function cleanLib(s){
+  const c=String(s).replace(/^(PRLV SEPA|PRELEVEMENT( SEPA)?|VIR(EMENT)?( SEPA)?( RECU| EMIS| INST(ANTANE)?)?|CARTE X?\d{4}( \d{2}\/\d{2})?|PAIEMENT PAR CARTE( X\d{4})?( \d{2}\/\d{2})?)\s*/i,"")
+    .replace(/\/(DE|FRM)\s+/i,"").replace(/\s*\/MOTIF\s+/i," – ").replace(/\s*\/(REF|ID|EREF|MDT|RUM|DATE|TIERS|ICS)\b.*$/i,"").replace(/\s{2,}/g," ").trim();
+  return (c||String(s)).slice(0,120);
+}
+function typeFromLib(s){s=strip(s);return /^prlv|prelevement|^frais|cotis|commission/.test(s)?"Prélevement":/^vir|virement/.test(s)?"Virement":/carte|^cb\b/.test(s)?"CB":/remise.*ch|rem chq|cheque|^chq/.test(s)?"Cheques":/versement|depot|remise esp/.test(s)?"Dépôt":/retrait|dab/.test(s)?"Retrait":"Autre";}
+function suggestEvent(iso,lib){
+  const s=strip(lib);
+  if(/frais|cotis|commission|tenue de compte|interet|abonnement|assurance|livret/.test(s))return "AUTRE";
+  const t=Date.parse(iso); let best="", bd=Infinity;
+  for(const x of evList().filter(isOpen)){
+    const a=Date.parse(x.managed.debut||x.managed.fin||""), b=Date.parse(x.managed.fin||x.managed.debut||"");
+    if(isNaN(a)||isNaN(b))continue;
+    const d=t<a?a-t:t>b?t-b:0; if(d<bd){bd=d;best=x.name;}
+  }
+  return bd<=60*864e5?best:"";
+}
+function renderNet(){
+  const n=$("net"); if(DEMO){n.hidden=true;return;}
+  const off=!navigator.onLine; n.hidden=!off&&!S.pending;
+  n.textContent=off?`Hors connexion : les modifications sont gardées sur cet appareil et seront envoyées au retour du réseau.${S.pending?` ${S.pending} en attente.`:""}`:`Synchronisation : ${S.pending} modification(s) en attente d'envoi.`;
 }
 
 /* ================= présentation ================= */
@@ -1020,14 +1557,16 @@ $("pSel").addEventListener("change",e=>{pKey=e.target.value;renderPres();});
 $("pNotes").addEventListener("input",e=>{setNotes(e.target.value);renderPres();});
 
 /* ================= navigation ================= */
-const VIEWS={synthese:renderSynthese,evenement:renderEvent,editions:renderEditions,ecritures:renderLines,budget:renderBudget,rapprochement:renderRap,presentation:renderPres,controles:renderControles,journal:renderJournal,acces:renderAcces};
+const VIEWS={synthese:renderSynthese,ecritures:renderLines,evenements:renderEvenements,evenement:renderEvent,editions:renderEditions,encarts:renderEncarts,rapprochement:renderRap,presentation:renderPres,controles:renderControles,journal:renderJournal,reglages:renderReglages};
+const ALIAS={budget:"evenements",acces:"reglages"};
 function show(){
-  let v=location.hash.replace("#","");
-  if(!VIEWS[v]||(v==="acces"&&!canWrite()))v="synthese";
+  let v=location.hash.replace("#",""); v=ALIAS[v]||v;
+  if(!VIEWS[v])v="synthese";
   for(const k in VIEWS)$("v-"+k).classList.toggle("on",k===v);
   for(const a of $("tabs").children)a.classList.toggle("on",a.getAttribute("href")==="#"+v);
-  $("empty").hidden=M.lines.length>0||v==="acces"||v==="journal"||v==="budget";
+  $("empty").hidden=M.lines.length>0||["reglages","journal","evenements","encarts"].includes(v);
   VIEWS[v]();
+  renderRecBanner("recBanner"); renderRecBanner("recBanner2");
 }
 function go(v){ if(location.hash==="#"+v)show(); else location.hash=v; }
 let raf=0;
@@ -1041,72 +1580,508 @@ function render(){
     if(scr!=="app")return;
     M=build(S.ecr);
     $("demo").hidden=!DEMO;
+    renderNet();
     $("src").textContent=[ASSO,`${M.lines.length} écritures`,M.maxIso?`dernière écriture le ${fdate(M.maxIso)}`:""].filter(Boolean).join(" · ");
     $("who").textContent=`${S.user.nom} · ${canWrite()?"trésorier":"lecteur"}`;
-    $("evList").innerHTML=[...new Set(S.ecr.map(e=>String(e.evenement||"").replace(/\s+/g," ").trim().toUpperCase()).filter(Boolean))].sort().map(n=>`<option value="${esc(n)}"></option>`).join("");
     if(season!=="all"&&!seasonsOf().includes(+season))season="all";
     show();
   });
 }
 
 /* ================= saisie ================= */
-function openEcriture(id){
+let eTouched=new Set();
+function eAuto(){
+  const rec=$("eRec").checked, amt=parseNum($("eAmt").value)||1;
+  const l=classify({acc:$("eAcc").value,iso:$("eDate").value,evt:$("eEvt").value==="__new"?"":$("eEvt").value,des:$("eDes").value,rec:rec?amt:0,dep:rec?0:amt,type:$("eType").value,com:"",poste:""});
+  const cur=$("ePoste").value; $("ePoste").innerHTML=posteOptions(l.cat,cur); $("ePoste").value=cur;
+  const fr=+P().fraisVirement||0;
+  $("eFraisL").hidden=!!editing||rec||!(fr>0)||!/^(virement|sepa)$/.test(strip($("eType").value));
+  $("eFraisM").textContent=fm(fr);
+}
+function openEcriture(id,preset){
   editing=id?S.ecr.find(e=>e.id===id):null;
   if(id&&!editing)return;
-  const e=editing||{compte:"CC",date:today(),evenement:"",designation:"",recette:0,depense:0,type:"Virement",commentaire:"",pointe:false};
+  const e=editing||Object.assign({compte:"CC",date:today(),evenement:"",designation:"",recette:0,depense:0,type:"Virement",commentaire:"",pointe:false,poste:""},preset||{});
+  eTouched=new Set(editing?["type","poste","sens"]:[]);
   $("eTitle").textContent=editing?"Modifier l'écriture":"Nouvelle écriture";
-  $("eAcc").value=e.compte==="LA"?"LA":"CC"; $("eDate").value=e.date||""; $("eEvt").value=e.evenement||""; $("eDes").value=e.designation||"";
+  $("eAcc").value=e.compte==="LA"?"LA":"CC"; $("eDate").value=e.date||"";
+  setEv($("eEvt"),e.evenement,e.date);
+  $("eDes").value=e.designation||"";
   const rec=(+e.recette||0)>0; $("eRec").checked=rec; $("eDep").checked=!rec;
   const amt=rec?+e.recette:+e.depense||0; $("eAmt").value=amt?amt.toFixed(2).replace(".",","):"";
-  const t=$("eType"); if(e.type&&![...t.options].some(o=>o.value===e.type))t.add(new Option(e.type,e.type)); t.value=e.type||"Virement";
-  $("eCom").value=e.commentaire||""; $("ePt").checked=!!e.pointe; $("eDel").hidden=!editing; $("eErr").hidden=true;
-  $("dlgE").showModal(); (editing?$("eDes"):$("eEvt")).focus();
+  $("eType").innerHTML=typeOptions(e.type||"Virement");
+  $("ePoste").innerHTML=posteOptions("",e.poste||"");
+  $("eCom").value=e.commentaire||""; $("ePt").checked=!!e.pointe; $("eFrais").checked=true;
+  $("eDel").hidden=$("eDup").hidden=!editing; $("eNext").hidden=!!editing; $("eErr").hidden=true;
+  const seen=new Set(), des=[];
+  for(const x of S.ecr.slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")))){const k=strip(x.designation);if(k&&!seen.has(k)){seen.add(k);des.push(x.designation);}if(des.length>=400)break;}
+  $("desList").innerHTML=des.map(d=>`<option value="${esc(d)}"></option>`).join("");
+  eAuto();
+  if(!$("dlgE").open)$("dlgE").showModal();
+  (editing||$("eEvt").value?$("eDes"):$("eEvt")).focus();
 }
-$("fE").addEventListener("submit",async ev=>{
-  ev.preventDefault();
-  const amt=round2(parseNum($("eAmt").value)), err=$("eErr");
-  if(!(amt>0)){err.textContent="Le montant doit être un nombre positif, par exemple 125,50.";err.hidden=false;return;}
+function prefillFromHistory(){
+  // reprend le type, le sens, le poste et le montant de la dernière écriture de même désignation
+  const k=strip($("eDes").value); if(!k)return;
+  const p=S.ecr.filter(x=>strip(x.designation)===k).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")))[0]; if(!p)return;
+  if(!eTouched.has("type")&&p.type)$("eType").innerHTML=typeOptions(p.type);
+  if(!eTouched.has("sens")){const r=(+p.recette||0)>0;$("eRec").checked=r;$("eDep").checked=!r;}
+  if(!eTouched.has("poste")&&p.poste)$("ePoste").innerHTML=posteOptions("",p.poste);
+  if(!$("eAmt").value){const a=(+p.recette||0)>0?+p.recette:+p.depense||0;if(a)$("eAmt").value=a.toFixed(2).replace(".",",");}
+}
+$("fE").addEventListener("input",ev=>{const id=ev.target.id;if(id==="eType")eTouched.add("type");if(id==="ePoste")eTouched.add("poste");if(id==="eRec"||id==="eDep")eTouched.add("sens");eAuto();});
+$("fE").addEventListener("change",ev=>{if(ev.target.id==="eDes"&&!editing)prefillFromHistory();eAuto();});
+async function saveE(next){
+  const err=$("eErr"), amt=round2(parseNum($("eAmt").value)), evt=$("eEvt").value;
+  const fail=t=>{err.textContent=t;err.hidden=false;};
+  if(!evt||evt==="__new")return fail("Choisissez l'événement.");
+  if(!$("eDes").value.trim())return fail("Saisissez une désignation.");
+  if(!(amt>0))return fail("Le montant doit être un nombre positif, par exemple 125,50.");
   const rec=$("eRec").checked;
-  const data={compte:$("eAcc").value,date:$("eDate").value||null,evenement:$("eEvt").value.replace(/\s+/g," ").trim().toUpperCase(),designation:$("eDes").value.trim(),recette:rec?amt:0,depense:rec?0:amt,type:$("eType").value,commentaire:$("eCom").value.trim(),pointe:$("ePt").checked};
-  if(await run(store.saveEcriture(editing?editing.id:null,data,editing),editing?"Écriture modifiée.":"Écriture enregistrée."))$("dlgE").close();
-});
-$("eCancel").onclick=()=>$("dlgE").close();
+  const data={compte:$("eAcc").value,date:$("eDate").value||null,evenement:evt,designation:$("eDes").value.trim(),recette:rec?amt:0,depense:rec?0:amt,type:$("eType").value,commentaire:$("eCom").value.trim(),pointe:$("ePt").checked,poste:$("ePoste").value};
+  const ops=[], jr=[];
+  if(editing){ops.push({t:"update",col:"ecritures",id:editing.id,data});jr.push({action:"Modification",texte:resume(editing)+"  →  "+resume(data)});}
+  else{
+    ops.push(opNewEcr(data));jr.push({action:"Création",texte:resume(data)});
+    if(!$("eFraisL").hidden&&$("eFrais").checked){
+      const f={compte:data.compte,date:data.date,evenement:data.evenement,designation:"Frais virement",recette:0,depense:round2(+P().fraisVirement),type:"Prélevement",commentaire:"",pointe:false,poste:"Frais bancaires"};
+      ops.push(opNewEcr(f,1));jr.push({action:"Création",texte:resume(f)});
+    }
+  }
+  const ok=await run(store.commit(ops,jr),editing?"Écriture modifiée.":ops.length>1?"Écriture et frais de virement enregistrés.":"Écriture enregistrée.");
+  if(!ok)return;
+  if(next)openEcriture(null,{compte:data.compte,date:data.date,evenement:data.evenement,type:data.type});
+  else $("dlgE").close();
+}
+$("fE").addEventListener("submit",ev=>{ev.preventDefault();saveE(false);});
+$("eNext").onclick=()=>{if($("fE").reportValidity())saveE(true);};
+$("eDup").onclick=()=>{
+  const e=editing; if(!e)return;
+  openEcriture(null,{compte:e.compte,date:today(),evenement:e.evenement,designation:e.designation,recette:e.recette,depense:e.depense,type:e.type,commentaire:"",pointe:false,poste:e.poste||""});
+  flash("Copie prête : vérifiez la date et le montant, puis enregistrez.");
+};
 $("eDel").onclick=async()=>{
   const e=editing; if(!e)return;
   $("dlgE").close();
-  if(await ask(`Supprimer définitivement cette écriture ?\n${resume(e)}`,"Supprimer"))await run(store.removeEcriture(e),"Écriture supprimée. L'opération reste visible dans le journal.");
+  if(await ask(`Supprimer définitivement cette écriture ?\n${resume(e)}`,"Supprimer"))
+    await run(store.commit([{t:"delete",col:"ecritures",id:e.id}],{action:"Suppression",texte:resume(e)}),"Écriture supprimée. L'opération reste visible dans le journal.");
 };
 $("bNew").onclick=()=>openEcriture(null);
 $("bTransfer").onclick=()=>{$("tDate").value=today();$("tAmt").value="";$("tErr").hidden=true;$("dlgT").showModal();};
-$("tCancel").onclick=()=>$("dlgT").close();
 $("fT").addEventListener("submit",async ev=>{
   ev.preventDefault();
   const amt=round2(parseNum($("tAmt").value)), toLA=document.querySelector("input[name=tDir]:checked").value==="CC>LA", date=$("tDate").value;
   if(!(amt>0)){$("tErr").textContent="Le montant doit être un nombre positif.";$("tErr").hidden=false;return;}
-  const base={date,evenement:"TRANSFERT COMPTE",type:"Virement",commentaire:"",pointe:false};
-  const list=[Object.assign({},base,{compte:"CC",designation:toLA?"Virement vers Livret A":"Virement depuis Livret A",recette:toLA?0:amt,depense:toLA?amt:0}),
-              Object.assign({},base,{compte:"LA",designation:toLA?"Virement depuis compte courant":"Virement vers compte courant",recette:toLA?amt:0,depense:toLA?0:amt})];
-  if(await run(store.saveMany(list,`Virement interne du ${fdate(date)} : ${fm(amt)} ${toLA?"du compte courant vers le Livret A":"du Livret A vers le compte courant"}`),"Virement enregistré sur les deux comptes."))$("dlgT").close();
+  const base={date,evenement:"TRANSFERT COMPTE",type:"Virement",commentaire:"",pointe:false,poste:""};
+  const ops=[opNewEcr(Object.assign({},base,{compte:"CC",designation:toLA?"Virement vers Livret A":"Virement depuis Livret A",recette:toLA?0:amt,depense:toLA?amt:0}),0),
+             opNewEcr(Object.assign({},base,{compte:"LA",designation:toLA?"Virement depuis compte courant":"Virement vers compte courant",recette:toLA?amt:0,depense:toLA?0:amt}),1)];
+  if(await run(store.commit(ops,{action:"Création",texte:`Virement interne du ${fdate(date)} : ${fm(amt)} ${toLA?"du compte courant vers le Livret A":"du Livret A vers le compte courant"}`}),"Virement enregistré sur les deux comptes."))$("dlgT").close();
 });
 
-/* ================= budget ================= */
-function openBudget(name){
-  editBudget=name?S.budgets.find(b=>eventKey(b.evenement).parent===name):null;
-  $("bEvt").value=name||""; $("bEvt").readOnly=!!editBudget;
-  $("bRec").value=editBudget?String(editBudget.recettes).replace(".",","):""; $("bDep").value=editBudget?String(editBudget.depenses).replace(".",","):""; $("bNote").value=editBudget?editBudget.note||"":"";
-  $("bDel").hidden=!editBudget; $("dlgB").showModal();
+/* ================= événements (liste et budget) ================= */
+let evFrom=null, evCb=null;
+function openEventDialog(name,cb){
+  evCb=cb||null; evFrom=name||null;
+  const x=name?(evList().find(y=>y.name===name)||{name,managed:null,ev:null}):null;
+  const m=x&&x.managed, e=x&&x.ev, b=name?S.budgets.find(y=>eventKey(y.evenement).parent===name):null;
+  $("vTitle").textContent=!name?"Nouvel événement":m?"Modifier l'événement":"Ajouter l'événement à la liste";
+  $("vNom").value=name||"";
+  $("vDeb").value=(m&&m.debut)||(e&&e.first)||""; $("vFin").value=(m&&m.fin)||(e&&e.last)||"";
+  $("vStat").value=(m&&m.statut)||"ouvert";
+  $("vSous").value=((m&&m.sous)||(e?Object.keys(e.subs).filter(k=>k!=="Général"):[])).join(", ");
+  $("vRec").value=b?dec(b.recettes):""; $("vDep").value=b?dec(b.depenses):"";
+  $("vNote").value=(m&&m.note)||(b&&b.note)||"";
+  $("vDel").hidden=!m; $("vErr").hidden=true;
+  $("dlgV").showModal(); $("vNom").focus();
 }
-$("bBudget").onclick=()=>openBudget("");
-$("bCancel").onclick=()=>$("dlgB").close();
-$("fB").addEventListener("submit",async ev=>{
+$("evNew").onclick=()=>openEventDialog(null);
+$("fV").addEventListener("submit",async ev=>{
   ev.preventDefault();
-  const data={evenement:eventKey($("bEvt").value).parent,recettes:round2(parseNum($("bRec").value)),depenses:round2(parseNum($("bDep").value)),note:$("bNote").value.trim()};
-  if(!data.evenement)return;
-  if(await run(store.saveBudget(data),"Budget enregistré."))$("dlgB").close();
+  const name=eventKey($("vNom").value).parent, from=evFrom, err=$("vErr");
+  const fail=t=>{err.textContent=t;err.hidden=false;};
+  if(!name)return fail("Saisissez le nom de l'événement, avec l'année (ex. FETE 2027).");
+  if(HORS_RE.test(name))return fail("Ce nom est réservé aux écritures hors événement.");
+  if(!from&&evList().some(x=>x.name===name&&x.managed))return fail("Cet événement existe déjà dans la liste.");
+  const ops=[], jr=[];
+  if(from&&name!==from){
+    const ls=S.ecr.filter(e=>eventKey(e.evenement).parent===from), merge=evList().some(x=>x.name===name);
+    if(!await ask(`${merge?"Fusionner":"Renommer"} « ${from} » ${merge?"avec":"en"} « ${name} » ? ${ls.length} écriture(s) seront modifiées.`,merge?"Fusionner":"Renommer"))return;
+    for(const e of ls){const k=eventKey(e.evenement);ops.push({t:"update",col:"ecritures",id:e.id,data:{evenement:k.sub?name+" - "+k.sub:name}});}
+    ops.push({t:"delete",col:"evenements",id:slug(from)});
+    const ob=S.budgets.find(b=>eventKey(b.evenement).parent===from); if(ob)ops.push({t:"delete",col:"budgets",id:ob.id});
+    const oc=S.caisses.find(c=>c.id===slug(from));
+    if(oc){if(!S.caisses.some(c=>c.id===slug(name)))ops.push({t:"set",col:"caisses",id:slug(name),data:{evenement:name,sessions:oc.sessions||[]}});ops.push({t:"delete",col:"caisses",id:slug(from)});}
+    jr.push({action:"Modification",texte:`Événement « ${from} » ${merge?"fusionné avec":"renommé en"} « ${name} » (${ls.length} écritures)`});
+  }
+  const doc={nom:name,debut:$("vDeb").value||null,fin:$("vFin").value||null,statut:$("vStat").value,sous:[...new Set($("vSous").value.split(/[,;]/).map(normEv).filter(Boolean))],note:$("vNote").value.trim()};
+  ops.push({t:"set",col:"evenements",id:slug(name),data:doc});
+  const r=$("vRec").value.trim(), d=$("vDep").value.trim(), oldB=S.budgets.find(b=>eventKey(b.evenement).parent===name);
+  if(r||d)ops.push({t:"set",col:"budgets",id:oldB?oldB.id:slug(name),data:{evenement:name,recettes:round2(parseNum(r)),depenses:round2(parseNum(d)),note:doc.note}});
+  else if(oldB&&(!from||from===name))ops.push({t:"delete",col:"budgets",id:oldB.id});
+  jr.push({action:"Événement",texte:`${name} : ${doc.statut==="clos"?"clos":"en cours"}${doc.debut?", du "+fdate(doc.debut):""}${doc.fin?" au "+fdate(doc.fin):""}${r||d?`, budget recettes ${fm(parseNum(r))} / dépenses ${fm(parseNum(d))}`:""}`});
+  if(await run(store.commit(ops,jr),"Événement enregistré.")){$("dlgV").close();if(evCb)evCb(name);}
 });
-$("bDel").onclick=async()=>{const b=editBudget;$("dlgB").close();if(b&&await ask(`Supprimer le budget de ${b.evenement} ?`,"Supprimer"))await run(store.removeBudget(b),"Budget supprimé.");};
+$("vDel").onclick=async()=>{
+  const n=evFrom; $("dlgV").close();
+  if(n&&await ask(`Retirer ${n} de la liste des événements ? Les écritures et le budget sont conservés.`,"Retirer"))
+    await run(store.commit([{t:"delete",col:"evenements",id:slug(n)}],{action:"Événement",texte:`${n} retiré de la liste`}),"Événement retiré de la liste.");
+};
+$("evAll").onclick=async()=>{
+  const add=evList().filter(x=>!x.managed&&x.ev); if(!add.length)return;
+  if(!await ask(`Ajouter ${add.length} événement(s) du cahier à la liste ? Ceux sans écriture depuis plus de 45 jours sont marqués « clos ». Vérifiez ensuite leurs dates : la première écriture est souvent un acompte.`,"Ajouter"))return;
+  const lim=new Date(Date.now()-45*864e5).toISOString().slice(0,10);
+  const ops=add.map(x=>({t:"set",col:"evenements",id:slug(x.name),data:{nom:x.name,debut:x.ev.first,fin:x.ev.last,statut:x.ev.upcoming||(x.ev.last&&x.ev.last>=lim)?"ouvert":"clos",sous:Object.keys(x.ev.subs).filter(k=>k!=="Général"),note:""}}));
+  await run(store.commit(ops,{action:"Événement",texte:`${add.length} événements ajoutés à la liste`}),`${add.length} événement(s) ajouté(s) à la liste.`);
+};
 
-/* ================= import / export ================= */
+/* ================= modification de masse ================= */
+const selRaw=()=>S.ecr.filter(e=>SEL.has(e.id));
+$("bkNone").onclick=()=>{SEL.clear();renderLines();};
+async function bulkPoint(v){
+  const ls=selRaw().filter(e=>!!e.pointe!==v); if(!ls.length){flash("Rien à changer.");return;}
+  await run(store.commit(ls.map(e=>({t:"update",col:"ecritures",id:e.id,data:{pointe:v}})),{action:v?"Pointage":"Dépointage",texte:`${ls.length} écritures ${v?"pointées":"dépointées"} (sélection)`}),`${ls.length} écriture(s) ${v?"pointée(s)":"dépointée(s)"}.`);
+}
+$("bkPt").onclick=()=>bulkPoint(true); $("bkUnpt").onclick=()=>bulkPoint(false);
+$("bkDel").onclick=async()=>{
+  const raw=selRaw(); if(!raw.length)return;
+  if(!await ask(`Supprimer définitivement ${raw.length} écriture(s) ?\nRecettes ${fm(sumOf(raw,e=>+e.recette||0))}, dépenses ${fm(sumOf(raw,e=>+e.depense||0))}.`,"Supprimer"))return;
+  if(await run(store.commit(raw.map(e=>({t:"delete",col:"ecritures",id:e.id})),{action:"Suppression",texte:`${raw.length} écritures supprimées : `+raw.slice(0,20).map(resume).join(" | ")+(raw.length>20?" | …":"")}),`${raw.length} écriture(s) supprimée(s). Le détail reste dans le journal.`))SEL.clear();
+};
+$("bkDup").onclick=async()=>{
+  const raw=selRaw(); if(!raw.length)return;
+  const ops=raw.map((e,i)=>opNewEcr({compte:e.compte,date:e.date,evenement:e.evenement,designation:e.designation,recette:+e.recette||0,depense:+e.depense||0,type:e.type||"",commentaire:e.commentaire||"",pointe:false,poste:e.poste||""},i));
+  if(await run(store.commit(ops,{action:"Création",texte:`${ops.length} écritures dupliquées : `+raw.slice(0,20).map(resume).join(" | ")}),`${ops.length} copie(s) créée(s) et sélectionnée(s) : « Modifier… » pour changer leur date ou leur événement.`)){SEL.clear();ops.forEach(o=>SEL.add(o.id));render();}
+};
+$("bkCsv").onclick=()=>exportCsv(M.lines.filter(l=>SEL.has(l.id)));
+$("bkEdit").onclick=()=>{
+  const n=SEL.size; if(!n)return;
+  $("kTitle").textContent=`Modifier ${n} écriture(s)`;
+  for(const id of ["kOnEvt","kOnPoste","kOnType","kOnAcc","kOnDate","kOnPt","kOnCom","kOnDes"])$(id).checked=false;
+  setEv($("kEvt"),"",today()); $("kPoste").innerHTML=posteOptions("",""); $("kType").innerHTML=typeOptions("Virement");
+  $("kAcc").value="CC"; $("kDate").value=""; $("kPt").value="oui"; $("kComMode").value="add"; $("kCom").value=""; $("kFind").value=""; $("kRepl").value="";
+  $("kErr").hidden=true; $("dlgK").showModal();
+};
+$("fK").addEventListener("input",e=>{const f=e.target.closest(".kf");if(f&&e.target.type!=="checkbox"){const c=f.querySelector("input[type=checkbox]");if(c)c.checked=true;}});
+$("fK").addEventListener("change",e=>{const f=e.target.closest(".kf");if(f&&e.target.type!=="checkbox"&&e.target.value!=="__new"){const c=f.querySelector("input[type=checkbox]");if(c)c.checked=true;}});
+$("fK").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const on=id=>$(id).checked, err=$("kErr"), fail=t=>{err.textContent=t;err.hidden=false;};
+  const evt=$("kEvt").value, poste=$("kPoste").value, type=$("kType").value, acc=$("kAcc").value, date=$("kDate").value, pt=$("kPt").value==="oui", com=$("kCom").value.trim(), find=$("kFind").value, repl=$("kRepl").value;
+  if(on("kOnEvt")&&(!evt||evt==="__new"))return fail("Choisissez l'événement.");
+  if(on("kOnDate")&&!date)return fail("Choisissez la date.");
+  if(on("kOnDes")&&!find)return fail("Indiquez le texte à remplacer dans la désignation.");
+  const parts=[];
+  if(on("kOnEvt"))parts.push("événement → "+evt);
+  if(on("kOnPoste"))parts.push("poste → "+(poste||"automatique"));
+  if(on("kOnType"))parts.push("paiement → "+type);
+  if(on("kOnAcc"))parts.push("compte → "+(acc==="LA"?"Livret A":"compte courant"));
+  if(on("kOnDate"))parts.push("date → "+fdate(date));
+  if(on("kOnPt"))parts.push(pt?"pointées":"non pointées");
+  if(on("kOnCom"))parts.push(($("kComMode").value==="add"?"commentaire complété : ":"commentaire remplacé : ")+com);
+  if(on("kOnDes"))parts.push(`désignation « ${find} » → « ${repl} »`);
+  if(!parts.length)return fail("Cochez au moins un champ à modifier.");
+  const ops=[];
+  for(const e of selRaw()){
+    const d={};
+    if(on("kOnEvt")&&e.evenement!==evt)d.evenement=evt;
+    if(on("kOnPoste")&&(e.poste||"")!==poste)d.poste=poste;
+    if(on("kOnType")&&e.type!==type)d.type=type;
+    if(on("kOnAcc")&&(e.compte==="LA"?"LA":"CC")!==acc)d.compte=acc;
+    if(on("kOnDate")&&e.date!==date)d.date=date;
+    if(on("kOnPt")&&!!e.pointe!==pt)d.pointe=pt;
+    if(on("kOnCom")){const old=e.commentaire||"", v=$("kComMode").value==="add"?(old&&com?old+" "+com:old||com):com;if(v!==old)d.commentaire=v;}
+    if(on("kOnDes")){const v=String(e.designation||"").split(find).join(repl);if(v!==e.designation)d.designation=v;}
+    if(Object.keys(d).length)ops.push({t:"update",col:"ecritures",id:e.id,data:d});
+  }
+  if(!ops.length)return fail("Aucune écriture n'est modifiée : elles ont déjà ces valeurs.");
+  if(await run(store.commit(ops,{action:"Modification",texte:`Modification groupée de ${ops.length} écritures : ${parts.join(" ; ")}`}),`${ops.length} écriture(s) modifiée(s).`))$("dlgK").close();
+});
+
+/* ================= écritures récurrentes ================= */
+let uEditing=null, GEN=[];
+function openRec(id){
+  uEditing=id?(P().recurrentes||[]).find(r=>r.id===id):null;
+  const r=uEditing||{designation:"",compte:"CC",evenement:"AUTRE",sens:"dep",montant:0,type:"Prélevement",poste:"",jour:1,depuis:today().slice(0,7)};
+  $("uDes").value=r.designation; $("uAcc").value=r.compte==="LA"?"LA":"CC"; setEv($("uEvt"),r.evenement,today());
+  $("uRec").checked=r.sens==="rec"; $("uDep").checked=r.sens!=="rec"; $("uAmt").value=dec(r.montant);
+  $("uType").innerHTML=typeOptions(r.type); $("uPoste").innerHTML=posteOptions("",r.poste||"");
+  $("uJour").value=r.jour||1; $("uDepuis").value=r.depuis||today().slice(0,7);
+  $("uDel").hidden=!uEditing; $("uErr").hidden=true; $("dlgU").showModal();
+}
+$("uNew").onclick=()=>openRec(null);
+$("fU").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const amt=round2(parseNum($("uAmt").value)), evt=$("uEvt").value, depuis=ymOf($("uDepuis").value), err=$("uErr");
+  if(!evt||evt==="__new"){err.textContent="Choisissez l'événement.";err.hidden=false;return;}
+  if(!(amt>0)){err.textContent="Le montant doit être un nombre positif.";err.hidden=false;return;}
+  if(!depuis){err.textContent="Indiquez le mois de départ, par exemple 2026-11.";err.hidden=false;return;}
+  const r={id:uEditing?uEditing.id:"r"+Date.now().toString(36),designation:$("uDes").value.trim(),compte:$("uAcc").value,evenement:evt,sens:$("uRec").checked?"rec":"dep",montant:amt,type:$("uType").value,poste:$("uPoste").value,jour:Math.min(Math.max(parseInt($("uJour").value)||1,1),28),depuis,derniere:uEditing&&uEditing.depuis===depuis?uEditing.derniere||null:null};
+  const list=(P().recurrentes||[]).filter(x=>x.id!==r.id).concat([r]);
+  if(await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{recurrentes:list}}],{action:"Réglages",texte:`Écriture récurrente « ${r.designation} » : ${fm(r.montant)} le ${r.jour} de chaque mois, depuis ${monthLabel(r.depuis)}`}),"Écriture récurrente enregistrée."))$("dlgU").close();
+});
+$("uDel").onclick=async()=>{
+  const r=uEditing; $("dlgU").close();
+  if(r&&await ask(`Supprimer l'écriture récurrente « ${r.designation} » ? Les écritures déjà créées sont conservées.`,"Supprimer"))
+    await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{recurrentes:(P().recurrentes||[]).filter(x=>x.id!==r.id)}}],{action:"Réglages",texte:`Écriture récurrente « ${r.designation} » supprimée`}),"Écriture récurrente supprimée.");
+};
+$("sFraisOk").onclick=()=>{const v=round2(parseNum($("sFrais").value));run(store.commit([{t:"merge",col:"parametres",id:"general",data:{fraisVirement:v}}],{action:"Réglages",texte:"Frais par virement : "+fm(v)}),"Réglage enregistré.");};
+function openGen(){
+  GEN=recPending(); if(!GEN.length)return;
+  $("gTable").innerHTML=`<thead><tr><th></th><th>Date</th><th>Désignation</th><th>Événement</th><th class="r">Montant</th></tr></thead><tbody>${GEN.map((x,i)=>`<tr><td><input type="checkbox" data-gi="${i}" checked aria-label="Créer"></td><td class="num">${fdate(x.iso)}</td><td>${esc(x.r.designation)}</td><td class="small">${esc(x.r.evenement)}</td><td class="r num ${x.r.sens==="rec"?"pos":"neg"}">${x.r.sens==="rec"?"+":"−"}${fm(+x.r.montant)}</td></tr>`).join("")}</tbody>`;
+  $("dlgG").showModal();
+}
+$("fG").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const chosen=GEN.filter((x,i)=>$("gTable").querySelector(`[data-gi="${i}"]`).checked);
+  const ops=chosen.map((x,i)=>opNewEcr({compte:x.r.compte,date:x.iso,evenement:x.r.evenement,designation:x.r.designation,recette:x.r.sens==="rec"?+x.r.montant:0,depense:x.r.sens==="rec"?0:+x.r.montant,type:x.r.type,commentaire:"Écriture récurrente",pointe:false,poste:x.r.poste||""},i));
+  const last={}; GEN.forEach(x=>{if(!last[x.r.id]||x.ym>last[x.r.id])last[x.r.id]=x.ym;});
+  ops.push({t:"merge",col:"parametres",id:"general",data:{recurrentes:(P().recurrentes||[]).map(r=>last[r.id]?Object.assign({},r,{derniere:last[r.id]}):r)}});
+  if(await run(store.commit(ops,{action:"Création",texte:`${chosen.length} écritures récurrentes créées${GEN.length>chosen.length?`, ${GEN.length-chosen.length} ignorées`:""}`}),`${chosen.length} écriture(s) récurrente(s) créée(s).`))$("dlgG").close();
+});
+
+/* ================= caisse d'un événement ================= */
+let qEditing=null;
+$("cFond").onclick=()=>{if(!curEv)return;$("fdEvt").textContent=curEv;$("fdAmt").value="";$("fdDate").value=today();$("fdAcc").value="CC";$("fdDes").value="Retrait fond de caisse";$("dlgF").showModal();};
+$("fF").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const amt=round2(parseNum($("fdAmt").value)); if(!(amt>0)){flash("Le montant doit être positif.",true);return;}
+  const d={compte:$("fdAcc").value,date:$("fdDate").value,evenement:curEv,designation:$("fdDes").value.trim(),recette:0,depense:amt,type:"Retrait",commentaire:"",pointe:false,poste:"Fond de caisse"};
+  if(await run(store.commit([opNewEcr(d)],{action:"Création",texte:resume(d)}),"Retrait de fond de caisse enregistré."))$("dlgF").close();
+});
+function qTotal(set){
+  let t=0; document.querySelectorAll("#qGrid [data-den]").forEach(i=>{t+=(+i.dataset.den)*(parseInt(i.value)||0);}); t=round2(t);
+  $("qTot").textContent=fm(t);
+  if(set&&t>0)$("qMont").value=String(round2(t-parseNum($("qFond").value))).replace(".",",");
+}
+function openComptage(id){
+  if(!curEv)return;
+  qEditing=id?caisseOf(curEv).sessions.find(s=>s.id===id):null;
+  const s=qEditing||{libelle:"",date:today(),activite:"Buvette & caisse",montant:0,cb:0,fond:0,detail:{}};
+  $("qLib").value=s.libelle||""; $("qDate").value=s.date||today();
+  $("qAct").innerHTML=CAISSE_ACT.map(v=>`<option ${v===s.activite?"selected":""}>${esc(v)}</option>`).join("");
+  $("qGrid").innerHTML=DENOMS.map(d=>{const k=String(Math.round(d*100));return `<label>${d>=5?"Billet":"Pièce"} de ${d.toLocaleString("fr-FR")} €<input type="number" min="0" step="1" inputmode="numeric" data-den="${d}" data-k="${k}" value="${(s.detail||{})[k]||""}"></label>`;}).join("");
+  $("qFond").value=dec(s.fond); $("qMont").value=dec(s.montant); $("qCb").value=dec(s.cb);
+  qTotal(false); $("qDel").hidden=!qEditing; $("qErr").hidden=true; $("dlgQ").showModal();
+}
+$("cCompt").onclick=()=>openComptage(null);
+$("qGrid").addEventListener("input",()=>qTotal(true)); $("qFond").addEventListener("input",()=>qTotal(true));
+async function saveSessions(list,texte,msg){return run(store.commit([{t:"set",col:"caisses",id:slug(curEv),data:{evenement:curEv,sessions:list}}],{action:"Caisse",texte}),msg);}
+$("fQ").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const mont=round2(parseNum($("qMont").value));
+  if(!(mont>=0)||$("qMont").value.trim()===""){$("qErr").textContent="Saisissez la recette en espèces, ou le détail des billets.";$("qErr").hidden=false;return;}
+  const detail={}; document.querySelectorAll("#qGrid [data-den]").forEach(i=>{const q=parseInt(i.value)||0;if(q>0)detail[i.dataset.k]=q;});
+  const s={id:qEditing?qEditing.id:"s"+Date.now().toString(36),libelle:$("qLib").value.trim(),date:$("qDate").value,activite:$("qAct").value,montant:mont,cb:round2(parseNum($("qCb").value)),fond:round2(parseNum($("qFond").value)),detail};
+  const list=caisseOf(curEv).sessions.filter(x=>x.id!==s.id).concat([s]);
+  if(await saveSessions(list,`${curEv} : comptage « ${s.libelle} » ${fm(s.montant)}`,"Comptage enregistré."))$("dlgQ").close();
+});
+$("qDel").onclick=async()=>{
+  const s=qEditing; $("dlgQ").close();
+  if(s&&await ask(`Supprimer le comptage « ${s.libelle} » (${fm(+s.montant||0)}) ?`,"Supprimer"))
+    await saveSessions(caisseOf(curEv).sessions.filter(x=>x.id!==s.id),`${curEv} : comptage « ${s.libelle} » supprimé`,"Comptage supprimé.");
+};
+function pdCalc(){const a=parseNum($("pdAmt").value), f=Math.min(a,Math.max(0,parseNum($("pdFond").value)));$("pdRest").textContent=`Seront créées : retour du fond de caisse ${fm(Math.max(0,f))} et recette ${fm(Math.max(0,a-f))}.`;}
+$("cDepot").onclick=()=>{
+  if(!curEv)return;
+  const c=caisseOf(curEv), fondDue=Math.max(0,round2(c.fonds-c.retours));
+  $("pdEvt").textContent=curEv; $("pdDate").value=today(); $("pdAcc").value="CC";
+  $("pdAmt").value=c.sessions.length&&c.reste>0?dec(c.reste):"";
+  $("pdFond").value=dec(fondDue); $("pdFondInfo").textContent=fondDue?`Fond de caisse pas encore redéposé : ${fm(fondDue)}`:"";
+  const acts=c.sessions.map(s=>s.activite), top=acts.sort((a,b)=>acts.filter(x=>x===b).length-acts.filter(x=>x===a).length)[0]||"Buvette & caisse";
+  $("pdPoste").innerHTML=CAISSE_ACT.map(v=>`<option ${v===top?"selected":""}>${esc(v)}</option>`).join("");
+  $("pdDes").value=("Dépôt espèces"+(c.sessions.length?" – "+c.sessions.map(s=>s.libelle).filter(Boolean).join(", "):"")).slice(0,120);
+  $("pdErr").hidden=true; pdCalc(); $("dlgP").showModal();
+};
+$("fP").addEventListener("input",pdCalc);
+$("fP").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const a=round2(parseNum($("pdAmt").value)), f=round2(Math.min(a,Math.max(0,parseNum($("pdFond").value))));
+  if(!(a>0)){$("pdErr").textContent="Le montant déposé doit être positif.";$("pdErr").hidden=false;return;}
+  const base={compte:$("pdAcc").value,date:$("pdDate").value,evenement:curEv,depense:0,type:"Dépôt",commentaire:"",pointe:false};
+  const ops=[], jr=[];
+  if(f>0){const d=Object.assign({},base,{designation:"Retour fond de caisse",recette:f,poste:"Fond de caisse"});ops.push(opNewEcr(d,0));jr.push({action:"Création",texte:resume(d)});}
+  if(a-f>0.005){const d=Object.assign({},base,{designation:$("pdDes").value.trim()||"Dépôt espèces",recette:round2(a-f),poste:$("pdPoste").value});ops.push(opNewEcr(d,1));jr.push({action:"Création",texte:resume(d)});}
+  if(await run(store.commit(ops,jr),"Dépôt enregistré."))$("dlgP").close();
+});
+
+/* ================= encarts publicitaires ================= */
+let aEditing=null, payA=null;
+$("aYear").addEventListener("change",e=>{aYear=+e.target.value;renderEncarts();});
+$("aQ").addEventListener("input",renderEncarts);
+function openAnn(id){
+  aEditing=id?S.annonceurs.find(a=>a.id===id):null;
+  const a=aEditing||{nom:"",contact:"",tel:"",email:"",note:"",encarts:{}}, c=(a.encarts||{})[aYear]||null;
+  $("anTitle").textContent=aEditing?"Modifier l'annonceur":"Nouvel annonceur";
+  $("anNom").value=a.nom||""; $("anContact").value=a.contact||""; $("anTel").value=a.tel||""; $("anMail").value=a.email||""; $("anNote").value=a.note||"";
+  $("anYearL").textContent=aYear; $("anYearL2").textContent=aYear;
+  $("anMont").value=c?dec(c.montant):""; $("anStat").value=c?c.statut:(aEditing?"":"relancer");
+  $("anDel").hidden=!aEditing; $("anErr").hidden=true; $("dlgA").showModal(); $("anNom").focus();
+}
+$("aNew").onclick=()=>openAnn(null);
+$("fA").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const nom=$("anNom").value.trim(); if(!nom){$("anErr").textContent="Saisissez le nom de l'annonceur.";$("anErr").hidden=false;return;}
+  const enc=Object.assign({},(aEditing&&aEditing.encarts)||{}), st=$("anStat").value;
+  if(st)enc[aYear]=Object.assign({},enc[aYear]||{},{montant:round2(parseNum($("anMont").value)),statut:st}); else delete enc[aYear];
+  const data={nom,contact:$("anContact").value.trim(),tel:$("anTel").value.trim(),email:$("anMail").value.trim(),note:$("anNote").value.trim(),encarts:enc};
+  if(await run(store.commit([{t:"set",col:"annonceurs",id:aEditing?aEditing.id:store.newId("annonceurs"),data}],{action:"Encarts",texte:`${nom} : fiche ${aEditing?"modifiée":"créée"}${st?`, encart ${aYear} ${ast(st)[0].toLowerCase()} ${fm(enc[aYear].montant)}`:""}`}),"Annonceur enregistré."))$("dlgA").close();
+});
+$("anDel").onclick=async()=>{
+  const a=aEditing; $("dlgA").close();
+  if(a&&await ask(`Supprimer l'annonceur ${a.nom} et son historique d'encarts ? Les écritures du cahier sont conservées.`,"Supprimer"))
+    await run(store.commit([{t:"delete",col:"annonceurs",id:a.id}],{action:"Encarts",texte:`${a.nom} : annonceur supprimé`}),"Annonceur supprimé.");
+};
+function openPay(id){
+  payA=S.annonceurs.find(a=>a.id===id); if(!payA)return;
+  const c=(payA.encarts||{})[aYear], p=(payA.encarts||{})[aYear-1];
+  $("apNom").textContent=`${payA.nom} · encart ${aYear}`; $("apEvt").textContent="ENCART PUB "+aYear;
+  $("apAmt").value=c&&+c.montant?dec(c.montant):p&&+p.montant?dec(p.montant):"";
+  $("apDate").value=today(); $("apType").innerHTML=typeOptions("Cheques"); $("apAcc").value="CC"; $("apCom").value=""; $("apCreate").checked=true; $("apErr").hidden=true;
+  $("dlgA2").showModal();
+}
+$("fA2").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const amt=round2(parseNum($("apAmt").value)); if(!(amt>0)){$("apErr").textContent="Le montant doit être positif.";$("apErr").hidden=false;return;}
+  const ops=[], date=$("apDate").value, create=$("apCreate").checked; let eid=null;
+  if(create){const o=opNewEcr({compte:$("apAcc").value,date,evenement:"ENCART PUB "+aYear,designation:"Encart "+payA.nom,recette:amt,depense:0,type:$("apType").value,commentaire:$("apCom").value.trim(),pointe:false,poste:"Encarts publicitaires"});eid=o.id;ops.push(o);}
+  const enc=Object.assign({},payA.encarts||{}); enc[aYear]={montant:amt,statut:"paye",date,ecriture:eid};
+  ops.push({t:"update",col:"annonceurs",id:payA.id,data:{encarts:enc}});
+  if(await run(store.commit(ops,{action:"Encarts",texte:`${payA.nom} : encart ${aYear} payé ${fm(amt)}${create?", écriture créée":""}`}),`Encart de ${payA.nom} encaissé.`))$("dlgA2").close();
+});
+$("aRenew").onclick=async()=>{
+  const y=aYear, py=y-1, list=S.annonceurs.filter(a=>{const p=(a.encarts||{})[py];return p&&["paye","promis"].includes(p.statut)&&!(a.encarts||{})[y];});
+  if(!list.length)return;
+  if(!await ask(`Reconduire ${list.length} annonceur(s) de ${py} en ${y} ? Ils passent « À relancer » avec le montant de ${py}.`,"Reconduire"))return;
+  const ops=list.map(a=>{const enc=Object.assign({},a.encarts);enc[y]={montant:+enc[py].montant||0,statut:"relancer"};return {t:"update",col:"annonceurs",id:a.id,data:{encarts:enc}};});
+  await run(store.commit(ops,{action:"Encarts",texte:`${list.length} annonceurs reconduits de ${py} en ${y}`}),`${list.length} annonceur(s) à relancer pour ${y}.`);
+};
+$("aSeed").onclick=async()=>{
+  const by=new Map(S.annonceurs.map(a=>[strip(a.nom),Object.assign({},a,{encarts:Object.assign({},a.encarts||{})})]));
+  const touched=new Set(), created=new Set();
+  for(const l of M.lines.filter(isEncartLine)){
+    const nom=annName(l.des), k=strip(nom), y=l.year; if(!y)continue;
+    let a=by.get(k);
+    if(!a){a={id:store.newId("annonceurs"),nom,contact:"",tel:"",email:"",note:/[\/+,&]| et /i.test(nom)?"Repris du cahier : plusieurs annonceurs sur une même ligne, à séparer.":"Repris du cahier.",encarts:{}};by.set(k,a);created.add(k);}
+    const c=a.encarts[y], tk=k+"|"+y;
+    if(c&&c.ecriture===l.id)continue;
+    if(c&&!touched.has(tk))continue;
+    a.encarts[y]=touched.has(tk)?{montant:round2((+c.montant||0)+l.rec),statut:"paye",date:c.date,ecriture:c.ecriture}:{montant:l.rec,statut:"paye",date:l.iso,ecriture:l.id};
+    touched.add(tk);
+  }
+  const keys=new Set([...touched].map(x=>x.split("|")[0]));
+  if(!keys.size){flash("Tous les encarts du cahier sont déjà repris.");return;}
+  if(!await ask(`Reprendre ${keys.size} annonceur(s) depuis les écritures « ENCART PUB » (dont ${created.size} nouveaux) ? Vérifiez ensuite les lignes qui regroupent plusieurs annonceurs.`,"Reprendre"))return;
+  const ops=[...keys].map(k=>{const a=by.get(k);return {t:"set",col:"annonceurs",id:a.id,data:{nom:a.nom,contact:a.contact||"",tel:a.tel||"",email:a.email||"",note:a.note||"",encarts:a.encarts}};});
+  await run(store.commit(ops,{action:"Encarts",texte:`${keys.size} annonceurs repris du cahier`}),`${keys.size} annonceur(s) repris du cahier.`);
+};
+$("aCopy").onclick=async()=>{
+  const y=aYear, l=S.annonceurs.filter(a=>((a.encarts||{})[y]||{}).statut==="relancer");
+  if(!l.length){flash(`Aucun annonceur à relancer pour ${y}.`);return;}
+  const txt=l.map(a=>[a.nom,a.contact,a.tel,a.email,fm(+a.encarts[y].montant||0)].filter(Boolean).join(" — ")).join("\n");
+  try{await navigator.clipboard.writeText(txt);flash(`${l.length} annonceur(s) copié(s) : collez la liste dans un courriel ou un message.`);}catch(e){flash("La copie a été refusée par le navigateur.",true);}
+};
+
+/* ================= relevé bancaire ================= */
+let REL=null;
+$("relFile").addEventListener("change",async e=>{
+  const f=e.target.files[0]; e.target.value=""; if(!f)return;
+  try{const rows=await readTable(f); if(!rows.length)throw new Error("Le fichier est vide."); REL={name:f.name,rows,map:detectMap(rows)}; openRelMap();}
+  catch(err){flash(err.message||"Relevé illisible.",true);}
+});
+function colOpts(cur){
+  const h=REL.map.head>=0?(REL.rows[REL.map.head]||[]):[], n=Math.max(1,...REL.rows.slice(0,80).map(r=>r.length));
+  let o=`<option value="-1">—</option>`;
+  for(let i=0;i<n;i++)o+=`<option value="${i}" ${i===cur?"selected":""}>${esc(h[i]?String(h[i]).slice(0,30):"Colonne "+(i+1))}</option>`;
+  return o;
+}
+function openRelMap(){
+  const m=REL.map;
+  $("rmFile").textContent=REL.name; $("rmHead").value=m.head+1; $("rmAcc").value=$("rAcc").value;
+  for(const [id,k] of [["rmDate","date"],["rmLib","lib"],["rmDeb","deb"],["rmCre","cre"],["rmMnt","mnt"]])$(id).innerHTML=colOpts(m[k]);
+  relPreview(); $("dlgR1").showModal();
+}
+function relPreview(){
+  REL.map={head:(parseInt($("rmHead").value)||0)-1,date:+$("rmDate").value,lib:+$("rmLib").value,deb:+$("rmDeb").value,cre:+$("rmCre").value,mnt:+$("rmMnt").value};
+  const ls=bankLines(REL.rows,REL.map); REL.lines=ls;
+  const d1=ls.length?ls.reduce((a,b)=>b.iso<a?b.iso:a,ls[0].iso):null, d2=ls.length?ls.reduce((a,b)=>b.iso>a?b.iso:a,ls[0].iso):null;
+  $("rmCount").textContent=`${ls.length} opération(s) lue(s)`+(ls.length?` du ${fdate(d1)} au ${fdate(d2)}`:"");
+  $("rmPrev").innerHTML=`<thead><tr><th>Date</th><th>Libellé</th><th class="r">Montant</th></tr></thead><tbody>${ls.slice(0,6).map(b=>`<tr><td class="num">${fdate(b.iso)}</td><td class="small">${esc(b.lib)}</td><td class="r num ${cls(b.amt)}">${sg(b.amt)}</td></tr>`).join("")||`<tr><td colspan="3" class="muted">Aucune opération lue : vérifiez la ligne des titres et les colonnes.</td></tr>`}</tbody>`;
+  $("rmGo").disabled=!ls.length;
+}
+$("fR1").addEventListener("change",e=>{if(e.target.id!=="rmAcc")relPreview();});
+$("rmHead").addEventListener("input",()=>{const h=(parseInt($("rmHead").value)||0)-1;REL.map.head=h;for(const id of ["rmDate","rmLib","rmDeb","rmCre","rmMnt"]){const v=+$(id).value;$(id).innerHTML=colOpts(v);}relPreview();});
+const relRef=(acc,b)=>`${acc}|${b.iso}|${b.amt.toFixed(2)}|${strip(b.lib).slice(0,60)}`;
+function buildRelItems(){
+  const acc=REL.acc, used=new Set(), pool=S.ecr.filter(e=>(e.compte==="LA"?"LA":"CC")===acc);
+  REL.items=REL.lines.slice().sort((a,b)=>a.iso.localeCompare(b.iso)).map(b=>{
+    const ref=relRef(acc,b), it={iso:b.iso,amt:b.amt,lib:b.lib,ref,check:true,state:"new",match:null};
+    let m=pool.find(e=>e.releveRef===ref&&!used.has(e.id));
+    if(!m){
+      const t=Date.parse(b.iso), want=Math.abs(b.amt);
+      const c=pool.filter(e=>!used.has(e.id)&&e.date&&Math.abs(Date.parse(e.date)-t)<=7*864e5&&(b.amt>0?Math.abs((+e.recette||0)-want)<0.005:Math.abs((+e.depense||0)-want)<0.005));
+      c.sort((x,y)=>(!!x.pointe-!!y.pointe)||Math.abs(Date.parse(x.date)-t)-Math.abs(Date.parse(y.date)-t));
+      m=c[0];
+    }
+    if(m){used.add(m.id);it.match=m;it.state=m.pointe?"done":"point";it.check=!m.pointe;}
+    else{it.evt=suggestEvent(b.iso,b.lib);it.des=cleanLib(b.lib);it.type=typeFromLib(b.lib);it.poste="";}
+    return it;
+  });
+}
+const relAuto=x=>classify({acc:REL.acc,iso:x.iso,evt:x.evt||"",des:x.des||x.lib,rec:x.amt>0?x.amt:0,dep:x.amt<0?-x.amt:0,type:x.type,com:"",poste:""}).cat;
+function relSum(){const it=REL.items;$("r2Sum").textContent=`${it.filter(x=>x.check&&x.state==="new").length} écriture(s) à créer, ${it.filter(x=>x.check&&x.state==="point").length} à pointer`;}
+function renderRelReview(){
+  const it=REL.items, hide=$("r2Hide").checked, n={new:0,point:0,done:0}; it.forEach(x=>n[x.state]++);
+  $("r2Head").textContent=`${REL.name} · ${REL.acc==="LA"?"Livret A":"Compte courant"} · ${it.length} opérations`;
+  $("r2Tiles").innerHTML=`<span class="pill neutral">${n.new} nouvelle(s)</span> <span class="pill warn">${n.point} à pointer</span> <span class="pill good">${n.done} déjà pointée(s)</span>`;
+  const rows=it.map((x,i)=>{
+    if(hide&&x.state==="done")return "";
+    const st=x.state==="new"?`<span class="pill neutral">Nouvelle</span>`:x.state==="point"?`<span class="pill warn">À pointer</span>`:`<span class="pill good">Déjà pointée</span>`;
+    const right=x.state==="new"
+      ?`<td><select class="evsel ${x.check&&!x.evt?"req":""}" data-ri="${i}" data-rk="evt" aria-label="Événement">${eventOptions(x.evt,x.iso)}</select></td><td><input type="text" data-ri="${i}" data-rk="des" value="${esc(x.des)}" aria-label="Désignation" style="min-width:200px"></td><td><select data-ri="${i}" data-rk="poste" aria-label="Poste">${posteOptions(relAuto(x),x.poste)}</select></td>`
+      :`<td colspan="3" class="small">${esc(x.match.evenement)} · ${esc(x.match.designation)} <span class="muted">(${fdate(x.match.date)})</span></td>`;
+    return `<tr><td><input type="checkbox" data-ri="${i}" data-rk="check" ${x.check?"checked":""} ${x.state==="done"?"disabled":""} aria-label="Retenir"></td><td class="num small">${fdate(x.iso)}</td><td class="small" style="max-width:280px">${esc(x.lib)}</td><td class="r num ${cls(x.amt)}">${sg(x.amt)}</td><td>${st}</td>${right}</tr>`;
+  }).join("");
+  $("r2Table").innerHTML=`<thead><tr><th></th><th>Date</th><th>Libellé de la banque</th><th class="r">Montant</th><th>État</th><th>Événement</th><th>Désignation</th><th>Poste</th></tr></thead><tbody>${rows||`<tr><td colspan="8" class="muted">Rien à afficher.</td></tr>`}</tbody>`;
+  $("r2Table").querySelectorAll("select[data-rk=evt]").forEach(s=>{const x=REL.items[+s.dataset.ri];s.value=normEv(x.evt);s.dataset.prev=s.value;});
+  relSum(); $("r2Err").hidden=true;
+}
+$("fR1").addEventListener("submit",e=>{
+  e.preventDefault(); relPreview(); if(!REL.lines.length)return;
+  REL.acc=$("rmAcc").value; $("dlgR1").close(); buildRelItems();
+  setEv($("r2Evt"),"",today()); $("r2Hide").checked=true; renderRelReview(); $("dlgR2").showModal();
+});
+$("r2Table").addEventListener("change",e=>{
+  const t=e.target, i=t.dataset.ri; if(i==null)return;
+  const x=REL.items[+i], k=t.dataset.rk;
+  if(k==="check"){x.check=t.checked;relSum();}
+  else if(k==="evt"){if(t.value==="__new")return;x.evt=t.value;t.classList.remove("req");}
+  else if(k==="poste")x.poste=t.value;
+  else if(k==="des")x.des=t.value;
+});
+$("r2Table").addEventListener("input",e=>{const t=e.target;if(t.dataset.rk==="des")REL.items[+t.dataset.ri].des=t.value;});
+$("r2Apply").onclick=()=>{const v=$("r2Evt").value;if(!v||v==="__new")return;REL.items.forEach(x=>{if(x.check&&x.state==="new")x.evt=v;});renderRelReview();};
+$("r2Hide").onchange=renderRelReview;
+$("fR2").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const news=REL.items.filter(x=>x.check&&x.state==="new"), pts=REL.items.filter(x=>x.check&&x.state==="point");
+  const miss=news.filter(x=>!x.evt||x.evt==="__new");
+  if(miss.length){renderRelReview();$("r2Err").textContent=`${miss.length} nouvelle(s) opération(s) sans événement, encadrée(s) en rouge : choisissez-le ou décochez la ligne.`;$("r2Err").hidden=false;return;}
+  if(!news.length&&!pts.length){$("dlgR2").close();return;}
+  const ops=news.map((x,i)=>opNewEcr({compte:REL.acc,date:x.iso,evenement:x.evt,designation:(x.des||x.lib).trim(),recette:x.amt>0?x.amt:0,depense:x.amt<0?round2(-x.amt):0,type:x.type,commentaire:"Relevé : "+x.lib.slice(0,140),pointe:true,poste:x.poste||"",releveRef:x.ref},i))
+    .concat(pts.map(x=>({t:"update",col:"ecritures",id:x.match.id,data:{pointe:true,releveRef:x.ref}})));
+  if(await run(store.commit(ops,{action:"Import relevé",texte:`${REL.name} (${REL.acc==="LA"?"Livret A":"compte courant"}) : ${news.length} écritures créées, ${pts.length} pointées`}),`Relevé importé : ${news.length} écriture(s) créée(s), ${pts.length} pointée(s).`))$("dlgR2").close();
+});
+
+/* ================= rapprochement ================= */
+$("rBulk").onclick=async()=>{
+  const until=$("rUntil").value, ls=rapLines().filter(l=>!l.pointe&&(!until||!l.iso||l.iso<=until));
+  if(ls.length&&await ask(`Pointer ${ls.length} écriture(s) du ${$("rAcc").value==="LA"?"Livret A":"compte courant"}${until?" jusqu'au "+fdate(until):""} ?`,"Pointer"))
+    await run(store.commit(ls.map(l=>({t:"update",col:"ecritures",id:l.id,data:{pointe:true}})),{action:"Pointage",texte:`${ls.length} écritures pointées en une fois${until?" jusqu'au "+fdate(until):""}`}),"Écritures pointées.");
+};
+for(const id of ["rAcc","rAll","rUntil"])$(id).addEventListener("change",renderRap);
+$("rRel").addEventListener("input",renderRap);
+
+/* ================= import / sauvegarde ================= */
 async function readFile(file){
   if(typeof XLSX==="undefined")throw new Error("La bibliothèque de lecture Excel n'a pas pu se charger. Vérifiez la connexion puis rechargez la page.");
   const wb=XLSX.read(await file.arrayBuffer(),{type:"array",raw:true});
@@ -1119,86 +2094,176 @@ async function readFile(file){
       const R=round2(parseNum(r[3])), D=round2(parseNum(r[4]));
       if(!(R>0)&&!(D>0))continue;
       const date=parseDate(r[0]); if(!date)noDate++;
-      const pt=r[7]==null?null:/^(oui|x|✓|true|1)$/i.test(String(r[7]).trim());
-      rows.push({compte:acc,date,evenement:String(r[1]==null?"":r[1]).replace(/\s+/g," ").trim().toUpperCase(),designation:String(r[2]==null?"":r[2]).trim(),recette:R>0?R:0,depense:R>0?0:D,type:String(r[5]==null?"":r[5]).trim(),commentaire:r[6]==null?"":String(r[6]).trim(),pointe:pt});
+      const pv=String(r[7]==null?"":r[7]).trim(), pt=/^(oui|x|✓|true|1)$/i.test(pv)?true:/^(non|no|false|0)$/i.test(pv)?false:null;
+      const poste=String(r[12]==null?"":r[12]).trim();
+      rows.push({compte:acc,date,evenement:normEv(r[1]),designation:String(r[2]==null?"":r[2]).trim(),recette:R>0?R:0,depense:R>0?0:D,type:String(r[5]==null?"":r[5]).trim(),commentaire:r[6]==null?"":String(r[6]).trim(),pointe:pt,poste:POSTES_ALL.includes(poste)?poste:""});
     }
   }
   if(!rows.length)throw new Error("Aucune écriture trouvée. Le fichier doit garder les colonnes Date, EVENEMENT, Designation, Recettes, Dépenses, Type de Payement, Commentaires.");
-  return {rows,sheets:names.length,noDate,name:file.name};
+  const sh=n=>wb.Sheets[n]?XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}).slice(1).filter(r=>r&&r.some(v=>v!=null&&v!=="")):null;
+  const extra={ev:sh("Événements"),ann:sh("Annonceurs"),cpt:sh("Comptages de caisse"),rec:sh("Récurrentes"),reg:sh("Réglages")};
+  return {rows,sheets:names.length,noDate,name:file.name,extra};
+}
+function restoreOps(x){
+  const ops=[];
+  if(x.ev){
+    S.evenements.forEach(m=>ops.push({t:"delete",col:"evenements",id:m.id})); S.budgets.forEach(b=>ops.push({t:"delete",col:"budgets",id:b.id}));
+    for(const r of x.ev){
+      const n=eventKey(r[0]).parent; if(!n)continue;
+      const st=strip(r[3]), note=String(r[7]==null?"":r[7]);
+      if(st)ops.push({t:"set",col:"evenements",id:slug(n),data:{nom:n,debut:parseDate(r[1]),fin:parseDate(r[2]),statut:st==="clos"?"clos":"ouvert",sous:String(r[4]||"").split(/[,;]/).map(normEv).filter(Boolean),note}});
+      if((r[5]!=null&&r[5]!=="")||(r[6]!=null&&r[6]!==""))ops.push({t:"set",col:"budgets",id:slug(n),data:{evenement:n,recettes:round2(parseNum(r[5])),depenses:round2(parseNum(r[6])),note}});
+    }
+  }
+  if(x.ann){
+    S.annonceurs.forEach(a=>ops.push({t:"delete",col:"annonceurs",id:a.id}));
+    const by=new Map();
+    for(const r of x.ann){
+      const nom=String(r[0]||"").trim(); if(!nom)continue;
+      const k=strip(nom); let a=by.get(k);
+      if(!a){a={nom,contact:String(r[1]||""),tel:String(r[2]||""),email:String(r[3]||""),note:String(r[4]||""),encarts:{}};by.set(k,a);}
+      const y=parseInt(r[5]); if(y){const st=Object.keys(ASTAT).find(s=>strip(ASTAT[s][0])===strip(r[7]))||"promis";a.encarts[y]={montant:round2(parseNum(r[6])),statut:st,date:parseDate(r[8])||null,ecriture:null};}
+    }
+    by.forEach(a=>ops.push({t:"set",col:"annonceurs",id:store.newId("annonceurs"),data:a}));
+  }
+  if(x.cpt){
+    S.caisses.forEach(c=>ops.push({t:"delete",col:"caisses",id:c.id}));
+    const by=new Map();
+    x.cpt.forEach((r,i)=>{const n=eventKey(r[0]).parent;if(!n)return;if(!by.has(n))by.set(n,[]);by.get(n).push({id:"s"+i+Date.now().toString(36),libelle:String(r[1]||""),date:parseDate(r[2]),activite:String(r[3]||"Buvette & caisse"),montant:round2(parseNum(r[4])),fond:round2(parseNum(r[5])),cb:round2(parseNum(r[6])),detail:parseDetail(r[7])});});
+    by.forEach((s,n)=>ops.push({t:"set",col:"caisses",id:slug(n),data:{evenement:n,sessions:s}}));
+  }
+  if(x.rec||x.reg){
+    const p={};
+    if(x.rec)p.recurrentes=x.rec.filter(r=>r[0]).map((r,i)=>({id:"r"+i+Date.now().toString(36),designation:String(r[0]),compte:/livret/i.test(String(r[1]))?"LA":"CC",evenement:normEv(r[2])||"AUTRE",sens:/recette/i.test(String(r[3]))?"rec":"dep",montant:round2(parseNum(r[4])),type:String(r[5]||"Prélevement"),poste:POSTES_ALL.includes(String(r[6]||""))?String(r[6]):"",jour:parseInt(r[7])||1,depuis:ymOf(r[8])||today().slice(0,7),derniere:ymOf(r[9])}));
+    if(x.reg){const f=x.reg.find(r=>/frais/i.test(String(r[0])));if(f)p.fraisVirement=round2(parseNum(f[1]));}
+    ops.push({t:"merge",col:"parametres",id:"general",data:p});
+  }
+  return ops;
 }
 async function startImport(file){
   if(!canWrite())return;
   try{
     pendingImport=await readFile(file);
-    const p=pendingImport;
+    const p=pendingImport, x=p.extra, parts=[];
     $("iInfo").textContent=`${p.name} : ${p.rows.length} écritures lues sur ${p.sheets} feuille(s)`+(p.noDate?`, dont ${p.noDate} sans date lisible.`:".");
+    if(x.ev)parts.push(`${x.ev.length} événement(s)`); if(x.ann)parts.push(`${new Set(x.ann.map(r=>strip(r[0]))).size} annonceur(s)`); if(x.cpt)parts.push(`${x.cpt.length} comptage(s) de caisse`); if(x.rec)parts.push(`${x.rec.length} écriture(s) récurrente(s)`);
+    $("iExtraL").hidden=!parts.length&&!x.reg; $("iExtra").checked=true;
+    $("iExtraT").textContent=`Restaurer aussi les autres données de la sauvegarde : ${parts.join(", ")||"réglages"} (remplace les listes actuelles)`;
     $("iModeF").hidden=!S.ecr.length; document.querySelector("input[name=iMode][value=add]").checked=true;
     $("dlgI").showModal();
   }catch(e){flash(e.message||"Fichier illisible.",true);}
 }
-$("iCancel").onclick=()=>$("dlgI").close();
 $("fI").addEventListener("submit",async ev=>{
   ev.preventDefault();
   const p=pendingImport; if(!p)return;
   const replace=S.ecr.length>0&&document.querySelector("input[name=iMode]:checked").value==="replace", pt=$("iPt").checked;
-  const rows=p.rows.map(r=>Object.assign({},r,{pointe:r.pointe==null?pt:r.pointe}));
+  const ops=[]; if(replace)S.ecr.forEach(e=>ops.push({t:"delete",col:"ecritures",id:e.id}));
+  p.rows.forEach((r,i)=>ops.push(opNewEcr(Object.assign({},r,{pointe:r.pointe==null?pt:r.pointe}),i)));
+  const extra=!$("iExtraL").hidden&&$("iExtra").checked;
+  if(extra)ops.push(...restoreOps(p.extra));
   $("iGo").disabled=true;
-  const ok=await run(store.importRows(rows,replace,`${p.name} : ${rows.length} écritures ${replace?"(remplacement complet)":"ajoutées"}`),`${rows.length} écritures importées.`);
+  const ok=await run(store.commit(ops,{action:"Import",texte:`${p.name} : ${p.rows.length} écritures ${replace?"(remplacement complet)":"ajoutées"}${extra?", autres données restaurées":""}`}),`${p.rows.length} écritures importées${extra?" et autres données restaurées":""}.`);
   $("iGo").disabled=false; if(ok){$("dlgI").close();pendingImport=null;}
 });
 $("file").addEventListener("change",e=>{const f=e.target.files[0];if(f)startImport(f);e.target.value="";});
 function download(blob,name){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);}
-const HEAD=["Date","EVENEMENT","Designation","Recettes (€)","Dépenses (€)","Type de Payement","Commentaires","Pointé"];
 function exportXlsx(){
+  // sauvegarde au format du Google Sheet d'origine : deux feuilles, mêmes colonnes, totaux en I2:L2 ;
+  // colonnes H (pointé) et M (poste choisi) en plus, puis les autres données sur des feuilles séparées
   if(typeof XLSX==="undefined"){flash("La bibliothèque Excel n'a pas pu se charger.",true);return;}
-  const wb=XLSX.utils.book_new();
-  for(const [acc,title] of [["CC","Compte Courant"],["LA","Livret A"]]){
-    const aoa=[HEAD,...M.lines.filter(l=>l.acc===acc).map(l=>[l.iso?new Date(l.iso+"T00:00:00Z"):null,l.evt,l.des,l.rec||null,l.dep||null,l.type,l.com,l.pointe?"oui":""])];
-    const ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true,dateNF:"dd/mm/yyyy"});
-    ws["!cols"]=[{wch:12},{wch:24},{wch:48},{wch:13},{wch:13},{wch:16},{wch:40},{wch:8}];
+  const wb=XLSX.utils.book_new(), all=round2(sumOf(M.lines,l=>l.rec-l.dep));
+  for(const [acc,title,first,other] of [["CC","Compte Courant",4,"Livret A"],["LA","Livret A",3,"Compte Courant"]]){
+    const ls=M.lines.filter(l=>l.acc===acc);
+    const aoa=[["Date","EVENEMENT","Designation","Recettes (€)","Dépenses (€)","Type de Payement","Commentaires","Pointé","TOTAL Recette :","TOTAL Dépense :","SOLDE du compte :","TOTAL DES COMPTES","Poste (application)"],[null]];
+    if(acc==="CC")aoa.push(["DATE","EVENEMENT","Designation","Recette","Depense","Type de Payement","Commentaire"]);
+    for(const l of ls)aoa.push([null,l.evt,l.des,l.rec||null,l.dep||null,l.type,l.com,l.pointe?"oui":"non",null,null,null,null,l.poste||null]);
+    const ws=XLSX.utils.aoa_to_sheet(aoa);
+    ls.forEach((l,i)=>{if(l.iso)ws["A"+(first+i)]={t:"n",v:Date.parse(l.iso+"T00:00:00Z")/864e5+25569,z:"dd/mm/yyyy"};});
+    const last=Math.max(2012,first+ls.length+500), r=round2(sumOf(ls,l=>l.rec)), d=round2(sumOf(ls,l=>l.dep));
+    ws.I2={t:"n",v:r,f:`SUM(D${first}:D${last})`}; ws.J2={t:"n",v:d,f:`SUM(E${first}:E${last})`};
+    ws.K2={t:"n",v:round2(r-d),f:"I2-J2"}; ws.L2={t:"n",v:all,f:`K2+'${other}'!K2`};
+    ws["!cols"]=[{wch:12},{wch:24},{wch:48},{wch:13},{wch:13},{wch:16},{wch:40},{wch:8},{wch:16},{wch:16},{wch:18},{wch:20},{wch:24}];
     XLSX.utils.book_append_sheet(wb,ws,title);
   }
-  const syn=[["Événement","Début","Fin","Recettes","Dépenses","Résultat","Subvention","Résultat hors subvention"],...M.events.map(e=>[e.name,fdate(e.first),fdate(e.last),round2(e.rec),round2(e.dep),round2(e.res),round2(e.subv),round2(e.resHS)])];
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(syn),"Synthèse événements");
-  download(new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),`cahier-des-comptes-${today()}.xlsx`);
+  const add=(name,aoa)=>{if(aoa.length>1)XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),name);};
+  const evR=[["Événement","Début","Fin","Statut","Sous-rubriques","Recettes prévues","Dépenses prévues","Note"]];
+  for(const n of new Set([...S.evenements.map(m=>eventKey(m.nom).parent),...S.budgets.map(b=>eventKey(b.evenement).parent)])){
+    const m=S.evenements.find(x=>eventKey(x.nom).parent===n), b=S.budgets.find(x=>eventKey(x.evenement).parent===n);
+    evR.push([n,(m&&m.debut)||"",(m&&m.fin)||"",m?(m.statut==="clos"?"clos":"en cours"):"",m&&m.sous?m.sous.join(", "):"",b?b.recettes:"",b?b.depenses:"",(m&&m.note)||(b&&b.note)||""]);
+  }
+  add("Événements",evR);
+  const anR=[["Annonceur","Contact","Téléphone","E-mail","Note","Année","Montant","Statut","Payé le"]];
+  for(const a of S.annonceurs){const ys=Object.keys(a.encarts||{}).sort();if(!ys.length)anR.push([a.nom,a.contact||"",a.tel||"",a.email||"",a.note||"","","","",""]);for(const y of ys){const c=a.encarts[y];anR.push([a.nom,a.contact||"",a.tel||"",a.email||"",a.note||"",+y,+c.montant||0,ast(c.statut)[0],c.date||""]);}}
+  add("Annonceurs",anR);
+  const cR=[["Événement","Comptage","Date","Activité","Espèces","Dont fond","Carte","Détail"]];
+  for(const c of S.caisses)for(const s of c.sessions||[])cR.push([c.evenement,s.libelle||"",s.date||"",s.activite||"",+s.montant||0,+s.fond||0,+s.cb||0,detailTxt(s.detail)]);
+  add("Comptages de caisse",cR);
+  const rR=[["Désignation","Compte","Événement","Sens","Montant","Paiement","Poste","Jour","Depuis","Dernière créée"]];
+  for(const r of P().recurrentes||[])rR.push([r.designation,r.compte==="LA"?"Livret A":"Compte courant",r.evenement,r.sens==="rec"?"Recette":"Dépense",+r.montant||0,r.type,r.poste||"",+r.jour||1,r.depuis||"",r.derniere||""]);
+  add("Récurrentes",rR);
+  add("Réglages",[["Paramètre","Valeur"],["Frais par virement",+P().fraisVirement]]);
+  download(new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),`Cahier_des_comptes_${today()}.xlsx`);
+  try{localStorage.setItem("cahier-derniere-sauvegarde",today());}catch(e){}
+  renderLines();
 }
-function exportCsv(){
-  const q=v=>`"${String(v==null?"":v).replace(/"/g,'""')}"`, n=v=>v?v.toFixed(2).replace(".",","):"";
-  const rows=[["Compte",...HEAD].map(q).join(";"),...M.lines.map(l=>[l.acc==="LA"?"Livret A":"Compte courant",fdate(l.iso),l.evt,l.des,n(l.rec),n(l.dep),l.type,l.com,l.pointe?"oui":""].map(q).join(";"))];
+function exportCsv(lines){
+  const ls=lines||M.lines, q=v=>`"${String(v==null?"":v).replace(/"/g,'""')}"`, n=v=>v?v.toFixed(2).replace(".",","):"";
+  const rows=[["Compte","Date","EVENEMENT","Designation","Recettes (€)","Dépenses (€)","Type de Payement","Commentaires","Pointé","Poste"].map(q).join(";"),...ls.map(l=>[l.acc==="LA"?"Livret A":"Compte courant",fdate(l.iso),l.evt,l.des,n(l.rec),n(l.dep),l.type,l.com,l.pointe?"oui":"",l.cat].map(q).join(";"))];
   download(new Blob(["﻿"+rows.join("\r\n")],{type:"text/csv;charset=utf-8"}),`cahier-des-comptes-${today()}.csv`);
 }
-$("xXlsx").onclick=exportXlsx; $("xCsv").onclick=exportCsv;
+$("xXlsx").onclick=exportXlsx; $("xCsv").onclick=()=>exportCsv();
 
 /* ================= événements d'interface ================= */
 document.addEventListener("click",async e=>{
   let t;
+  if((t=e.target.closest("[data-close]"))){t.closest("dialog").close();return;}
+  if(e.target.id==="selAll"){const on=e.target.checked;shownIds.forEach(id=>{if(on)SEL.add(id);else SEL.delete(id);});syncSel();return;}
+  if((t=e.target.closest("[data-sel]"))){pick(t,e.shiftKey);return;}
   if((t=e.target.closest("[data-edit]"))){openEcriture(t.dataset.edit);return;}
   if((t=e.target.closest("[data-s]"))){season=t.dataset.s;renderSynthese();return;}
   if((t=e.target.closest("[data-ev]"))){curEv=t.dataset.ev;go("evenement");window.scrollTo(0,0);return;}
   if((t=e.target.closest("[data-f]"))){curFam=t.dataset.f;renderEditions();return;}
-  if((t=e.target.closest("[data-bg]"))){openBudget(t.dataset.bg);return;}
-  if((t=e.target.closest("[data-ok]"))){const d=S.demandes.find(x=>x.id===t.dataset.ok);if(d)await run(store.setMembre(d.id,{email:d.email||"",nom:d.nom||"",role:"lecteur"}),"Accès accordé en lecture.");return;}
-  if((t=e.target.closest("[data-no]"))){const d=S.demandes.find(x=>x.id===t.dataset.no);if(d)await run(store.refuse(d),"Demande refusée.");return;}
-  if((t=e.target.closest("[data-rm]"))){const m=S.membres.find(x=>x.id===t.dataset.rm);if(m&&await ask(`Retirer l'accès de ${m.nom||m.email} ?`,"Retirer"))await run(store.removeMembre(m),"Accès retiré.");return;}
+  if((t=e.target.closest("[data-evf]"))){evFilter=t.dataset.evf;renderEvenements();return;}
+  if((t=e.target.closest("[data-evedit]"))){openEventDialog(t.dataset.evedit);return;}
+  if((t=e.target.closest("[data-af]"))){aFilter=t.dataset.af;renderEncarts();return;}
+  if((t=e.target.closest("[data-apay]"))){openPay(t.dataset.apay);return;}
+  if((t=e.target.closest("[data-aedit]"))){openAnn(t.dataset.aedit);return;}
+  if((t=e.target.closest("[data-qedit]"))){openComptage(t.dataset.qedit);return;}
+  if((t=e.target.closest("[data-uedit]"))){openRec(t.dataset.uedit);return;}
+  if((t=e.target.closest("[data-gen]"))){openGen();return;}
+  if((t=e.target.closest("[data-ok]"))){const d=S.demandes.find(x=>x.id===t.dataset.ok);if(d)await run(store.commit([{t:"set",col:"membres",id:d.id,data:{email:d.email||"",nom:d.nom||"",role:"lecteur",at:store.now()}},{t:"delete",col:"demandes",id:d.id}],{action:"Accès",texte:`${d.nom||d.email} : lecteur`}),"Accès accordé en lecture.");return;}
+  if((t=e.target.closest("[data-no]"))){const d=S.demandes.find(x=>x.id===t.dataset.no);if(d)await run(store.commit([{t:"delete",col:"demandes",id:d.id}],{action:"Accès",texte:`${d.nom||d.email} : demande refusée`}),"Demande refusée.");return;}
+  if((t=e.target.closest("[data-rm]"))){const m=S.membres.find(x=>x.id===t.dataset.rm);if(m&&await ask(`Retirer l'accès de ${m.nom||m.email} ?`,"Retirer"))await run(store.commit([{t:"delete",col:"membres",id:m.id}],{action:"Accès",texte:`${m.nom||m.email} : accès retiré`}),"Accès retiré.");return;}
 });
 document.addEventListener("change",async e=>{
   const t=e.target;
-  if(t.dataset.pt){const l=M.lines.find(x=>x.id===t.dataset.pt);if(l&&!await run(store.setPointe([l.id],t.checked,resume({date:l.iso,compte:l.acc,evenement:l.evt,designation:l.des,recette:l.rec,depense:l.dep}))))t.checked=!t.checked;return;}
-  if(t.dataset.role){const m=S.membres.find(x=>x.id===t.dataset.role);if(m)await run(store.setMembre(m.id,{email:m.email||"",nom:m.nom||"",role:t.value}),"Rôle modifié.");return;}
+  if(t.classList&&t.classList.contains("evsel")){
+    if(t.value==="__new"){t.value=t.dataset.prev||"";openEventDialog(null,name=>{setEv(t,name,today());t.dispatchEvent(new Event("change",{bubbles:true}));t.dispatchEvent(new Event("input",{bubbles:true}));});}
+    else t.dataset.prev=t.value;
+    return;
+  }
+  if(t.dataset.pt){
+    const l=M.lines.find(x=>x.id===t.dataset.pt);
+    if(l&&!await run(store.commit([{t:"update",col:"ecritures",id:l.id,data:{pointe:t.checked}}],{action:t.checked?"Pointage":"Dépointage",texte:resume({date:l.iso,compte:l.acc,evenement:l.evt,designation:l.des,recette:l.rec,depense:l.dep})})))t.checked=!t.checked;
+    return;
+  }
+  if(t.dataset.role){const m=S.membres.find(x=>x.id===t.dataset.role);if(m)await run(store.commit([{t:"merge",col:"membres",id:m.id,data:{role:t.value}}],{action:"Accès",texte:`${m.nom||m.email} : ${t.value==="tresorier"?"trésorier":"lecteur"}`}),"Rôle modifié.");return;}
+  if(t.dataset.astat){
+    const a=S.annonceurs.find(x=>x.id===t.dataset.astat); if(!a)return;
+    const v=t.value, y=aYear, enc=Object.assign({},a.encarts||{});
+    if(v==="paye"){t.value=enc[y]?enc[y].statut:"";openPay(a.id);return;}
+    if(!v)delete enc[y]; else enc[y]=Object.assign({montant:+((enc[y-1]||{}).montant)||0},enc[y]||{},{statut:v});
+    await run(store.commit([{t:"update",col:"annonceurs",id:a.id,data:{encarts:enc}}],{action:"Encarts",texte:`${a.nom} : encart ${y} ${v?ast(v)[0].toLowerCase():"retiré"}`}),"Statut modifié.");
+  }
 });
-$("rBulk").onclick=async()=>{
-  const until=$("rUntil").value, ids=rapLines().filter(l=>!l.pointe&&(!until||!l.iso||l.iso<=until)).map(l=>l.id);
-  if(ids.length&&await ask(`Pointer ${ids.length} écriture(s) du ${$("rAcc").value==="LA"?"Livret A":"compte courant"}${until?" jusqu'au "+fdate(until):""} ?`,"Pointer"))
-    await run(store.setPointe(ids,true,`${ids.length} écritures pointées en une fois${until?" jusqu'au "+fdate(until):""}`),"Écritures pointées.");
-};
-for(const id of ["rAcc","rAll","rUntil"])$(id).addEventListener("change",renderRap);
-$("rRel").addEventListener("input",renderRap);
 $("evSel").addEventListener("change",e=>{curEv=e.target.value;renderEvent();});
-$("q").addEventListener("input",renderLines); for(const id of ["fEv","fCat","fAcc"])$(id).addEventListener("change",renderLines);
+$("q").addEventListener("input",renderLines);
+for(const id of ["fEv","fCat","fAcc","fPt","fDu","fAu"])$(id).addEventListener("change",renderLines);
+$("fClear").onclick=()=>{$("q").value="";for(const id of ["fEv","fCat","fAcc","fPt","fDu","fAu"])$(id).value="";renderLines();};
 $("copyEv").addEventListener("click",async()=>{
   const evs=M.events.filter(inSeason), n=v=>v.toFixed(2).replace(".",",");
-  const t=["Événement\tRecettes\tDépenses\tRésultat\tHors subvention",...evs.map(e=>[e.name,n(e.rec),n(e.dep),n(e.res),n(e.resHS)].join("\t"))].join("\n");
-  try{await navigator.clipboard.writeText(t);flash("Tableau copié : collez-le dans un tableur ou un courriel.");}catch(err){flash("La copie a été refusée par le navigateur.",true);}
+  const txt=["Événement\tRecettes\tDépenses\tRésultat\tHors subvention",...evs.map(e=>[e.name,n(e.rec),n(e.dep),n(e.res),n(e.resHS)].join("\t"))].join("\n");
+  try{await navigator.clipboard.writeText(txt);flash("Tableau copié : collez-le dans un tableur ou un courriel.");}catch(err){flash("La copie a été refusée par le navigateur.",true);}
 });
 const app=$("app");
 app.addEventListener("dragover",e=>{if(canWrite()){e.preventDefault();app.classList.add("drop");}});
@@ -1220,6 +2285,14 @@ $("aReset").onclick=async()=>{const m=$("aMail").value.trim();if(!m){authMsg("Sa
 $("bOut").onclick=()=>store.signOut(); $("wOut").onclick=()=>store.signOut(); $("wRetry").onclick=()=>location.reload();
 
 /* ================= démarrage ================= */
+let installEvt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvt=e;$("bInstall").hidden=false;if(S.role)renderReglages();});
+window.addEventListener("appinstalled",()=>{installEvt=null;$("bInstall").hidden=true;flash("Application installée.");});
+async function doInstall(){if(!installEvt)return;installEvt.prompt();try{await installEvt.userChoice;}catch(e){}installEvt=null;$("bInstall").hidden=true;if(S.role)renderReglages();}
+$("bInstall").onclick=doInstall; $("instBtn").onclick=doInstall;
+window.addEventListener("online",()=>{render();if(!DEMO)flash("Connexion rétablie : synchronisation en cours.");});
+window.addEventListener("offline",render);
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register("sw.js").catch(()=>{});
 $("assoA").textContent=ASSO;
 onData=render;
 try{

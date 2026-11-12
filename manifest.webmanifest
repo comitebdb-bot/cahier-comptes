@@ -1,0 +1,17 @@
+{
+  "name": "Cahier des comptes",
+  "short_name": "Comptes",
+  "description": "Cahier des comptes du Comité des Fêtes : saisie, analyse par événement, rapprochement bancaire.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f2f4f3",
+  "theme_color": "#1d4e89",
+  "lang": "fr",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
