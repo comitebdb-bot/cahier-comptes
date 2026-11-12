@@ -185,6 +185,94 @@ body:not(.can-write) .w{display:none !important}
   .hb{grid-template-columns:1fr 124px} .hb .lbl{grid-column:1 / -1;margin-top:6px}
   .grid2{grid-template-columns:1fr}
 }
+
+/* ================= v6 : menu latéral, fiches, panneaux ================= */
+:root{--bg:#f4f6f5;--line:#e1e6e3;--side:#ffffff}
+@media (prefers-color-scheme: dark){:root{--bg:#0f1513;--line:#26302c;--side:#131a17}}
+.tile,.tile.good,.tile.bad,.tile.acc{border-left:1px solid var(--line)}
+.tile h3{font-size:11.5px}
+.tile .v{font-family:var(--body);font-weight:600;font-size:24px}
+h1,h2{font-family:var(--body);font-weight:600;letter-spacing:-.005em}
+h2{font-size:16.5px}
+.card{border-radius:12px}
+.shell{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100vh;background:linear-gradient(to right,var(--side) 236px,var(--bg) 236px)}
+a.btn{text-decoration:none}
+.side{position:sticky;top:0;height:100vh;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px;padding:18px 12px 14px;overflow:auto}
+.brand{display:flex;gap:10px;align-items:center;padding:0 8px 16px}
+.brand .logo{width:34px;height:34px;border-radius:9px;background:var(--accent);color:var(--surface);display:grid;place-items:center;font-weight:700;font-size:17px;flex:none}
+.brand b{display:block;font-size:14.5px;line-height:1.2}.brand span{font-size:12px;color:var(--muted)}
+#sideNav,#sideNav2{display:flex;flex-direction:column;gap:2px}
+#sideNav a,#sideNav2 a,.navbtn{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:8px;color:var(--muted);text-decoration:none;font-weight:500;border:0;background:none;text-align:left}
+#sideNav a:hover,#sideNav2 a:hover,.navbtn:hover{background:var(--bg);color:var(--ink)}
+#sideNav a.on,#sideNav2 a.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+#sideNav svg,#sideNav2 svg,.botnav svg{width:18px;height:18px;flex:none}
+.side .sep{flex:1}
+.me{border-top:1px solid var(--line);margin-top:8px;padding:12px 6px 0;display:flex;gap:10px;align-items:center}
+.me .av{width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:600;font-size:12.5px;flex:none}
+.me .who{flex:1;min-width:0}.me .who b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.me .who span{font-size:12px;color:var(--muted)}
+main.mainc{min-width:0;padding:0 28px 60px;display:flex;flex-direction:column;gap:18px;max-width:1260px;width:100%}
+.topbar{position:sticky;top:0;z-index:20;background:var(--bg);display:flex;gap:12px;align-items:center;padding:16px 0 12px;border-bottom:1px solid var(--line)}
+.topbar .ttl{flex:1;min-width:0}.topbar h1{font-size:21px}.topbar .src{font-size:12.5px;color:var(--muted);margin-top:2px}
+.gsearch{position:relative;width:min(340px,32vw)}
+.gsearch input{width:100%;padding-right:58px}
+.gsearch kbd{position:absolute;right:8px;top:50%;transform:translateY(-50%);font:11.5px var(--body);color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:1px 6px;background:var(--bg);pointer-events:none}
+.pop{position:absolute;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 36px rgba(0,0,0,.16);padding:6px;min-width:100%;z-index:40;display:flex;flex-direction:column;max-height:70vh;overflow:auto}
+.pop button,.pop a,.pop label.mi{display:flex;gap:10px;align-items:center;text-align:left;border:0;background:none;padding:8px 10px;border-radius:7px;font-weight:500;color:var(--ink);text-decoration:none;cursor:pointer;width:100%;white-space:nowrap}
+.pop button:hover,.pop button.hl,.pop a:hover,.pop label.mi:hover{background:var(--accent-soft)}
+.pop .grp{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:8px 10px 2px;font-weight:600}
+.pop .sub{margin-left:auto;padding-left:14px;font-size:12.5px;color:var(--muted);font-weight:400}
+details.menu{position:relative}details.menu>summary{list-style:none;white-space:nowrap}details.menu>summary::-webkit-details-marker{display:none}
+details.menu .pop{min-width:250px}
+#subnav{margin-top:-6px}
+.fhead{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.fh-top{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start}
+.fh-title{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 2px}
+.fh-title h2{font-size:21px}
+.fhead nav a{color:var(--muted)}
+body.fiche .evpick{display:none !important}
+body.fiche #evStatus .pill{display:none}
+body[data-tab=apercu] #evLinesCard,body[data-tab=apercu] #caisseCard{display:none !important}
+body[data-tab=ops] #v-evenement>:not(#evLinesCard){display:none !important}
+body[data-tab=caisse] #v-evenement>:not(#caisseCard){display:none !important}
+body[data-tab=budget] #prjCard{display:none !important}
+body[data-tab=comparer] #famChips{display:none !important}
+ul.todo{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+ul.todo li{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+ul.todo li:first-child{border-top:0}
+ul.todo .tx{flex:1;font-size:14px}
+ul.todo .pill{min-width:44px;text-align:center}
+.evl{display:flex;flex-direction:column}
+.evl button{display:flex;justify-content:space-between;gap:12px;align-items:center;text-align:left;border:0;border-top:1px solid var(--line);border-radius:0;background:none;padding:10px 4px;width:100%}
+.evl button:first-child{border-top:0}
+.evl button:hover{background:var(--bg)}
+.evl button>span{display:flex;flex-direction:column;gap:2px}
+.evl .r{align-items:flex-end}
+tr.clk{cursor:pointer}tr.clk:hover td{background:var(--bg)}
+#opViews{gap:6px}
+#fToggle.on{border-color:var(--accent);color:var(--accent)}
+dialog.drawer{margin:0 0 0 auto;height:100vh;max-height:100vh;width:min(540px,100vw);border-radius:0;border-width:0 0 0 1px;overflow:auto;padding:22px}
+dialog.drawer[open]{animation:drw .18s ease-out}
+@keyframes drw{from{transform:translateX(40px);opacity:.5}}
+.botnav{display:none}
+@media (max-width:880px){
+  .shell{grid-template-columns:minmax(0,1fr);background:var(--bg)}
+  .topbar{position:static}
+  .side{display:none}
+  main.mainc{padding:0 12px 92px}
+  .topbar{flex-wrap:wrap;padding:12px 0 10px}
+  .topbar .ttl{flex-basis:100%}
+  .gsearch{flex:1;width:auto}
+  .gsearch kbd{display:none}
+  .botnav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--line);z-index:30;justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .botnav>a,.botnav summary{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted);text-decoration:none;padding:4px 8px;cursor:pointer;font-weight:500}
+  .botnav svg{width:22px;height:22px}
+  .botnav>a.on{color:var(--accent)}
+  .botnav .pop{top:auto;bottom:calc(100% + 8px)}
+  .bulk{bottom:74px}
+  dialog.drawer{width:100vw;border-width:0}
+  #subnav{margin-top:0}
+}
+@media print{.side,.topbar,.botnav,#subnav,#evHead{display:none !important}.shell{display:block}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#1d4e89">
@@ -227,46 +315,63 @@ body:not(.can-write) .w{display:none !important}
 <div class="wrap" id="scrLoad"><p class="muted">Chargement…</p></div>
 
 <!-- application -->
-<div class="wrap" id="app" hidden>
-  <header class="top">
-    <div>
-      <h1>Cahier des comptes</h1>
-      <div class="src" id="src"></div>
-    </div>
-    <div class="actions">
-      <button type="button" class="primary w" id="bNew">+ Nouvelle écriture</button>
-      <button type="button" class="w" id="bTransfer">Virement interne</button>
-      <button type="button" id="bInstall" hidden>Installer l'application</button>
-      <span class="small muted" id="who"></span>
-      <button type="button" id="bOut">Se déconnecter</button>
-    </div>
-  </header>
-  <div id="demo" class="msg warn" hidden>Mode démonstration : aucune connexion n'est configurée, les données restent sur cet appareil. Renseignez <b>config.js</b> pour activer les comptes et le partage (voir le guide d'installation).</div>
-  <div id="net" class="msg warn" hidden></div>
-  <div id="flash" class="msg" hidden></div>
+<div class="shell" id="app" hidden>
+  <aside class="side" aria-label="Menu principal">
+    <div class="brand"><div class="logo" aria-hidden="true">€</div><div><b>Cahier des comptes</b><span id="assoSide">Comité des fêtes</span></div></div>
+    <nav id="sideNav">
+      <a href="#accueil" data-sec="accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Accueil</a>
+      <a href="#operations" data-sec="operations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Opérations</a>
+      <a href="#evenements" data-sec="evenements"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Événements</a>
+      <a href="#stock" data-sec="stock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Stock</a>
+      <a href="#encarts" data-sec="encarts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Encarts</a>
+      <a href="#synthese" data-sec="rapports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Rapports</a>
+    </nav>
+    <div class="sep"></div>
+    <nav id="sideNav2"><a href="#reglages" data-sec="reglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Réglages</a>
+      <button type="button" id="bInstall" class="navbtn" hidden>Installer l'application</button></nav>
+    <div class="me"><div class="av" id="whoIni" aria-hidden="true"></div><div class="who"><b id="who"></b><span id="whoRole"></span></div><button type="button" class="mini" id="bOut" title="Se déconnecter">Sortir</button></div>
+  </aside>
 
-  <div class="sections" id="sections"><a href="#synthese" data-sec="treso">Trésorerie</a><a href="#stock" data-sec="stock">Stock</a></div>
+  <main class="mainc">
+    <header class="topbar">
+      <div class="ttl"><h1 id="pgTitle">Accueil</h1><div class="src" id="src"></div></div>
+      <div class="gsearch" role="search">
+        <input type="search" id="gq" placeholder="Rechercher partout…" aria-label="Rechercher partout" autocomplete="off">
+        <kbd aria-hidden="true">Ctrl K</kbd>
+        <div class="pop" id="gqRes" hidden></div>
+      </div>
+      <details class="menu" id="newMenuWrap">
+        <summary class="btn primary">+ Nouveau</summary>
+        <div class="pop" id="newMenu">
+          <button type="button" class="w" id="bNew">Opération<span class="sub">recette ou dépense</span></button>
+          <button type="button" class="w" id="bTransfer">Virement interne<span class="sub">compte ↔ Livret A</span></button>
+          <button type="button" class="w" id="bNewEv">Événement</button>
+          <button type="button" class="w" id="bNewAnn">Annonceur</button>
+          <div class="grp ws">Stock</div>
+          <button type="button" class="ws" id="bNewIn">Réception d'achat</button>
+          <button type="button" class="ws" id="bNewOut">Sortie vers un événement</button>
+          <button type="button" class="ws" id="bNewArt">Article</button>
+          <div class="grp w">Fichiers</div>
+          <button type="button" class="w" id="bNewImp">Importer un fichier…</button>
+        </div>
+      </details>
+    </header>
+    <div id="demo" class="msg warn" hidden>Mode démonstration : aucune connexion n'est configurée, les données restent sur cet appareil. Renseignez <b>config.js</b> pour activer les comptes et le partage (voir le guide d'installation).</div>
+    <div id="net" class="msg warn" hidden></div>
+    <div id="flash" class="msg" hidden></div>
 
-  <nav class="tabs" id="tabs">
-    <a href="#synthese">Synthèse</a>
-    <a href="#ecritures">Écritures</a>
-    <a href="#evenements">Événements</a>
-    <a href="#previsionnel">Prévisionnel</a>
-    <a href="#evenement">Bilan d'un événement</a>
-    <a href="#editions">Éditions</a>
-    <a href="#encarts">Encarts</a>
-    <a href="#rapprochement">Rapprochement</a>
-    <a href="#presentation">Présentation</a>
-    <a href="#controles">Contrôles</a>
-    <a href="#journal">Journal</a>
-    <a href="#reglages">Réglages</a>
-  </nav>
-  <nav class="tabs" id="tabsStock" hidden>
-    <a href="#stock">État du stock</a>
-    <a href="#stockev">Stock par événement</a>
-    <a href="#mouvements">Mouvements</a>
-    <a href="#buvette">Analyse buvette</a>
-  </nav>
+    <div class="fhead" id="evHead" hidden></div>
+    <nav class="tabs" id="subnav" hidden></nav>
+    <div class="card" id="ficheEmpty" hidden></div>
+
+    <section class="view" id="v-accueil">
+      <div class="tiles" id="hTiles"></div>
+      <div class="two">
+        <div class="card"><div class="row between"><h2>À faire</h2><span class="small muted" id="hTodoN"></span></div><ul class="todo" id="hTodo"></ul></div>
+        <div class="card"><div class="row between"><h2>Événements en cours</h2><a href="#evenements" class="small">Tous les événements</a></div><div id="hEvents"></div></div>
+      </div>
+      <div class="card"><div class="row between"><h2>Dernières opérations</h2><a href="#operations" class="small">Toutes les opérations</a></div><div class="scroll"><table id="hLast"></table></div></div>
+    </section>
 
   <div class="card" id="empty" hidden>
     <h2>Le cahier est vide</h2>
@@ -294,7 +399,7 @@ body:not(.can-write) .w{display:none !important}
   </section>
 
   <section class="view" id="v-evenement">
-    <div class="row"><label for="evSel" class="muted">Événement</label><select id="evSel"></select><span id="evStatus"></span></div>
+    <div class="row"><label for="evSel" class="muted evpick">Événement</label><select id="evSel" class="evpick"></select><span id="evStatus"></span></div>
     <div class="tiles" id="evTiles"></div>
     <div class="two">
       <div class="card"><h2>Recettes par poste</h2><div class="hb" id="evRec"></div></div>
@@ -312,7 +417,7 @@ body:not(.can-write) .w{display:none !important}
       <div class="scroll"><table id="cTable"></table></div>
       <p class="small muted" style="margin:0">Le déposé comprend tous les dépôts d'espèces de l'événement : ajoutez un comptage pour chaque caisse (buvette, repas…) pour que l'écart soit juste.</p>
     </div>
-    <div class="card"><h2>Écritures de l'événement</h2><div class="scroll"><table id="evLines"></table></div></div>
+    <div class="card" id="evLinesCard"><h2>Opérations de l'événement</h2><div class="scroll"><table id="evLines"></table></div></div>
   </section>
 
   <section class="view" id="v-editions">
@@ -326,8 +431,15 @@ body:not(.can-write) .w{display:none !important}
   <section class="view" id="v-ecritures">
     <div id="recBanner" class="msg" hidden></div>
     <div class="card">
-      <div class="row">
-        <input type="search" id="q" placeholder="Rechercher (désignation, commentaire, poste…)" aria-label="Rechercher">
+      <div class="row between">
+        <div class="row"><input type="search" id="q" placeholder="Rechercher (désignation, commentaire, poste…)" aria-label="Rechercher dans les opérations" style="min-width:260px"><button type="button" id="fToggle">Filtrer</button></div>
+        <details class="menu"><summary class="btn">Importer / exporter</summary><div class="pop">
+          <label class="mi w" for="file">Importer un fichier (historique .xlsx ou relevé .csv)</label>
+          <button type="button" id="xXlsx">Sauvegarde Excel (format Google Sheet)</button>
+          <button type="button" id="xCsv">Exporter en CSV</button></div></details>
+      </div>
+      <div class="chips" id="opViews"></div>
+      <div class="row" id="fAdv" hidden>
         <select id="fAcc" aria-label="Filtrer par compte"><option value="">Tous les comptes</option><option value="CC">Compte courant</option><option value="LA">Livret A</option></select>
         <select id="fEv" aria-label="Filtrer par événement"></select>
         <select id="fCat" aria-label="Filtrer par poste"></select>
@@ -336,14 +448,7 @@ body:not(.can-write) .w{display:none !important}
         <label class="small muted" for="fAu">au</label><input type="date" id="fAu">
         <button type="button" id="fClear">Effacer les filtres</button>
       </div>
-      <div class="row between">
-        <span class="muted small"><span id="lnCount"></span><span id="lastSave"></span></span>
-        <div class="row">
-          <label class="btn w" for="file">Importer (.xlsx)</label>
-          <button type="button" id="xXlsx">Sauvegarde Excel (format Google Sheet)</button>
-          <button type="button" id="xCsv">Exporter en CSV</button>
-        </div>
-      </div>
+      <span class="muted small"><span id="lnCount"></span><span id="lastSave"></span></span>
       <p class="small muted w" style="margin:0">Cochez des écritures pour les modifier en une fois. Maj + clic coche toute une plage.</p>
       <div class="scroll"><table id="lnTable"></table></div>
     </div>
@@ -374,14 +479,14 @@ body:not(.can-write) .w{display:none !important}
   <section class="view" id="v-previsionnel">
     <div class="card">
       <div class="row between">
-        <div class="row"><h2>Prévisionnel</h2><select id="pvSel" aria-label="Événement"></select></div>
+        <div class="row"><h2>Prévisionnel</h2><select id="pvSel" class="evpick" aria-label="Événement"></select></div>
         <div class="row w"><button type="button" id="pvPrev">Partir de l'édition précédente</button><button type="button" id="pvAddRec">+ Recette prévue</button><button type="button" class="primary" id="pvAddDep">+ Dépense prévue</button></div>
       </div>
       <div class="tiles" id="pvTiles"></div>
       <div class="scroll"><table id="pvTable"></table></div>
       <p class="small muted" style="margin:0">Réalisé : écritures du cahier pour cet événement, par poste. Écart positif : mieux que prévu. « Pour l'équilibre » : quantité à vendre, les autres lignes restant identiques, pour un résultat nul. Une dépense « engagée » correspond à un devis signé ou une commande passée. Le total du prévisionnel devient le budget de l'événement.</p>
     </div>
-    <div class="card">
+    <div class="card" id="prjCard">
       <div class="row between"><h2>Trésorerie prévisionnelle sur 12 mois</h2><span id="prjPill"></span></div>
       <div id="prjChart"></div>
       <div class="scroll"><table id="prjTable"></table></div>
@@ -473,7 +578,7 @@ body:not(.can-write) .w{display:none !important}
   </section>
 
   <section class="view" id="v-stockev">
-    <div class="row"><label for="seSel" class="muted">Événement</label><select id="seSel"></select><span class="small muted" id="seRef"></span></div>
+    <div class="row"><label for="seSel" class="muted evpick">Événement</label><select id="seSel" class="evpick"></select><span class="small muted" id="seRef"></span></div>
     <div class="tiles" id="seTiles"></div>
     <div class="card">
       <div class="row between"><h2>Consommation de l'événement</h2><div class="row ws"><button type="button" id="seOut">Sortie vers l'événement</button><button type="button" id="seRet">Retour après l'événement</button></div></div>
@@ -498,7 +603,7 @@ body:not(.can-write) .w{display:none !important}
 
   <section class="view" id="v-buvette">
     <div class="row between">
-      <div class="row"><label for="bvSel" class="muted">Événement</label><select id="bvSel"></select></div>
+      <div class="row evpick"><label for="bvSel" class="muted">Événement</label><select id="bvSel"></select></div>
       <div class="row ws"><button type="button" id="bvTpl">Modèle d'import</button><label class="btn primary" for="bvFile">Importer des factures (Excel)</label><input type="file" id="bvFile" accept=".xlsx,.xls,.csv" hidden></div>
     </div>
     <div class="tiles" id="bvTiles"></div>
@@ -533,8 +638,16 @@ body:not(.can-write) .w{display:none !important}
       <p class="small muted" style="margin:0" id="offTxt"></p>
       <div class="row"><button type="button" class="primary" id="instBtn" hidden>Installer l'application</button></div></div>
   </section>
+  </main>
+  <nav class="botnav" aria-label="Menu">
+    <a href="#accueil" data-sec="accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Accueil</a>
+    <a href="#operations" data-sec="operations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Opérations</a>
+    <a href="#evenements" data-sec="evenements"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Événements</a>
+    <a href="#stock" data-sec="stock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Stock</a>
+    <details class="menu"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg>Plus</summary>
+      <div class="pop"><a href="#encarts">Encarts</a><a href="#synthese">Rapports</a><a href="#reglages">Réglages</a><button type="button" data-signout="1">Se déconnecter</button></div></details>
+  </nav>
 </div>
-
 <div id="show" hidden><div id="showSlide"></div><div class="showbar"><button type="button" id="shPrev" aria-label="Diapositive précédente">‹</button><span id="showPos"></span><button type="button" id="shNext" aria-label="Diapositive suivante">›</button><button type="button" id="shClose">Quitter</button></div></div>
 <div id="printDeck"></div>
 
@@ -1324,6 +1437,7 @@ function renderEvent(){
 }
 function renderEditions(){
   const fam=families(), multi=[...fam.entries()].filter(([,a])=>a.length>1);
+  if(FICHE&&!multi.some(([k])=>k===curFam)){$("famChips").innerHTML="";$("famTable").innerHTML=`<tbody><tr><td class="muted">Une seule édition de ${esc(famOf(FICHE))} pour l'instant : la comparaison sera possible à la prochaine.</td></tr></tbody>`;$("famNotes").innerHTML="";return;}
   if(!multi.length){$("famChips").innerHTML="";$("famTable").innerHTML=`<tbody><tr><td class="muted">Il faut au moins deux éditions d'un même événement (même nom, année différente).</td></tr></tbody>`;$("famNotes").innerHTML="";return;}
   if(!curFam||!multi.some(([k])=>k===curFam))curFam=(multi.find(([k])=>/fete/i.test(k))||multi[0])[0];
   $("famChips").innerHTML=multi.map(([k])=>`<button type="button" class="chip ${k===curFam?"on":""}" data-f="${esc(k)}">${esc(k)}</button>`).join("");
@@ -1358,6 +1472,7 @@ function renderLines(){
   let sv=null; try{sv=localStorage.getItem("cahier-derniere-sauvegarde");}catch(e){}
   $("lastSave").textContent=sv?` · dernière sauvegarde Excel depuis cet appareil le ${fdate(sv)}`:" · aucune sauvegarde Excel faite depuis cet appareil";
   $("lnTable").innerHTML=linesTable(ls,{sel:true});
+  renderOpViews();
   syncSel();
 }
 function syncSel(){
@@ -1736,21 +1851,86 @@ $("pSel").addEventListener("change",e=>{pKey=e.target.value;renderPres();});
 $("pNotes").addEventListener("input",e=>{setNotes(e.target.value);renderPres();});
 
 /* ================= navigation ================= */
-const VIEWS={synthese:renderSynthese,ecritures:renderLines,evenements:renderEvenements,previsionnel:renderPrev,evenement:renderEvent,editions:renderEditions,encarts:renderEncarts,rapprochement:renderRap,presentation:renderPres,controles:renderControles,journal:renderJournal,reglages:renderReglages,stock:renderStock,stockev:renderStockEv,mouvements:renderMvts,buvette:renderBuvette};
-const STOCK_VIEWS=["stock","stockev","mouvements","buvette"];
-const ALIAS={budget:"evenements",acces:"reglages"};
+// Rubriques du menu latéral, sous-onglets et fiche d'événement (#fiche/<onglet>/<événement>).
+const ROUTES={
+  accueil:{sec:"accueil",view:"accueil",title:"Accueil"},
+  operations:{sec:"operations",view:"ecritures",title:"Opérations",sub:"ops"},
+  rapprochement:{sec:"operations",view:"rapprochement",title:"Rapprochement bancaire",sub:"ops"},
+  evenements:{sec:"evenements",view:"evenements",title:"Événements"},
+  stock:{sec:"stock",view:"stock",title:"Stock",sub:"stock"},
+  mouvements:{sec:"stock",view:"mouvements",title:"Mouvements de stock",sub:"stock"},
+  buvette:{sec:"stock",view:"buvette",title:"Analyse buvette",sub:"stock"},
+  encarts:{sec:"encarts",view:"encarts",title:"Encarts publicitaires"},
+  synthese:{sec:"rapports",view:"synthese",title:"Synthèse annuelle",sub:"rap"},
+  editions:{sec:"rapports",view:"editions",title:"Comparer les éditions",sub:"rap"},
+  tresorerie:{sec:"rapports",view:"previsionnel",title:"Trésorerie prévisionnelle",sub:"rap"},
+  presentation:{sec:"rapports",view:"presentation",title:"Présentation",sub:"rap"},
+  controles:{sec:"rapports",view:"controles",title:"Contrôles",sub:"rap"},
+  journal:{sec:"rapports",view:"journal",title:"Journal des modifications",sub:"rap"},
+  reglages:{sec:"reglages",view:"reglages",title:"Réglages"}
+};
+const SUBS={
+  ops:[["operations","Opérations"],["rapprochement","Rapprochement"]],
+  stock:[["stock","Articles"],["mouvements","Mouvements"],["buvette","Analyse buvette"]],
+  rap:[["synthese","Synthèse annuelle"],["editions","Comparer les éditions"],["tresorerie","Trésorerie prévisionnelle"],["presentation","Présentation"],["controles","Contrôles"],["journal","Journal"]]
+};
+const FICHE_TABS=[["apercu","Vue d'ensemble"],["budget","Budget"],["caisse","Caisse"],["buvette","Buvette"],["stock","Stock"],["comparer","Comparer"],["ops","Opérations"]];
+const ALIAS={ecritures:"operations",budget:"evenements",previsionnel:"evenements",acces:"reglages",stockev:"stock",evenement:"evenements"};
+const VIEWS={accueil:renderAccueil,synthese:renderSynthese,ecritures:renderLines,evenements:renderEvenements,previsionnel:renderPrev,evenement:renderEvent,editions:renderEditions,encarts:renderEncarts,rapprochement:renderRap,presentation:renderPres,controles:renderControles,journal:renderJournal,reglages:renderReglages,stock:renderStock,stockev:renderStockEv,mouvements:renderMvts,buvette:renderBuvette};
+let FICHE=null;
+const ficheHash=(name,tab)=>"#fiche/"+(tab||"apercu")+"/"+slug(name);
+function openFiche(name,tab){location.hash=ficheHash(name,tab);window.scrollTo(0,0);}
+function allEventNames(){return [...new Set([...evList().map(x=>x.name),...S.previsions.map(p=>eventKey(p.evenement).parent)])];}
+function showView(v){for(const k in VIEWS)$("v-"+k).classList.toggle("on",k===v);}
 function show(){
-  let v=location.hash.replace("#",""); v=ALIAS[v]||v;
-  if(!VIEWS[v])v=S.role==="stock"?"stock":"synthese";
-  const sec=STOCK_VIEWS.includes(v)?"stock":"treso";
-  $("tabs").hidden=sec!=="treso"; $("tabsStock").hidden=sec!=="stock";
-  document.querySelectorAll("#sections a").forEach(a=>a.classList.toggle("on",a.dataset.sec===sec));
-  for(const k in VIEWS)$("v-"+k).classList.toggle("on",k===v);
-  document.querySelectorAll("#tabs a,#tabsStock a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+v));
-  $("empty").hidden=M.lines.length>0||sec==="stock"||["reglages","journal","evenements","encarts","previsionnel"].includes(v);
-  VIEWS[v]();
+  let h=decodeURIComponent(location.hash.replace("#",""));
+  const b=document.body; b.classList.remove("fiche"); delete b.dataset.tab; b.dataset.route="";
+  $("evHead").hidden=true; $("ficheEmpty").hidden=true;
+  if(h.startsWith("fiche/")){
+    const [,tab,sl]=h.split("/"), name=allEventNames().find(n=>slug(n)===sl);
+    if(name){renderFiche(name,FICHE_TABS.some(x=>x[0]===tab)?tab:"apercu");return;}
+    h="evenements";
+  }
+  FICHE=null;
+  h=ALIAS[h]||h;
+  if(!ROUTES[h])h=S.role==="stock"?"stock":"accueil";
+  const r=ROUTES[h]; b.dataset.route=h;
+  $("pgTitle").textContent=r.title;
+  document.querySelectorAll("#sideNav a[data-sec],#sideNav2 a[data-sec],.botnav a[data-sec]").forEach(a=>a.classList.toggle("on",a.dataset.sec===r.sec));
+  const sub=r.sub?SUBS[r.sub]:null;
+  $("subnav").hidden=!sub;
+  $("subnav").innerHTML=sub?sub.map(([k,l])=>`<a href="#${k}" class="${k===h?"on":""}">${esc(l)}</a>`).join(""):"";
+  $("empty").hidden=M.lines.length>0||h!=="accueil";
+  showView(r.view);
+  VIEWS[r.view]();
   renderRecBanner("recBanner"); renderRecBanner("recBanner2");
 }
+function renderFiche(name,tab){
+  FICHE=name; curEv=pvEv=bvEv=seEv=name; curFam=famOf(name);
+  const b=document.body; b.classList.add("fiche"); b.dataset.tab=tab; b.dataset.route="fiche";
+  document.querySelectorAll("#sideNav a[data-sec],#sideNav2 a[data-sec],.botnav a[data-sec]").forEach(a=>a.classList.toggle("on",a.dataset.sec==="evenements"));
+  $("pgTitle").textContent="Événements";
+  const x=evList().find(y=>y.name===name)||{name,managed:null,ev:null}, m=x.managed, e=M.events.find(y=>y.name===name);
+  const st=!m?pill2("Non listé","warn"):m.statut==="clos"?pill2("Clos","neutral"):pill2("En cours","good");
+  const res=e&&!e.upcoming?(e.res>0.005?pill2("Bénéficiaire","good"):e.res<-0.005?pill2("Déficitaire","bad"):""):"";
+  const d1=(m&&m.debut)||(e&&e.first), d2=(m&&m.fin)||(e&&e.last);
+  const y=yearOf(name), next=y?famOf(name)+" "+(y+1):null, w=canWrite();
+  $("evHead").hidden=false;
+  $("evHead").innerHTML=`<div class="fh-top"><div class="fh-id"><nav aria-label="Fil d'Ariane" class="small"><a href="#evenements">Événements</a> / ${esc(name)}</nav><div class="fh-title"><h2>${esc(name)}</h2>${st}${res}</div><span class="small muted">${d1?`Du ${fdate(d1)} au ${fdate(d2||d1)}`:"Dates à renseigner"}${m&&m.sous&&m.sous.length?` · sous-rubriques ${esc(m.sous.join(", "))}`:""}</span></div>
+    <div class="row">${w?`<button type="button" data-fhedit="1">Modifier</button>`:""}${w&&next&&!allEventNames().includes(next)?`<button type="button" data-fhnext="${esc(next)}">Préparer ${esc(next)}</button>`:""}<button type="button" class="primary" data-fhpres="1">Présentation</button></div></div>`;
+  $("subnav").hidden=false;
+  $("subnav").innerHTML=FICHE_TABS.map(([k,l])=>`<a href="${ficheHash(name,k)}" class="${k===tab?"on":""}">${esc(l)}</a>`).join("");
+  $("empty").hidden=true;
+  if(tab==="apercu"||tab==="ops"){
+    if(!e){showView("none");$("ficheEmpty").hidden=false;$("ficheEmpty").innerHTML=`<h3>Aucune opération pour l'instant</h3><p class="muted" style="margin:0">Commencez par le budget de l'événement, puis saisissez les opérations avec « + Nouveau ».</p><div class="row"><a class="btn primary" href="${ficheHash(name,"budget")}">Préparer le budget</a></div>`;return;}
+    showView("evenement"); renderEvent();
+  } else if(tab==="caisse"){showView("evenement"); renderCaisse({name});}
+  else if(tab==="budget"){showView("previsionnel"); renderPrev();}
+  else if(tab==="buvette"){showView("buvette"); renderBuvette();}
+  else if(tab==="stock"){showView("stockev"); renderStockEv();}
+  else if(tab==="comparer"){showView("editions"); renderEditions();}
+}
+const pill2=(t,k)=>`<span class="pill ${k}">${esc(t)}</span>`;
 function go(v){ if(location.hash==="#"+v)show(); else location.hash=v; }
 let raf=0;
 function render(){
@@ -1765,8 +1945,10 @@ function render(){
     M=build(S.ecr);
     $("demo").hidden=!DEMO;
     renderNet();
-    $("src").textContent=[ASSO,`${M.lines.length} écritures`,M.maxIso?`dernière écriture le ${fdate(M.maxIso)}`:""].filter(Boolean).join(" · ");
-    $("who").textContent=`${S.user.nom} · ${ROLE_LBL[S.role]||S.role}`;
+    $("src").textContent=[ASSO,M.maxIso?`dernière opération le ${fdate(M.maxIso)}`:""].filter(Boolean).join(" · ");
+    $("who").textContent=S.user.nom; $("whoRole").textContent=ROLE_LBL[S.role]||S.role;
+    $("whoIni").textContent=String(S.user.nom||"?").split(/\s+/).map(w=>w[0]||"").join("").slice(0,2).toUpperCase();
+    $("newMenuWrap").hidden=!canStock(); $("assoSide").textContent=ASSO||"Comité des fêtes";
     if(season!=="all"&&!seasonsOf().includes(+season))season="all";
     show();
   });
@@ -2433,7 +2615,8 @@ document.addEventListener("click",async e=>{
   if((t=e.target.closest("[data-sel]"))){pick(t,e.shiftKey);return;}
   if((t=e.target.closest("[data-edit]"))){openEcriture(t.dataset.edit);return;}
   if((t=e.target.closest("[data-s]"))){season=t.dataset.s;renderSynthese();return;}
-  if((t=e.target.closest("[data-ev]"))){curEv=t.dataset.ev;go("evenement");window.scrollTo(0,0);return;}
+  if((t=e.target.closest("[data-ev]"))){openFiche(t.dataset.ev);return;}
+  if((t=e.target.closest("[data-signout]"))){store.signOut();return;}
   if((t=e.target.closest("[data-f]"))){curFam=t.dataset.f;renderEditions();return;}
   if((t=e.target.closest("[data-evf]"))){evFilter=t.dataset.evf;renderEvenements();return;}
   if((t=e.target.closest("[data-evedit]"))){openEventDialog(t.dataset.evedit);return;}
@@ -2481,7 +2664,7 @@ const app=$("app");
 app.addEventListener("dragover",e=>{if(canWrite()){e.preventDefault();app.classList.add("drop");}});
 app.addEventListener("dragleave",()=>app.classList.remove("drop"));
 app.addEventListener("drop",e=>{if(!canWrite())return;e.preventDefault();app.classList.remove("drop");const f=e.dataTransfer.files[0];if(f)startImport(f);});
-window.addEventListener("hashchange",()=>{if(S.user&&S.role)show();});
+window.addEventListener("hashchange",()=>{if(S.user&&S.role){show();window.scrollTo(0,0);}});
 
 /* ================= prévisionnel ================= */
 const pvDoc=n=>S.previsions.find(p=>p.id===slug(n));
@@ -2497,7 +2680,7 @@ function pvNames(){
   return [...names].filter(Boolean).sort((a,b)=>key(a).localeCompare(key(b)));
 }
 function renderPrev(){
-  const names=pvNames();
+  const names=pvNames(); if(FICHE&&!names.includes(FICHE))names.unshift(FICHE);
   if(!pvEv||!names.includes(pvEv)) pvEv=names.find(n=>pvLines(n).length)||names[0]||null;
   $("pvSel").innerHTML=names.length?names.map(n=>`<option ${n===pvEv?"selected":""}>${esc(n)}</option>`).join(""):`<option value="">Aucun événement en cours</option>`;
   $("pvPrev").disabled=$("pvAddRec").disabled=$("pvAddDep").disabled=!pvEv;
@@ -2698,6 +2881,7 @@ function prevEditionWithStock(name){
 }
 function renderStockEv(){
   const names=[...new Set([...pvNames(),...S.mouvements.map(m=>m.evenement?eventKey(m.evenement).parent:"").filter(Boolean),...M.events.map(e=>e.name)])].sort((a,b)=>(yearOf(b)||0)-(yearOf(a)||0)||a.localeCompare(b));
+  if(FICHE&&!names.includes(FICHE))names.unshift(FICHE);
   if(!seEv||!names.includes(seEv))seEv=pvNames()[0]||names[0]||null;
   $("seSel").innerHTML=names.map(n=>`<option ${n===seEv?"selected":""}>${esc(n)}</option>`).join("");
   if(!seEv)return;
@@ -2932,7 +3116,7 @@ function bvData(name){
   return {rows,stockOnly};
 }
 function renderBuvette(){
-  const evs=bvEvents();
+  const evs=bvEvents(); if(FICHE&&!evs.includes(FICHE))evs.unshift(FICHE);
   if(!bvEv||!evs.includes(bvEv))bvEv=evs[0]||null;
   $("bvSel").innerHTML=evs.length?evs.map(n=>`<option ${n===bvEv?"selected":""}>${esc(n)}</option>`).join(""):`<option value="">Aucun achat rattaché à un événement</option>`;
   renderGrille(); renderPrixAchat();
@@ -3049,6 +3233,121 @@ $("fBV").addEventListener("submit",async ev=>{
     $("dlgBV").close(); const e1=X.items.find(x=>x.evt); if(e1){bvEv=e1.evt;} BVI=null;
   }
 });
+
+/* ================= accueil ================= */
+function renderAccueil(){
+  const cc=sumOf(M.lines.filter(l=>l.acc==="CC"),l=>l.rec-l.dep), la=sumOf(M.lines.filter(l=>l.acc==="LA"),l=>l.rec-l.dep);
+  const y=+today().slice(0,4), evY=M.events.filter(e=>e.year===y&&!e.upcoming), resY=sumOf(evY,e=>e.res);
+  const up=M.events.filter(e=>e.upcoming), acompte=sumOf(up,e=>e.rec-e.dep);
+  $("hTiles").innerHTML=`
+    <div class="tile"><h3>Trésorerie totale</h3><div class="v">${fm(cc+la)}</div><div class="s">${M.maxIso?"au "+fdate(M.maxIso):"aucune opération"}</div></div>
+    <div class="tile"><h3>Compte courant</h3><div class="v">${fm(cc)}</div><div class="s">Livret A ${fm(la)}</div></div>
+    <div class="tile"><h3>Résultat des événements ${y}</h3><div class="v ${cls(resY)}">${sg(resY)}</div><div class="s">${evY.length} événement(s) passé(s)</div></div>
+    <div class="tile"><h3>Événements à venir</h3><div class="v ${cls(acompte)}">${sg(acompte)}</div><div class="s">${up.length?"déjà au cahier pour "+up.map(e=>e.name).join(", "):"aucun événement à venir"}</div></div>`;
+  // À faire
+  const T=[], w=canWrite(), add=(n,txt,href,lvl,btn)=>T.push(`<li><span class="pill ${lvl||"warn"}">${n}</span><span class="tx">${txt}</span>${btn||`<a href="${href}" class="btn mini">Voir</a>`}</li>`);
+  if(w){const p=recPending(); if(p.length)add(p.length,`écriture(s) récurrente(s) à créer (${esc(p.slice(0,2).map(x=>x.r.designation).join(", "))}${p.length>2?"…":""})`,"",null,`<button type="button" class="mini primary" data-gen="1">Créer</button>`);}
+  const lim=new Date(Date.now()-30*864e5).toISOString().slice(0,10), np=M.lines.filter(l=>l.acc==="CC"&&!l.pointe&&l.iso&&l.iso<lim);
+  if(np.length)add(np.length,`opération(s) non pointée(s) depuis plus de 30 jours (${fm(sumOf(np,l=>l.rec-l.dep))})`,"#rapprochement");
+  for(const e of M.events){const c=caisseOf(e.name);if(c.sessions.length&&c.reste>0.005)add(fm(c.reste),`à déposer en banque pour ${esc(e.name)}`,ficheHash(e.name,"caisse"),"bad");}
+  const ay=aYear||y, rel=S.annonceurs.filter(a=>{const c=(a.encarts||{})[ay];return c&&(c.statut==="relancer"||c.statut==="promis");});
+  if(rel.length)add(rel.length,`encart(s) ${ay} à relancer ou promis (${fm(sumOf(rel,a=>+a.encarts[ay].montant||0))})`,"#encarts");
+  if(S.articles.length){const st=stockState(), al=S.articles.filter(a=>a.actif!==false&&(+a.seuil>0&&st.get(a.id).qty<+a.seuil));if(al.length)add(al.length,"article(s) sous le seuil d'alerte, à racheter","#stock");}
+  if(S.previsions.length){const pj=projection(), bl=pj.rows.find(x=>x.solde<pj.seuil);if(bl)add("!",`trésorerie prévue sous ${fm0(pj.seuil)} en ${esc(monthLabel(bl.ym))} (${fm0(bl.solde)})`,"#tresorerie","bad");}
+  for(const x of evList().filter(isOpen)){if(!pvLines(x.name).length&&!S.budgets.some(b=>eventKey(b.evenement).parent===x.name))add("—",`${esc(x.name)} n'a pas encore de budget`,ficheHash(x.name,"budget"),"neutral");}
+  const dv=M.lines.filter(l=>!l.iso||l.cat==="Divers").length;
+  if(dv)add(dv,"opération(s) sans date ou classée(s) « Divers » à vérifier","#controles","neutral");
+  $("hTodo").innerHTML=T.join("")||`<li class="muted">Rien à faire : tout est à jour.</li>`;
+  $("hTodoN").textContent=T.length?T.length+" point(s)":"";
+  // événements en cours
+  const open=evList().filter(x=>isOpen(x)||(x.ev&&x.ev.upcoming)).sort((a,b)=>String((a.managed&&a.managed.debut)||(a.ev&&a.ev.first)||"").localeCompare(String((b.managed&&b.managed.debut)||(b.ev&&b.ev.first)||"")));
+  $("hEvents").innerHTML=open.length?`<div class="evl">${open.map(x=>{
+    const e=x.ev, L=pvLines(x.name), bg=S.budgets.find(b=>eventKey(b.evenement).parent===x.name);
+    const prev=L.length?sumOf(L,l=>(l.sens==="rec"?1:-1)*(+l.montant||0)):bg?bg.recettes-bg.depenses:null, d=(x.managed&&x.managed.debut)||(e&&e.first);
+    return `<button type="button" data-ev="${esc(x.name)}"><span><b>${esc(x.name)}</b><span class="small muted">${d?fdate(d):"date à fixer"}${e?` · ${e.lines.length} opération(s)`:""}</span></span><span class="r"><b class="num ${e?cls(e.res):""}">${e?sg(e.res):"—"}</b><span class="small muted">${prev!=null?"prévu "+sg(prev):"pas de budget"}</span></span></button>`;}).join("")}</div>`
+    :`<p class="muted" style="margin:0">Aucun événement en cours.</p>${w?`<div class="row"><button type="button" class="primary" data-newev="1">+ Créer un événement</button></div>`:""}`;
+  const last=M.lines.filter(l=>l.iso).slice(-8).reverse();
+  $("hLast").innerHTML=`<tbody>${last.map(l=>`<tr${w?` class="clk" data-edit="${esc(l.id)}"`:""}><td class="num small">${fdate(l.iso)}</td><td>${esc(l.des)}<div class="small muted">${esc(l.evt.trim())}${l.acc==="LA"?" · Livret A":""}</div></td><td class="small muted">${esc(l.cat)}</td><td class="r num ${l.rec?"pos":"neg"}">${l.rec?"+"+fm(l.rec):"−"+fm(l.dep)}</td><td class="small">${l.pointe?`<span class="pill good">Pointé</span>`:""}</td></tr>`).join("")||`<tr><td class="muted">Aucune opération.</td></tr>`}</tbody>`;
+}
+
+/* ================= création d'événement, fiche ================= */
+function newEvent(prefill){
+  openEventDialog(null,name=>openFiche(name,"budget"));
+  if(prefill){$("vNom").value=prefill;const p=evList().find(x=>famOf(x.name)===famOf(prefill)&&yearOf(x.name)===yearOf(prefill)-1);
+    if(p&&p.managed&&p.managed.sous)$("vSous").value=p.managed.sous.join(", ");}
+}
+$("evNew").onclick=()=>newEvent();
+$("bNewEv").onclick=()=>newEvent();
+$("bNewAnn").onclick=()=>openAnn(null);
+$("bNewIn").onclick=()=>$("stIn").click();
+$("bNewOut").onclick=()=>$("stOut").click();
+$("bNewArt").onclick=()=>$("stNew").click();
+$("bNewImp").onclick=()=>$("file").click();
+document.addEventListener("click",e=>{
+  let t;
+  // ferme les menus déroulants ouverts quand on clique ailleurs ou sur une entrée
+  document.querySelectorAll("details.menu[open]").forEach(d=>{if(!d.contains(e.target)||e.target.closest(".pop button,.pop a,.pop label"))d.open=false;});
+  if(!e.target.closest(".gsearch"))$("gqRes").hidden=true;
+  if((t=e.target.closest("[data-newev]"))){newEvent();return;}
+  if((t=e.target.closest("[data-fhedit]"))){openEventDialog(FICHE,n=>openFiche(n,document.body.dataset.tab));return;}
+  if((t=e.target.closest("[data-fhnext]"))){newEvent(t.dataset.fhnext);return;}
+  if((t=e.target.closest("[data-fhpres]"))){pType="event";pKey=FICHE;const r=document.querySelector('input[name=pType][value=event]');if(r)r.checked=true;go("presentation");return;}
+  if((t=e.target.closest("[data-opv]"))){setOpView(t.dataset.opv);return;}
+  if((t=e.target.closest("[data-go]"))){$("gqRes").hidden=true;$("gq").value="";const v=t.dataset.go;if(v.startsWith("edit:"))openEcriture(v.slice(5));else if(v.startsWith("ann:"))openAnn(v.slice(4));else if(v.startsWith("art:")){location.hash="stock";setTimeout(()=>{$("stQ").value=v.slice(4);$("stQ").dispatchEvent(new Event("input"));},0);}else location.hash=v;return;}
+});
+
+/* ================= opérations : vues rapides ================= */
+let opView="all";
+const OPV=[["all","Toutes"],["np","Non pointées"],["mois","Ce mois"],["cc","Compte courant"],["la","Livret A"],["divers","À classer"]];
+function setOpView(v){
+  opView=v; $("q").value=""; for(const id of ["fEv","fCat","fAcc","fPt","fDu","fAu"])$(id).value="";
+  if(v==="np")$("fPt").value="non"; else if(v==="mois")$("fDu").value=today().slice(0,8)+"01";
+  else if(v==="cc")$("fAcc").value="CC"; else if(v==="la")$("fAcc").value="LA"; else if(v==="divers"){renderLines();$("fCat").value="Divers";}
+  renderLines();
+}
+function renderOpViews(){
+  const adv=["fEv","fCat","fAcc","fPt","fDu","fAu"].filter(id=>$(id).value).length;
+  $("opViews").innerHTML=OPV.map(([k,l])=>`<button type="button" class="chip ${k===opView?"on":""}" data-opv="${k}">${l}</button>`).join("")+(opView==="custom"&&adv?`<span class="pill neutral">${adv} filtre(s)</span>`:"");
+  $("fToggle").classList.toggle("on",!$("fAdv").hidden);
+}
+for(const id of ["fEv","fCat","fAcc","fPt","fDu","fAu"])$(id).addEventListener("change",()=>{opView="custom";renderOpViews();});
+$("fToggle").onclick=()=>{$("fAdv").hidden=!$("fAdv").hidden;renderOpViews();};
+$("fClear").onclick=()=>setOpView("all");
+
+/* ================= recherche globale ================= */
+let gqSel=0;
+function gqItems(q){
+  const s=strip(q); if(s.length<2)return [];
+  const out=[], push=(grp,lab,sub,go)=>out.push({grp,lab,sub,go});
+  for(const [k,r] of Object.entries(ROUTES))if(strip(r.title).includes(s))push("Pages",r.title,"",k);
+  for(const n of allEventNames())if(strip(n).includes(s))push("Événements",n,"",ficheHash(n).slice(1));
+  M.lines.filter(l=>strip(l.des+" "+l.com+" "+l.evt).includes(s)).slice(-8).reverse().forEach(l=>push("Opérations",l.des,`${fdate(l.iso)} · ${l.rec?"+"+fm(l.rec):"−"+fm(l.dep)}`,canWrite()?"edit:"+l.id:"operations"));
+  S.articles.filter(a=>strip(a.nom).includes(s)).slice(0,5).forEach(a=>push("Articles",a.nom,a.categorie||"","art:"+a.nom));
+  S.annonceurs.filter(a=>strip(a.nom+" "+(a.contact||"")).includes(s)).slice(0,5).forEach(a=>push("Annonceurs",a.nom,a.contact||"",canWrite()?"ann:"+a.id:"encarts"));
+  return out.slice(0,24);
+}
+function renderGq(){
+  const it=gqItems($("gq").value), box=$("gqRes");
+  if(!$("gq").value.trim()){box.hidden=true;return;}
+  gqSel=Math.min(gqSel,Math.max(0,it.length-1));
+  let g="", h="";
+  it.forEach((x,i)=>{if(x.grp!==g){g=x.grp;h+=`<div class="grp">${esc(g)}</div>`;}h+=`<button type="button" data-go="${esc(x.go)}" class="${i===gqSel?"hl":""}">${esc(x.lab)}${x.sub?`<span class="sub">${esc(x.sub)}</span>`:""}</button>`;});
+  box.innerHTML=h||`<div class="grp">Aucun résultat</div>`+(strip($("gq").value).length>=2?`<button type="button" data-go="operations" id="gqAll">Chercher dans les opérations</button>`:"");
+  box.hidden=false;
+}
+$("gq").addEventListener("input",()=>{gqSel=0;renderGq();});
+$("gq").addEventListener("focus",renderGq);
+$("gq").addEventListener("keydown",e=>{
+  const bs=[...$("gqRes").querySelectorAll("button")];
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();gqSel=Math.max(0,Math.min(bs.length-1,gqSel+(e.key==="ArrowDown"?1:-1)));renderGq();}
+  else if(e.key==="Enter"){e.preventDefault();const b=bs[gqSel];if(b){if(b.id==="gqAll"){const v=$("gq").value;location.hash="operations";setTimeout(()=>{$("q").value=v;opView="custom";renderLines();},0);$("gqRes").hidden=true;$("gq").value="";}else b.click();}}
+  else if(e.key==="Escape"){$("gq").value="";$("gqRes").hidden=true;$("gq").blur();}
+});
+document.addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"&&!document.querySelector("dialog[open]")){e.preventDefault();$("gq").focus();$("gq").select();}
+});
+// fenêtres de saisie en panneau latéral
+["dlgE","dlgT","dlgV","dlgA","dlgArt","dlgL","dlgU"].forEach(id=>{const d=$(id);if(d)d.classList.add("drawer");});
 
 /* ================= connexion ================= */
 let signup=false;
