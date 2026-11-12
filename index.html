@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cahier des comptes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Registre comptable : papier froid, encre bleue, vert/rouge réservés au résultat. Une colonne, synthèse avant détail. */
+  --bg:#f2f4f3; --surface:#ffffff; --ink:#17211e; --muted:#5c6a65; --line:#d8dedb;
+  --accent:#1d4e89; --accent-soft:#e3ecf6;
+  --good:#1c7a4c; --good-soft:#dff1e7; --bad:#b4372f; --bad-soft:#f8e2df; --warn:#9a6200; --warn-soft:#f7ecd2;
+  --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme:dark;
+    --bg:#0f1513; --surface:#171f1c; --ink:#e7edea; --muted:#98a6a0; --line:#2a3531;
+    --accent:#86b6ef; --accent-soft:#1c2c40;
+    --good:#62c692; --good-soft:#173326; --bad:#f08a81; --bad-soft:#3a1f1c; --warn:#e2b45a; --warn-soft:#3a2f16;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+h1{font-size:25px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:19px;font-weight:700}
+h3{font-weight:500;color:var(--muted);font-family:var(--body);text-transform:uppercase;letter-spacing:.06em;font-size:12px}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.muted{color:var(--muted)} .small{font-size:13px}
+header.top{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
+header.top .src{font-size:13px;color:var(--muted);margin-top:4px}
+.actions,.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row{gap:10px}
+.between{justify-content:space-between}
+button,.btn{font:inherit;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer}
+button:hover,.btn:hover{border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:default}
+button.primary,.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button.danger{color:var(--bad);border-color:var(--bad)}
+button.link{border:0;background:none;padding:0;color:var(--accent);text-decoration:underline;font-weight:400}
+button.mini{padding:3px 9px;font-size:13px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+nav.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav.tabs a{padding:9px 12px;text-decoration:none;color:var(--muted);font-weight:500;border-bottom:3px solid transparent;white-space:nowrap}
+nav.tabs a.on{color:var(--ink);border-bottom-color:var(--accent)}
+section.view{display:none;flex-direction:column;gap:18px}
+section.view.on{display:flex}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;border-left:4px solid var(--line)}
+.tile.good{border-left-color:var(--good)} .tile.bad{border-left-color:var(--bad)} .tile.acc{border-left-color:var(--accent)}
+.tile .v{font-family:var(--display);font-size:25px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tile .s{font-size:12.5px;color:var(--muted)}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;font-size:13.5px}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)} .pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.neutral{background:var(--accent-soft);color:var(--accent)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;white-space:nowrap}
+td.r,th.r{text-align:right}
+tr.click{cursor:pointer} tr.click:hover td{background:var(--accent-soft)}
+tr.total td{font-weight:600;border-top:2px solid var(--line)}
+tr.grp td{background:var(--bg);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.dv{display:grid;grid-template-columns:minmax(120px,210px) 1fr 96px;gap:4px 10px;align-items:center}
+.dv .track{position:relative;height:18px;background:linear-gradient(to right,transparent calc(50% - .5px),var(--line) calc(50% - .5px),var(--line) calc(50% + .5px),transparent calc(50% + .5px))}
+.dv .bar{position:absolute;top:2px;bottom:2px;border-radius:3px}
+.dv .bar.p{left:50%;background:var(--good)} .dv .bar.n{right:50%;background:var(--bad)}
+.dv .val{text-align:right;font-size:13.5px}
+.dv button.lbl{border:0;background:none;padding:0;text-align:left;color:var(--accent);text-decoration:underline;font-weight:400;font-size:13.5px;overflow-wrap:anywhere}
+.hb{display:grid;grid-template-columns:minmax(110px,190px) 1fr 132px;gap:5px 10px;align-items:center;font-size:13.5px}
+.hb .track{height:14px;background:var(--bg);border-radius:3px;overflow:hidden}
+.hb .fill{height:100%;border-radius:3px;background:var(--accent)}
+.hb .fill.g{background:var(--good)} .hb .fill.b{background:var(--bad)}
+.hb .val{text-align:right}
+ul.notes{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px}
+ul.notes li{max-width:78ch}
+select,input[type=search],input[type=text],input[type=email],input[type=password],input[type=date],textarea{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);max-width:100%}
+.msg{padding:10px 14px;border-radius:8px;background:var(--accent-soft);color:var(--ink);font-size:14px}
+.msg.err{background:var(--bad-soft)} .msg.warn{background:var(--warn-soft)}
+svg text{font-family:var(--body);fill:var(--muted);font-size:11px}
+a{color:var(--accent)}
+.drop{outline:3px dashed var(--accent);outline-offset:-6px}
+/* présentation : diapositives 16:9, toujours en clair, dimensionnées en cqw pour l'aperçu, le plein écran et le PDF */
+.deck{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:16px}
+.slide{container-type:inline-size;aspect-ratio:16/9;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:8px;
+  --bg:#f2f4f3;--surface:#ffffff;--ink:#17211e;--muted:#5c6a65;--line:#d8dedb;--accent:#1d4e89;--accent-soft:#e3ecf6;--good:#1c7a4c;--bad:#b4372f;
+  background:var(--surface);color:var(--ink);color-scheme:light;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.sl-in{position:absolute;inset:0;padding:4.2cqw 5.5cqw 5.6cqw;display:flex;flex-direction:column;gap:1.8cqw;font-size:1.85cqw;line-height:1.4}
+.sl-in .eyebrow{font-size:1.4cqw;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:600}
+.sl-in h1{font-size:6.4cqw;line-height:1.05;letter-spacing:-.015em}
+.sl-in h2{font-size:3.5cqw;line-height:1.1}
+.sl-in h3{font-size:1.35cqw;margin-bottom:1cqw}
+.sl-in p{margin:0} .sl-in .lead{font-size:2.1cqw;max-width:62cqw}
+.sl-in .note{font-size:1.3cqw;color:var(--muted);margin-top:auto}
+.sl-in ul{margin:0;padding-left:2.4cqw;display:flex;flex-direction:column;gap:1.1cqw}
+.sl-title{margin:auto 0;display:flex;flex-direction:column;gap:2cqw;border-left:1cqw solid var(--accent);padding-left:3.5cqw}
+.sl-title p{font-size:2.2cqw;color:var(--muted)}
+.sl-foot{position:absolute;left:5.5cqw;right:5.5cqw;bottom:1.9cqw;display:flex;justify-content:space-between;font-size:1.2cqw;color:var(--muted)}
+.kpis{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:1.8cqw}
+.kpi{background:var(--bg);border-left:.6cqw solid var(--line);padding:1.6cqw 1.8cqw;display:flex;flex-direction:column;gap:.4cqw;border-radius:.6cqw}
+.kpi.good{border-left-color:var(--good)} .kpi.bad{border-left-color:var(--bad)} .kpi.acc{border-left-color:var(--accent)}
+.kpi span{font-size:1.3cqw;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.kpi b{font-family:var(--display);font-size:3.9cqw;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi.good b{color:var(--good)} .kpi.bad b{color:var(--bad)}
+.kpi small{font-size:1.3cqw;color:var(--muted)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:4cqw;min-height:0}
+.sb{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) auto;gap:.9cqw 1.2cqw;align-items:center;font-size:1.55cqw}
+.sb .track{height:1.5cqw;background:var(--bg);border-radius:.3cqw;overflow:hidden}
+.sb .fill{height:100%;background:var(--accent);border-radius:.3cqw} .sb .fill.g{background:var(--good)} .sb .fill.b{background:var(--bad)}
+.sb .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap} .sb i{font-style:normal;color:var(--muted);font-size:1.25cqw}
+.sd{display:grid;grid-template-columns:minmax(0,26cqw) 1fr 13cqw;gap:.75cqw 1.4cqw;align-items:center;font-size:1.6cqw}
+.sd .track{position:relative;height:1.7cqw;background:linear-gradient(to right,transparent calc(50% - .5px),var(--line) calc(50% - .5px),var(--line) calc(50% + .5px),transparent calc(50% + .5px))}
+.sd .bar{position:absolute;top:.15cqw;bottom:.15cqw;border-radius:.3cqw} .sd .bar.p{left:50%;background:var(--good)} .sd .bar.n{right:50%;background:var(--bad)}
+.sd .num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+table.st{font-size:1.6cqw} table.st th{font-size:1.15cqw;padding:.6cqw 1cqw} table.st td{padding:.6cqw 1cqw;border-bottom:1px solid var(--line)}
+#show{position:fixed;inset:0;z-index:50;background:#0b0f0e;display:flex;align-items:center;justify-content:center}
+#show .slide{width:min(100vw,calc(100vh * 16 / 9));border:0;border-radius:0;cursor:pointer}
+.showbar{position:fixed;right:14px;bottom:12px;display:flex;gap:6px;align-items:center;color:#cfd6d3;font-size:13px;opacity:.75}
+.showbar:hover{opacity:1}
+.showbar button{padding:4px 11px;background:#1c2421;color:#e7edea;border-color:#34413c}
+#printDeck{display:none}
+@media print{
+  @page{size:297mm 167.06mm;margin:0}
+  body{background:#fff}
+  body>*{display:none !important}
+  body>#printDeck{display:block !important}
+  #printDeck .slide{width:297mm;height:167.06mm;aspect-ratio:auto;border:0;border-radius:0;break-after:page;page-break-after:always}
+}
+/* connexion */
+.auth{max-width:420px;margin:8vh auto 0;display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:13px;color:var(--muted);font-weight:500}
+.field input,.field select,.field textarea{width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* fenêtres */
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:20px;width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 24px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog form{display:flex;flex-direction:column;gap:12px}
+.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg label{flex:1;text-align:center;padding:8px;cursor:pointer;font-weight:500}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg input:checked+span{color:var(--surface)}
+.seg label:has(input:checked){background:var(--accent);color:var(--surface)}
+.seg label:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:-2px}
+body:not(.can-write) .w{display:none !important}
+@media (max-width:520px){
+  h1{font-size:21px}
+  .dv{grid-template-columns:1fr 84px} .dv .lbl{grid-column:1 / -1;margin-top:6px}
+  .hb{grid-template-columns:1fr 124px} .hb .lbl{grid-column:1 / -1;margin-top:6px}
+  .grid2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- écran de connexion -->
+<div class="wrap" id="scrAuth" hidden>
+  <div class="auth card">
+    <div><h1>Cahier des comptes</h1><div class="muted small" id="assoA"></div></div>
+    <div id="authMsg" class="msg" hidden></div>
+    <form id="fLogin" class="auth" style="margin:0">
+      <div class="field" id="fldNom" hidden><label for="aNom">Prénom et nom</label><input type="text" id="aNom" autocomplete="name"></div>
+      <div class="field"><label for="aMail">Adresse e-mail</label><input type="email" id="aMail" autocomplete="email" required></div>
+      <div class="field"><label for="aPw">Mot de passe</label><input type="password" id="aPw" autocomplete="current-password" required minlength="6"></div>
+      <button type="submit" class="primary" id="aGo">Se connecter</button>
+    </form>
+    <div class="row between small">
+      <button type="button" class="link" id="aSwitch">Créer mon compte</button>
+      <button type="button" class="link" id="aReset">Mot de passe oublié</button>
+    </div>
+  </div>
+</div>
+
+<!-- compte en attente -->
+<div class="wrap" id="scrWait" hidden>
+  <div class="auth card">
+    <h1>Accès en attente</h1>
+    <p style="margin:0">Votre compte est créé. Le trésorier doit maintenant valider votre accès au cahier des comptes.</p>
+    <div class="field"><label for="wUid">Votre identifiant (à transmettre au trésorier si besoin)</label><input type="text" id="wUid" readonly></div>
+    <div class="row"><button type="button" class="primary" id="wRetry">Réessayer</button><button type="button" id="wOut">Se déconnecter</button></div>
+  </div>
+</div>
+
+<div class="wrap" id="scrLoad"><p class="muted">Chargement…</p></div>
+
+<!-- application -->
+<div class="wrap" id="app" hidden>
+  <header class="top">
+    <div>
+      <h1>Cahier des comptes</h1>
+      <div class="src" id="src"></div>
+    </div>
+    <div class="actions">
+      <button type="button" class="primary w" id="bNew">+ Nouvelle écriture</button>
+      <button type="button" class="w" id="bTransfer">Virement interne</button>
+      <span class="small muted" id="who"></span>
+      <button type="button" id="bOut">Se déconnecter</button>
+    </div>
+  </header>
+  <div id="demo" class="msg warn" hidden>Mode démonstration : aucune connexion n'est configurée, les données restent sur cet appareil. Renseignez <b>config.js</b> pour activer les comptes et le partage (voir le guide d'installation).</div>
+  <div id="flash" class="msg" hidden></div>
+
+  <nav class="tabs" id="tabs">
+    <a href="#synthese">Synthèse</a>
+    <a href="#evenement">Événement</a>
+    <a href="#editions">Éditions</a>
+    <a href="#ecritures">Écritures</a>
+    <a href="#budget">Budget</a>
+    <a href="#rapprochement">Rapprochement</a>
+    <a href="#presentation">Présentation</a>
+    <a href="#controles">Contrôles</a>
+    <a href="#journal">Journal</a>
+    <a href="#acces" class="w">Accès</a>
+  </nav>
+
+  <div class="card" id="empty" hidden>
+    <h2>Le cahier est vide</h2>
+    <p style="margin:0" class="w">Reprenez l'historique : dans Google Sheets, <b>Fichier → Télécharger → Microsoft Excel (.xlsx)</b>, puis importez le fichier ici. Vous pouvez aussi commencer par une première écriture.</p>
+    <div class="row w"><label class="btn primary" for="file">Importer l'historique (.xlsx)</label></div>
+  </div>
+  <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
+
+  <section class="view" id="v-synthese">
+    <div class="tiles" id="treso"></div>
+    <div class="card">
+      <div class="row between"><h2>Résultat par événement</h2><div class="chips" id="seasons"></div></div>
+      <div class="tiles" id="seasonTiles"></div>
+      <div class="dv" id="evBars"></div>
+      <p class="small muted" style="margin:0">Les fonds de caisse (retraits puis retours) sont neutralisés et les virements entre compte courant et Livret A sont exclus. Cliquez sur un événement pour ouvrir son détail.</p>
+    </div>
+    <div class="card">
+      <div class="row between"><h2>Tableau des événements</h2><button type="button" id="copyEv">Copier le tableau</button></div>
+      <div class="scroll"><table id="evTable"></table></div>
+    </div>
+    <div class="card"><h2>Points d'attention</h2><ul class="notes" id="insights"></ul></div>
+    <div class="card"><h2>Évolution de la trésorerie</h2><div id="tresoChart"></div>
+      <p class="small muted" style="margin:0">Compte courant + Livret A cumulés, écriture après écriture.</p></div>
+  </section>
+
+  <section class="view" id="v-evenement">
+    <div class="row"><label for="evSel" class="muted">Événement</label><select id="evSel"></select><span id="evStatus"></span></div>
+    <div class="tiles" id="evTiles"></div>
+    <div class="two">
+      <div class="card"><h2>Recettes par poste</h2><div class="hb" id="evRec"></div></div>
+      <div class="card"><h2>Dépenses par poste</h2><div class="hb" id="evDep"></div></div>
+    </div>
+    <div class="two">
+      <div class="card"><h2>Ratios utiles</h2><div class="scroll"><table id="evRatios"></table></div>
+        <p class="small muted" style="margin:0">Ratios indicatifs : ils dépendent du libellé des écritures (une facture de courses peut mélanger repas et buvette).</p></div>
+      <div class="card"><h2>Moyens d'encaissement</h2><div class="hb" id="evPay"></div><div id="evSubs"></div></div>
+    </div>
+    <div class="card"><h2>Écritures de l'événement</h2><div class="scroll"><table id="evLines"></table></div></div>
+  </section>
+
+  <section class="view" id="v-editions">
+    <div class="card">
+      <div class="row between"><h2>Une édition face à la précédente</h2><div class="chips" id="famChips"></div></div>
+      <div class="scroll"><table id="famTable"></table></div>
+      <ul class="notes" id="famNotes"></ul>
+    </div>
+  </section>
+
+  <section class="view" id="v-ecritures">
+    <div class="card">
+      <div class="row">
+        <input type="search" id="q" placeholder="Rechercher (désignation, commentaire…)" aria-label="Rechercher">
+        <select id="fAcc" aria-label="Filtrer par compte"><option value="">Tous les comptes</option><option value="CC">Compte courant</option><option value="LA">Livret A</option></select>
+        <select id="fEv" aria-label="Filtrer par événement"></select>
+        <select id="fCat" aria-label="Filtrer par poste"></select>
+      </div>
+      <div class="row between">
+        <span class="muted small" id="lnCount"></span>
+        <div class="row">
+          <label class="btn w" for="file">Importer (.xlsx)</label>
+          <button type="button" id="xXlsx">Exporter en Excel</button>
+          <button type="button" id="xCsv">Exporter en CSV</button>
+        </div>
+      </div>
+      <div class="scroll"><table id="lnTable"></table></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-budget">
+    <div class="card">
+      <div class="row between"><h2>Budget prévisionnel et réalisé</h2><button type="button" class="primary w" id="bBudget">+ Budget d'un événement</button></div>
+      <div class="scroll"><table id="bgTable"></table></div>
+      <p class="small muted" style="margin:0">Le réalisé neutralise les fonds de caisse, comme dans la synthèse. Un écart positif sur le résultat signifie que l'événement fait mieux que prévu.</p>
+    </div>
+  </section>
+
+  <section class="view" id="v-rapprochement">
+    <div class="card">
+      <div class="row">
+        <select id="rAcc" aria-label="Compte"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select>
+        <div class="field" style="flex-direction:row;align-items:center;gap:8px"><label for="rRel">Solde du relevé bancaire</label><input type="text" inputmode="decimal" id="rRel" placeholder="ex. 2 053,18" style="width:140px"></div>
+      </div>
+      <div class="tiles" id="rTiles"></div>
+    </div>
+    <div class="card">
+      <div class="row between">
+        <h2 id="rTitle">Écritures non pointées</h2>
+        <div class="row">
+          <label class="small"><input type="checkbox" id="rAll"> Afficher aussi les écritures pointées</label>
+          <span class="w row"><label for="rUntil" class="small muted">jusqu'au</label><input type="date" id="rUntil"><button type="button" id="rBulk">Pointer</button></span>
+        </div>
+      </div>
+      <div class="scroll"><table id="rTable"></table></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-presentation">
+    <div class="card">
+      <div class="row between">
+        <h2>Présentation pour une réunion ou l'AG</h2>
+        <div class="row"><button type="button" class="primary" id="pPlay">Lancer la présentation</button><button type="button" id="pPrint">Imprimer ou enregistrer en PDF</button></div>
+      </div>
+      <div class="row">
+        <div class="seg" style="min-width:280px"><label><input type="radio" name="pType" value="event" checked><span>Un événement</span></label><label><input type="radio" name="pType" value="year"><span>Une année</span></label></div>
+        <select id="pSel" aria-label="Événement ou année à présenter"></select>
+        <span class="small muted" id="pCount"></span>
+      </div>
+      <div class="field"><label for="pNotes">Pistes d'amélioration à présenter (une ligne par point, affichées sur la dernière diapositive)</label><textarea id="pNotes" rows="3" placeholder="ex. Renégocier le cachet de l'orchestre&#10;ex. Passer le repas à 15 €"></textarea></div>
+      <p class="small muted" style="margin:0">En présentation : flèches du clavier ou clic pour avancer, Échap pour quitter. Pour un PDF, choisissez « Enregistrer au format PDF » comme imprimante.</p>
+    </div>
+    <div class="deck" id="deck"></div>
+  </section>
+
+  <section class="view" id="v-controles">
+    <div class="card"><h2>Cohérence des comptes</h2><div class="scroll"><table id="ctlRecon"></table></div></div>
+    <div class="card"><h2>Écritures à vérifier</h2><div id="ctlList"></div></div>
+    <div class="card"><h2>Comment les chiffres sont calculés</h2>
+      <ul class="notes">
+        <li><b>Événement</b> : champ « Événement » de l'écriture. Les sous-rubriques « FETE 2025 - REPAS », « - GOODIES », « - TEXTILLE » ainsi que « TEXTILLE 2026 » sont rattachées à la fête de la même année.</li>
+        <li><b>Fonds de caisse</b> : un retrait (type « Retrait », hors « paiement ») n'est pas une dépense ; il est déduit des recettes de caisse, puisqu'il revient à la banque dans les dépôts.</li>
+        <li><b>Mouvements internes</b> : virements compte courant ↔ Livret A, « TRANSFERT COMPTE », reprises de solde. Ils n'entrent dans aucun résultat. Le bouton « Virement interne » crée les deux écritures d'un coup.</li>
+        <li><b>Hors événements</b> : « AUTRE » (frais de tenue de compte, assurance…), « REUNION AG », « INVESTISSEMENT », intérêts du Livret A.</li>
+        <li><b>Postes</b> : attribués automatiquement d'après les mots de la désignation (ABD → Boissons, BIARD → Traiteur, SACEM → Droits d'auteur…).</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="view" id="v-journal">
+    <div class="card"><h2>Journal des modifications</h2>
+      <p class="small muted" style="margin:0">Les 300 dernières opérations. Le journal ne peut être ni modifié ni effacé depuis l'application.</p>
+      <div class="scroll"><table id="jTable"></table></div></div>
+  </section>
+
+  <section class="view" id="v-acces">
+    <div class="card"><h2>Demandes d'accès</h2><div class="scroll"><table id="dTable"></table></div></div>
+    <div class="card"><h2>Membres</h2>
+      <p class="small muted" style="margin:0">Un lecteur consulte tout sans rien modifier. Un trésorier saisit, pointe, gère le budget et les accès.</p>
+      <div class="scroll"><table id="mTable"></table></div></div>
+  </section>
+</div>
+
+<div id="show" hidden><div id="showSlide"></div><div class="showbar"><button type="button" id="shPrev" aria-label="Diapositive précédente">‹</button><span id="showPos"></span><button type="button" id="shNext" aria-label="Diapositive suivante">›</button><button type="button" id="shClose">Quitter</button></div></div>
+<div id="printDeck"></div>
+
+<!-- écriture -->
+<dialog id="dlgE"><form id="fE">
+  <h2 id="eTitle">Nouvelle écriture</h2>
+  <div class="grid2">
+    <div class="field"><label for="eAcc">Compte</label><select id="eAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
+    <div class="field"><label for="eDate">Date</label><input type="date" id="eDate" required></div>
+  </div>
+  <div class="field"><label for="eEvt">Événement</label><input type="text" id="eEvt" list="evList" required placeholder="ex. FETE 2027, CASSOULET 2026, AUTRE"><datalist id="evList"></datalist></div>
+  <div class="field"><label for="eDes">Désignation</label><input type="text" id="eDes" required placeholder="ex. ABD - Boissons - Facture 2600123"></div>
+  <div class="grid2">
+    <div class="field"><label>Sens</label><div class="seg"><label><input type="radio" name="eSens" value="rec" id="eRec"><span>Recette</span></label><label><input type="radio" name="eSens" value="dep" id="eDep" checked><span>Dépense</span></label></div></div>
+    <div class="field"><label for="eAmt">Montant (€)</label><input type="text" inputmode="decimal" id="eAmt" required placeholder="0,00"></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="eType">Type de paiement</label><select id="eType"><option>Virement</option><option>Prélevement</option><option>Cheques</option><option>Dépôt</option><option>CB</option><option>Retrait</option><option>Espece</option><option>SEPA</option><option>Autre</option></select></div>
+    <div class="field"><label for="eCom">Commentaire, n° de chèque, lien de la pièce</label><input type="text" id="eCom"></div>
+  </div>
+  <label class="small"><input type="checkbox" id="ePt"> Écriture pointée (vue sur le relevé bancaire)</label>
+  <div id="eErr" class="msg err" hidden></div>
+  <div class="row between">
+    <button type="button" class="danger" id="eDel">Supprimer</button>
+    <div class="row"><button type="button" id="eCancel">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+  </div>
+</form></dialog>
+
+<!-- virement interne -->
+<dialog id="dlgT"><form id="fT">
+  <h2>Virement entre les deux comptes</h2>
+  <div class="field"><label>Sens du virement</label><div class="seg"><label><input type="radio" name="tDir" value="CC>LA" checked><span>Compte courant → Livret A</span></label><label><input type="radio" name="tDir" value="LA>CC"><span>Livret A → Compte courant</span></label></div></div>
+  <div class="grid2">
+    <div class="field"><label for="tDate">Date</label><input type="date" id="tDate" required></div>
+    <div class="field"><label for="tAmt">Montant (€)</label><input type="text" inputmode="decimal" id="tAmt" required></div>
+  </div>
+  <p class="small muted" style="margin:0">Deux écritures sont créées, une par compte. Elles n'entrent dans le résultat d'aucun événement.</p>
+  <div id="tErr" class="msg err" hidden></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" id="tCancel">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+</form></dialog>
+
+<!-- budget -->
+<dialog id="dlgB"><form id="fB">
+  <h2>Budget d'un événement</h2>
+  <div class="field"><label for="bEvt">Événement</label><input type="text" id="bEvt" list="evList" required placeholder="ex. FETE 2027"></div>
+  <div class="grid2">
+    <div class="field"><label for="bRec">Recettes prévues (€)</label><input type="text" inputmode="decimal" id="bRec" required></div>
+    <div class="field"><label for="bDep">Dépenses prévues (€)</label><input type="text" inputmode="decimal" id="bDep" required></div>
+  </div>
+  <div class="field"><label for="bNote">Note (hypothèses : nombre de repas, cachets, subvention…)</label><textarea id="bNote" rows="3"></textarea></div>
+  <div class="row between">
+    <button type="button" class="danger" id="bDel">Supprimer ce budget</button>
+    <div class="row"><button type="button" id="bCancel">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+  </div>
+</form></dialog>
+
+<!-- import -->
+<dialog id="dlgI"><form id="fI">
+  <h2>Importer des écritures</h2>
+  <p id="iInfo" style="margin:0"></p>
+  <div class="field" id="iModeF"><label>Le cahier contient déjà des écritures</label>
+    <div class="seg"><label><input type="radio" name="iMode" value="add" checked><span>Ajouter à la suite</span></label><label><input type="radio" name="iMode" value="replace"><span>Tout remplacer</span></label></div></div>
+  <label class="small"><input type="checkbox" id="iPt" checked> Marquer les écritures importées comme pointées (elles viennent des relevés bancaires)</label>
+  <div class="row" style="justify-content:flex-end"><button type="button" id="iCancel">Annuler</button><button type="submit" class="primary" id="iGo">Importer</button></div>
+</form></dialog>
+
+<!-- confirmation -->
+<dialog id="dlgC"><form id="fC">
+  <p id="cText" style="margin:0;white-space:pre-line"></p>
+  <div class="row" style="justify-content:flex-end"><button type="button" id="cNo">Annuler</button><button type="submit" class="primary" id="cYes">Confirmer</button></div>
+</form></dialog>
+
+<script src="config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+"use strict";
+const CFG=window.FIREBASE_CONFIG||{};
+const DEMO=!(CFG.apiKey&&CFG.projectId);
+const ASSO=window.NOM_ASSOCIATION||"";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const strip=s=>String(s==null?"":s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+const eur2=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"});
+const eur0=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+const fm=v=>eur2.format(Math.abs(v)<0.005?0:v);
+const fm0=v=>eur0.format(Math.abs(v)<0.5?0:v);
+const sg=v=>(v>0.005?"+":"")+fm(v);
+const pct=v=>isFinite(v)?(v*100).toFixed(0).replace("-","−")+" %":"n/a";
+const cls=v=>v>0.005?"pos":v<-0.005?"neg":"";
+const fdate=iso=>iso?iso.slice(8,10)+"/"+iso.slice(5,7)+"/"+iso.slice(0,4):"sans date";
+const today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const round2=v=>Math.round(v*100)/100;
+
+/* ================= lecture de fichiers ================= */
+const MO={jan:0,fev:1,mar:2,avr:3,mai:4,jun:5,jul:6,aou:7,sep:8,oct:9,nov:10,dec:11};
+function parseDate(v){
+  if(v==null||v==="")return null;
+  const iso=(y,m,d)=>{const t=new Date(Date.UTC(y,m,d));return isNaN(t)?null:t.toISOString().slice(0,10)};
+  if(typeof v==="number")return v>20000&&v<90000?new Date(Date.UTC(1899,11,30)+Math.round(v)*864e5).toISOString().slice(0,10):null;
+  if(v instanceof Date)return iso(v.getFullYear(),v.getMonth(),v.getDate());
+  const s=String(v).trim(); let m;
+  if((m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s)))return iso(+m[1],+m[2]-1,+m[3]);
+  if((m=/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/.exec(s)))return iso(+m[3]<100?2000+ +m[3]:+m[3],+m[2]-1,+m[1]);
+  if((m=/^(\d{1,2})(?:er)?\s+([a-z.]+)\s+(\d{4})$/.exec(strip(s)))){
+    let k=m[2].replace(".","").slice(0,3); if(k==="jui")k=m[2].startsWith("juil")?"jul":"jun";
+    if(k in MO)return iso(+m[3],MO[k],+m[1]);
+  }
+  return null;
+}
+function parseNum(v){
+  if(v==null||v==="")return 0;
+  if(typeof v==="number")return isFinite(v)?v:0;
+  const n=parseFloat(String(v).replace(/[€\s  ]/g,"").replace(/\.(?=\d{3}(\D|$))/g,"").replace(",","."));
+  return isFinite(n)?n:0;
+}
+
+/* ================= classement et calculs ================= */
+const DEP_RULES=[
+  ["Droits d'auteur (SACEM, SPRE)",/\bsacem\b|\bsacm\b|\bspre?\b/],
+  ["Goodies & textile",/chapeau|bandana|goodies|textil|fanion|bracel/],
+  ["Animation & spectacle",/\bdj|machprod|\bband\b|\bbandas\b|orchestre|sonorisation|rafiki|guso|sangria|sangrai|carte blanche|gonflable/],
+  ["Frais bancaires",/frais|commission|tenue de compte|cotisation carte|\bcael\b|part sociale|diff deficit/],
+  ["Matériel & équipement",/baffle|trepied|friteuse|coffret|tiroir|rangement|carafe|gourde/],
+  ["Boissons",/\babd\b|dp distribution|get ?27|perrier|boisson/],
+  ["Boulangerie & desserts",/barbini|\bpain\b|flute|beauzil|boulangerie|croustade|tarte|diant|pizza/],
+  ["Traiteur & repas",/biard|billard|traiteur|repas|steack|saucisse|dario/],
+  ["Courses & consommables",/super u|carrefour|courses|rouxel|amazon|\bgaz\b|ustensil/],
+  ["Impression & communication",/chausson|affiche|imprimerie|livret|etiquette|banderol|bouteille/],
+  ["Assurance & sécurité",/assurance|croix rouge|arnoux/]
+];
+function eventKey(name){
+  const clean=String(name||"").replace(/\s+/g," ").trim().toUpperCase();
+  let parent=clean, sub="";
+  const i=clean.indexOf(" - ");
+  if(i>0){parent=clean.slice(0,i).trim();sub=clean.slice(i+3).trim();}
+  const m=/^(TEXTILLE|TEXTILE|GOODIES)\s+(\d{4})$/.exec(parent);
+  if(m){sub=m[1];parent="FETE "+m[2];}
+  return {parent,sub};
+}
+function classify(l){
+  const d=strip(l.des), t=strip(l.type), e=strip(l.evt);
+  if(l.acc==="LA"){ l.kind=/interet/.test(e+" "+d)?"fonct":"interne"; }
+  else if(e==="transfert compte") l.kind="interne";
+  else if(e==="autre"||e===""){ l.kind=/livret|solde du compte|recuperation du compte/.test(d)?"interne":"fonct"; }
+  else if(/^investissement/.test(e)) l.kind="invest";
+  else if(/^reunion|^ag\b|assemblee/.test(e)) l.kind="fonct";
+  else l.kind="event";
+  const k=eventKey(l.evt); l.parent=k.parent; l.sub=k.sub;
+  const m=/(\d{4})/.exec(l.parent);
+  l.year=l.kind==="event"&&m?+m[1]:(l.iso?+l.iso.slice(0,4):null);
+  l.family=l.parent.replace(/\s*\d{4}\s*/," ").replace(/\s+/g," ").trim();
+  l.fdc=false;
+  if(l.kind==="event"){
+    if(l.dep>0&&t==="retrait"&&!/paiement/.test(d)) l.fdc=true;
+    if(l.rec>0&&/fond de caisse|retour monnaie/.test(d)&&!/\bdont\b/.test(d)) l.fdc=true;
+  }
+  const ss=strip(l.sub);
+  if(l.kind==="interne") l.cat="Mouvement interne";
+  else if(l.fdc) l.cat="Fond de caisse";
+  else if(l.dep>0){
+    l.cat="Divers";
+    for(const [n,re] of DEP_RULES){ if(re.test(d)){l.cat=n;break;} }
+    if(l.cat==="Divers"||l.cat==="Courses & consommables"||l.cat==="Impression & communication"){
+      if(/textil|goodies/.test(ss)) l.cat="Goodies & textile";
+      else if(ss==="repas"&&l.cat==="Divers") l.cat="Traiteur & repas";
+      else if(l.kind==="invest") l.cat="Matériel & équipement";
+    }
+  } else {
+    if(/interet/.test(e+" "+d)) l.cat="Intérêts";
+    else if(/subvention/.test(d)) l.cat="Subvention";
+    else if(/textil|goodies/.test(ss)||/chapeau|bandana|textil/.test(d)) l.cat="Goodies & textile";
+    else if(/tour du village/.test(d)) l.cat="Tour du village";
+    else if(/encart/.test(strip(l.parent))||/encart/.test(d)) l.cat="Encarts publicitaires";
+    else if(ss==="repas"||/repas|hello ?asso/.test(d)) l.cat="Réservations (repas, emplacements)";
+    else if(l.kind==="event") l.cat="Buvette & caisse";
+    else l.cat="Autres produits";
+  }
+  if(l.rec>0) l.pay=/hello ?asso/.test(d)?"HelloAsso":t==="cb"?"Carte bancaire":/cheque/.test(t)||/cheque/.test(d)?"Chèques":/depot|espece/.test(t)?"Espèces":"Virement";
+  return l;
+}
+function build(ecr){
+  const sorted=[...ecr].sort((a,b)=>(a.date||"")<(b.date||"")?-1:(a.date||"")>(b.date||"")?1:(a.ordre||0)-(b.ordre||0));
+  const lines=sorted.map((e,i)=>classify({n:i,id:e.id,acc:e.compte==="LA"?"LA":"CC",iso:e.date||null,evt:String(e.evenement||""),des:String(e.designation||""),rec:+e.recette||0,dep:+e.depense||0,type:String(e.type||""),com:String(e.commentaire||""),pointe:!!e.pointe}));
+  const evs=new Map();
+  for(const l of lines){
+    if(l.kind!=="event")continue;
+    let e=evs.get(l.parent);
+    if(!e){e={name:l.parent,family:l.family,year:l.year,lines:[],rec:0,dep:0,subv:0,recCat:{},depCat:{},pay:{},subs:{},cb:0,cbFees:0,first:null,last:null};evs.set(l.parent,e);}
+    e.lines.push(l);
+    if(l.iso){ if(!e.first||l.iso<e.first)e.first=l.iso; if(!e.last||l.iso>e.last)e.last=l.iso; }
+    const add=(o,k,v)=>{o[k]=(o[k]||0)+v};
+    const sk=l.sub||"Général";
+    if(!e.subs[sk])e.subs[sk]={rec:0,dep:0};
+    if(l.fdc){ const v=l.rec-l.dep; e.rec+=v; add(e.recCat,"Buvette & caisse",v); add(e.pay,"Espèces",v); e.subs[sk].rec+=v; continue; }
+    if(l.rec>0){ e.rec+=l.rec; add(e.recCat,l.cat,l.rec); add(e.pay,l.pay,l.rec); e.subs[sk].rec+=l.rec; if(l.cat==="Subvention")e.subv+=l.rec; if(l.pay==="Carte bancaire")e.cb+=l.rec; }
+    if(l.dep>0){ e.dep+=l.dep; add(e.depCat,l.cat,l.dep); e.subs[sk].dep+=l.dep; if(/\bcb\b/.test(strip(l.des))&&l.cat==="Frais bancaires")e.cbFees+=l.dep; }
+  }
+  let maxIso=null; for(const l of lines){ if(l.iso&&(!maxIso||l.iso>maxIso))maxIso=l.iso; }
+  const maxYear=maxIso?+maxIso.slice(0,4):0;
+  const list=[...evs.values()];
+  for(const e of list){
+    e.res=e.rec-e.dep; e.resHS=e.res-e.subv;
+    e.upcoming=e.rec<=0.005&&e.year&&e.year>maxYear;
+    e.margin=e.rec>0?e.res/e.rec:NaN;
+  }
+  list.sort((a,b)=>(a.first||"9")<(b.first||"9")?-1:1);
+  return {lines,events:list,maxIso};
+}
+
+/* ================= stockage : Firebase ou démonstration ================= */
+const S={ready:false,user:null,role:null,ecr:[],budgets:[],journal:[],membres:[],demandes:[]};
+let onData=()=>{};
+const slug=s=>strip(s).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"sans-nom";
+const resume=e=>`${fdate(e.date)} · ${e.compte==="LA"?"Livret A":"Compte courant"} · ${e.evenement} · ${e.designation} · ${e.recette?"+"+fm(e.recette):"−"+fm(e.depense)}`;
+
+function firebaseStore(){
+  firebase.initializeApp(CFG);
+  const auth=firebase.auth(), db=firebase.firestore(), now=()=>firebase.firestore.FieldValue.serverTimestamp();
+  let unsub=[], pendingName="";
+  const me=()=>({uid:S.user.uid,nom:S.user.nom});
+  const jr=(b,action,texte)=>b.set(db.collection("journal").doc(),{at:now(),uid:S.user.uid,nom:S.user.nom,action,texte:String(texte).slice(0,600)});
+  const stop=()=>{unsub.forEach(f=>f());unsub=[];};
+  async function role(u){
+    try{const d=await db.doc("membres/"+u.uid).get(); if(d.exists)return d.data().role||"lecteur";}catch(e){}
+    // le premier trésorier est désigné par son identifiant dans les règles de sécurité
+    try{await db.doc("membres/"+u.uid).set({email:u.email,nom:S.user.nom,role:"tresorier",at:now()});return "tresorier";}catch(e){}
+    try{await db.doc("demandes/"+u.uid).set({email:u.email,nom:S.user.nom,at:now()});}catch(e){}
+    return null;
+  }
+  function listen(){
+    const err=e=>flash("Lecture impossible : "+(e.message||e.code),true);
+    const col=(q,key)=>unsub.push(q.onSnapshot(s=>{S[key]=s.docs.map(d=>Object.assign({id:d.id},d.data()));onData();},err));
+    col(db.collection("ecritures"),"ecr");
+    col(db.collection("budgets"),"budgets");
+    col(db.collection("journal").orderBy("at","desc").limit(300),"journal");
+    if(S.role==="tresorier"){ col(db.collection("membres"),"membres"); col(db.collection("demandes"),"demandes"); }
+  }
+  auth.onAuthStateChanged(async u=>{
+    stop(); Object.assign(S,{ecr:[],budgets:[],journal:[],membres:[],demandes:[],role:null});
+    if(!u){S.user=null;S.ready=true;onData();return;}
+    S.user={uid:u.uid,email:u.email,nom:pendingName||u.displayName||u.email};
+    S.role=await role(u); S.ready=true; onData();
+    if(S.role)listen();
+  });
+  async function chunks(ops){ // ops : fonctions (batch)=>void, 400 par lot
+    for(let i=0;i<ops.length;i+=400){const b=db.batch();ops.slice(i,i+400).forEach(f=>f(b));await b.commit();}
+  }
+  return {
+    signIn:(m,p)=>auth.signInWithEmailAndPassword(m,p),
+    async signUp(nom,m,p){pendingName=nom;const c=await auth.createUserWithEmailAndPassword(m,p);try{await c.user.updateProfile({displayName:nom});}catch(e){}},
+    reset:m=>auth.sendPasswordResetEmail(m),
+    signOut:()=>auth.signOut(),
+    async saveEcriture(id,data,before){
+      const b=db.batch(), ref=id?db.doc("ecritures/"+id):db.collection("ecritures").doc();
+      if(id){b.update(ref,Object.assign({},data,{modifieLe:now(),modifiePar:me()}));jr(b,"Modification",resume(before)+"  →  "+resume(data));}
+      else{b.set(ref,Object.assign({},data,{ordre:Date.now(),creeLe:now(),creePar:me()}));jr(b,"Création",resume(data));}
+      await b.commit();
+    },
+    async saveMany(list,texte){
+      const b=db.batch(); list.forEach((d,i)=>b.set(db.collection("ecritures").doc(),Object.assign({},d,{ordre:Date.now()+i,creeLe:now(),creePar:me()})));
+      jr(b,"Création",texte); await b.commit();
+    },
+    async removeEcriture(e){const b=db.batch();b.delete(db.doc("ecritures/"+e.id));jr(b,"Suppression",resume(e));await b.commit();},
+    async setPointe(ids,val,texte){
+      await chunks(ids.map(id=>b=>b.update(db.doc("ecritures/"+id),{pointe:val})));
+      const b=db.batch();jr(b,val?"Pointage":"Dépointage",texte);await b.commit();
+    },
+    async importRows(rows,replace,texte){
+      const ops=[]; if(replace)S.ecr.forEach(e=>ops.push(b=>b.delete(db.doc("ecritures/"+e.id))));
+      const t=Date.now(); rows.forEach((r,i)=>ops.push(b=>b.set(db.collection("ecritures").doc(),Object.assign({},r,{ordre:t+i,creeLe:now(),creePar:me()}))));
+      await chunks(ops); const b=db.batch();jr(b,"Import",texte);await b.commit();
+    },
+    async saveBudget(data){const b=db.batch();b.set(db.doc("budgets/"+slug(data.evenement)),data);jr(b,"Budget",`${data.evenement} : recettes ${fm(data.recettes)}, dépenses ${fm(data.depenses)}`);await b.commit();},
+    async removeBudget(bg){const b=db.batch();b.delete(db.doc("budgets/"+bg.id));jr(b,"Budget",`${bg.evenement} : budget supprimé`);await b.commit();},
+    async setMembre(uid,data){const b=db.batch();b.set(db.doc("membres/"+uid),Object.assign({},data,{at:now()}));b.delete(db.doc("demandes/"+uid));jr(b,"Accès",`${data.nom||data.email} : ${data.role==="tresorier"?"trésorier":"lecteur"}`);await b.commit();},
+    async removeMembre(m){const b=db.batch();b.delete(db.doc("membres/"+m.id));jr(b,"Accès",`${m.nom||m.email} : accès retiré`);await b.commit();},
+    refuse:d=>db.doc("demandes/"+d.id).delete()
+  };
+}
+
+function demoStore(){
+  const KEY="cahier-comptes-demo-v2";
+  let D={ecr:[],budgets:[],journal:[]};
+  try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&Array.isArray(s.ecr))D=s;}catch(e){}
+  const uid=()=>Math.random().toString(36).slice(2,12)+Date.now().toString(36);
+  const sync=()=>{try{localStorage.setItem(KEY,JSON.stringify(D));}catch(e){} S.ecr=D.ecr.slice();S.budgets=D.budgets.slice();S.journal=D.journal.slice(0,300);onData();};
+  const jr=(action,texte)=>D.journal.unshift({id:uid(),at:new Date().toISOString(),nom:"Démonstration",action,texte:String(texte).slice(0,600)});
+  S.user={uid:"demo",email:"",nom:"Démonstration"};S.role="tresorier";S.ready=true;
+  setTimeout(sync,0);
+  return {
+    signIn:async()=>{},signUp:async()=>{},reset:async()=>{},signOut:async()=>{flash("En mode démonstration, il n'y a pas de compte à déconnecter.");},
+    async saveEcriture(id,data,before){
+      if(id){const i=D.ecr.findIndex(e=>e.id===id);D.ecr[i]=Object.assign({},D.ecr[i],data);jr("Modification",resume(before)+"  →  "+resume(data));}
+      else{D.ecr.push(Object.assign({id:uid(),ordre:Date.now()},data));jr("Création",resume(data));}
+      sync();
+    },
+    async saveMany(list,texte){list.forEach((d,i)=>D.ecr.push(Object.assign({id:uid(),ordre:Date.now()+i},d)));jr("Création",texte);sync();},
+    async removeEcriture(e){D.ecr=D.ecr.filter(x=>x.id!==e.id);jr("Suppression",resume(e));sync();},
+    async setPointe(ids,val,texte){const s=new Set(ids);D.ecr.forEach(e=>{if(s.has(e.id))e.pointe=val;});jr(val?"Pointage":"Dépointage",texte);sync();},
+    async importRows(rows,replace,texte){if(replace)D.ecr=[];const t=Date.now();rows.forEach((r,i)=>D.ecr.push(Object.assign({id:uid(),ordre:t+i},r)));jr("Import",texte);sync();},
+    async saveBudget(data){const id=slug(data.evenement);D.budgets=D.budgets.filter(b=>b.id!==id);D.budgets.push(Object.assign({id},data));jr("Budget",`${data.evenement} : recettes ${fm(data.recettes)}, dépenses ${fm(data.depenses)}`);sync();},
+    async removeBudget(bg){D.budgets=D.budgets.filter(b=>b.id!==bg.id);jr("Budget",`${bg.evenement} : budget supprimé`);sync();},
+    async setMembre(){},async removeMembre(){},async refuse(){}
+  };
+}
+
+/* ================= état d'affichage ================= */
+let store, M=build([]), season="all", curEv=null, curFam=null, editing=null, pendingImport=null, editBudget=null;
+const canWrite=()=>S.role==="tresorier";
+const seasonsOf=()=>[...new Set(M.events.map(e=>e.year).filter(Boolean))].sort();
+const inSeason=e=>season==="all"||e.year===+season;
+const lineInSeason=l=>season==="all"||l.year===+season;
+function flash(t,err){const f=$("flash");if(!f)return;f.textContent=t||"";f.hidden=!t;f.classList.toggle("err",!!err);if(t&&!err){clearTimeout(flash.t);flash.t=setTimeout(()=>{f.hidden=true;},7000);}}
+const fbErr=e=>({"auth/invalid-credential":"E-mail ou mot de passe incorrect.","auth/wrong-password":"E-mail ou mot de passe incorrect.","auth/user-not-found":"Aucun compte avec cette adresse.","auth/email-already-in-use":"Un compte existe déjà avec cette adresse.","auth/weak-password":"Mot de passe trop court (6 caractères minimum).","auth/invalid-email":"Adresse e-mail invalide.","auth/too-many-requests":"Trop d'essais. Réessayez dans quelques minutes.","auth/network-request-failed":"Connexion Internet indisponible.","permission-denied":"Action refusée : votre compte n'a pas ce droit."}[e&&e.code]||(e&&e.message)||"Erreur inconnue.");
+async function run(p,okMsg){try{await p;if(okMsg)flash(okMsg);return true;}catch(e){flash(fbErr(e),true);return false;}}
+function ask(text,yes){return new Promise(res=>{$("cText").textContent=text;$("cYes").textContent=yes||"Confirmer";const d=$("dlgC");const done=v=>{d.close();$("fC").onsubmit=null;$("cNo").onclick=null;res(v);};$("fC").onsubmit=e=>{e.preventDefault();done(true);};$("cNo").onclick=()=>done(false);d.showModal();});}
+
+/* ================= rendus ================= */
+function hbars(el,obj,kind){
+  const items=Object.entries(obj).filter(([,v])=>Math.abs(v)>0.005).sort((a,b)=>b[1]-a[1]);
+  const max=Math.max(1,...items.map(([,v])=>Math.abs(v))), tot=items.reduce((s,[,v])=>s+v,0);
+  el.innerHTML=items.length?items.map(([k,v])=>`<div class="lbl">${esc(k)}</div><div class="track"><div class="fill ${kind||""}" style="width:${Math.max(0,v)/max*100}%"></div></div><div class="val num">${fm(v)}${tot>0?` <span class="muted small">${pct(v/tot)}</span>`:""}</div>`).join(""):`<div class="muted">Aucune écriture.</div>`;
+}
+function statusPill(e){
+  if(e.upcoming)return `<span class="pill neutral">À venir</span>`;
+  if(e.res>0.005)return `<span class="pill good">Bénéficiaire</span>`;
+  if(e.res<-0.005)return `<span class="pill bad">Déficitaire</span>`;
+  return `<span class="pill neutral">À l'équilibre</span>`;
+}
+function linesTable(ls,opt){
+  opt=opt||{}; const w=canWrite();
+  return `<thead><tr>${opt.check?"<th>Pointé</th>":""}<th>Date</th><th>Événement</th><th>Désignation</th><th>Poste</th><th class="r">Recette</th><th class="r">Dépense</th><th>Paiement</th><th>Commentaire</th>${opt.check?"":"<th>Pointé</th>"}${w?"<th></th>":""}</tr></thead><tbody>`+
+  (ls.length?ls.map(l=>{
+    const u=/https?:\/\/\S+/.exec(l.com);
+    const com=u?(esc(l.com.replace(u[0],"").replace(/[:\s]+$/,""))+` <a href="${esc(u[0])}" target="_blank" rel="noopener">pièce</a>`):esc(l.com);
+    const chk=opt.check?`<td><input type="checkbox" data-pt="${esc(l.id)}" ${l.pointe?"checked":""} ${w?"":"disabled"} aria-label="Pointer"></td>`:"";
+    return `<tr>${chk}<td class="num">${fdate(l.iso)}</td><td class="small">${l.acc==="LA"?"Livret A · ":""}${esc(l.evt.trim())}</td><td>${esc(l.des)}</td><td class="small muted">${esc(l.cat)}</td><td class="r num pos">${l.rec?fm(l.rec):""}</td><td class="r num neg">${l.dep?fm(l.dep):""}</td><td class="small">${esc(l.type)}</td><td class="small muted">${com}</td>${opt.check?"":`<td class="small">${l.pointe?"✓":""}</td>`}${w?`<td><button type="button" class="mini" data-edit="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
+  }).join(""):`<tr><td colspan="11" class="muted">Aucune écriture.</td></tr>`)+`</tbody>`;
+}
+function renderSynthese(){
+  const cc=M.lines.filter(l=>l.acc==="CC").reduce((s,l)=>s+l.rec-l.dep,0), la=M.lines.filter(l=>l.acc==="LA").reduce((s,l)=>s+l.rec-l.dep,0);
+  $("treso").innerHTML=`
+    <div class="tile acc"><h3>Trésorerie totale</h3><div class="v">${fm(cc+la)}</div><div class="s">au ${fdate(M.maxIso)}</div></div>
+    <div class="tile"><h3>Compte courant</h3><div class="v">${fm(cc)}</div><div class="s">${M.lines.filter(l=>l.acc==="CC").length} écritures</div></div>
+    <div class="tile"><h3>Livret A</h3><div class="v">${fm(la)}</div><div class="s">${M.lines.filter(l=>l.acc==="LA").length} écritures</div></div>`;
+  const ys=seasonsOf();
+  $("seasons").innerHTML=[["all","Toutes les saisons"],...ys.map(y=>[String(y),String(y)])].map(([v,t])=>`<button type="button" class="chip ${season===v?"on":""}" data-s="${v}">${t}</button>`).join("");
+  const evs=M.events.filter(inSeason), done=evs.filter(e=>!e.upcoming);
+  const resEv=done.reduce((s,e)=>s+e.res,0), subv=done.reduce((s,e)=>s+e.subv,0);
+  const other=M.lines.filter(l=>(l.kind==="fonct"||l.kind==="invest")&&lineInSeason(l));
+  const fon=other.filter(l=>l.kind==="fonct").reduce((s,l)=>s+l.rec-l.dep,0), inv=other.filter(l=>l.kind==="invest").reduce((s,l)=>s+l.rec-l.dep,0);
+  const up=evs.filter(e=>e.upcoming).reduce((s,e)=>s+e.res,0), tot=resEv+fon+inv+up;
+  $("seasonTiles").innerHTML=`
+    <div class="tile ${resEv>=0?"good":"bad"}"><h3>Résultat des événements</h3><div class="v ${cls(resEv)}">${sg(resEv)}</div><div class="s">${done.length} événement(s) · ${sg(resEv-subv)} hors subvention</div></div>
+    <div class="tile"><h3>Fonctionnement</h3><div class="v ${cls(fon)}">${sg(fon)}</div><div class="s">banque, assurance, AG, intérêts</div></div>
+    <div class="tile"><h3>Investissements</h3><div class="v ${cls(inv)}">${sg(inv)}</div><div class="s">matériel durable</div></div>
+    <div class="tile ${tot>=0?"good":"bad"}"><h3>Résultat ${season==="all"?"cumulé":"saison "+season}</h3><div class="v ${cls(tot)}">${sg(tot)}</div><div class="s">${Math.abs(up)>0.005?"dont "+sg(up)+" d'acomptes sur événements à venir":"événements + fonctionnement + investissements"}</div></div>`;
+  const sorted=[...evs].sort((a,b)=>b.res-a.res), max=Math.max(1,...sorted.map(e=>Math.abs(e.res)));
+  $("evBars").innerHTML=sorted.map(e=>`<button type="button" class="lbl" data-ev="${esc(e.name)}">${esc(e.name)}</button><div class="track"><div class="bar ${e.res>=0?"p":"n"}" style="width:${Math.abs(e.res)/max*50}%"></div></div><div class="val num ${cls(e.res)}">${sg(e.res).replace(/,\d\d/,"")}</div>`).join("")||`<div class="muted">Aucun événement sur cette saison.</div>`;
+  $("evTable").innerHTML=`<thead><tr><th>Événement</th><th>Période</th><th class="r">Recettes</th><th class="r">Dépenses</th><th class="r">Résultat</th><th class="r">Marge</th><th class="r">Hors subvention</th><th>État</th></tr></thead><tbody>`+
+    evs.map(e=>`<tr class="click" data-ev="${esc(e.name)}"><td><b>${esc(e.name)}</b></td><td class="num small muted">${fdate(e.first)} → ${fdate(e.last)}</td><td class="r num">${fm(e.rec)}</td><td class="r num">${fm(e.dep)}</td><td class="r num ${cls(e.res)}"><b>${sg(e.res)}</b></td><td class="r num">${pct(e.margin)}</td><td class="r num ${cls(e.resHS)}">${e.subv>0?sg(e.resHS):"·"}</td><td>${statusPill(e)}</td></tr>`).join("")+
+    `<tr class="total"><td>Total</td><td></td><td class="r num">${fm(evs.reduce((s,e)=>s+e.rec,0))}</td><td class="r num">${fm(evs.reduce((s,e)=>s+e.dep,0))}</td><td class="r num ${cls(resEv+up)}">${sg(resEv+up)}</td><td></td><td class="r num">${sg(resEv+up-subv)}</td><td></td></tr></tbody>`;
+  $("insights").innerHTML=insights(evs).map(t=>`<li>${t}</li>`).join("")||`<li class="muted">Rien à signaler.</li>`;
+  renderTresoChart();
+}
+function families(){
+  const f=new Map();
+  for(const e of M.events){ if(!f.has(e.family))f.set(e.family,[]); f.get(e.family).push(e); }
+  for(const a of f.values())a.sort((x,y)=>(x.year||0)-(y.year||0));
+  return f;
+}
+function insights(evs){
+  const out=[], b=s=>`<b>${esc(s)}</b>`, done=evs.filter(e=>!e.upcoming);
+  const def=done.filter(e=>e.res<-0.005).sort((a,c)=>a.res-c.res);
+  if(def.length) out.push(`Événements déficitaires : ${def.map(e=>`${b(e.name)} (${sg(e.res)})`).join(", ")}.`);
+  const best=[...done].sort((a,c)=>c.res-a.res)[0];
+  if(best&&best.res>0) out.push(`Meilleur contributeur : ${b(best.name)} avec ${sg(best.res)}, soit ${pct(best.margin)} de marge sur ${fm(best.rec)} de recettes.`);
+  for(const [,eds] of families()){
+    const ed=eds.filter(e=>!e.upcoming&&inSeason(e)); if(!ed.length)continue;
+    const cur=ed[ed.length-1], prev=eds.filter(e=>!e.upcoming&&e.year<cur.year).pop(); if(!prev)continue;
+    const cats=new Set([...Object.keys(cur.depCat),...Object.keys(prev.depCat)]);
+    const mv=[...cats].map(c=>[c,(cur.depCat[c]||0)-(prev.depCat[c]||0)]).sort((x,y)=>Math.abs(y[1])-Math.abs(x[1]))[0];
+    out.push(`${b(cur.name)} : résultat ${sg(cur.res)} contre ${sg(prev.res)} pour ${esc(prev.name)} (${sg(cur.res-prev.res)}). Recettes ${sg(cur.rec-prev.rec)}, dépenses ${sg(cur.dep-prev.dep)}${mv&&Math.abs(mv[1])>1?` ; plus forte variation de dépense : ${esc(mv[0])} (${sg(mv[1])})`:""}.`);
+  }
+  const sub=done.filter(e=>e.subv>0&&e.res>0&&e.resHS<0);
+  if(sub.length) out.push(`Bénéficiaires uniquement grâce à la subvention : ${sub.map(e=>`${b(e.name)} (${sg(e.resHS)} sans elle)`).join(", ")}.`);
+  for(const bg of S.budgets){const e=M.events.find(x=>x.name===eventKey(bg.evenement).parent); if(e&&inSeason(e)&&e.dep>bg.depenses+0.005) out.push(`${b(e.name)} dépasse son budget de dépenses de ${fm(e.dep-bg.depenses)} (${fm(e.dep)} pour ${fm(bg.depenses)} prévus).`);}
+  const fees=M.lines.filter(l=>l.cat==="Frais bancaires"&&l.kind!=="interne"&&lineInSeason(l)), ft=fees.reduce((s,l)=>s+l.dep,0);
+  const cb=done.reduce((s,e)=>s+e.cb,0), cbf=done.reduce((s,e)=>s+e.cbFees,0);
+  if(ft>0) out.push(`Frais bancaires : ${b(fm(ft))} sur ${fees.length} écritures${cb>0?`, dont ${fm(cbf)} de commissions carte pour ${fm(cb)} encaissés (${(cbf/cb*100).toFixed(2).replace(".",",")} %)`:""}.`);
+  const dep={}; for(const e of done)for(const [k,v] of Object.entries(e.depCat))dep[k]=(dep[k]||0)+v;
+  const top=Object.entries(dep).sort((a,c)=>c[1]-a[1]).slice(0,3), td=Object.values(dep).reduce((s,v)=>s+v,0);
+  if(top.length) out.push(`Trois premiers postes de dépense : ${top.map(([k,v])=>`${esc(k)} ${fm0(v)} (${pct(v/td)})`).join(", ")}.`);
+  const up=evs.filter(e=>e.upcoming);
+  if(up.length) out.push(`Acomptes déjà versés pour ${up.map(e=>`${b(e.name)} (${fm(e.dep)})`).join(", ")} : ils pèsent sur la trésorerie actuelle sans recette en face.`);
+  return out;
+}
+function tresoSvg(until){
+  const ls=M.lines.filter(l=>l.iso&&(!until||l.iso<=until));
+  if(ls.length<2)return "";
+  const pts=[];let c=0;
+  for(const l of ls){c+=l.rec-l.dep;const t=Date.parse(l.iso);if(pts.length&&pts[pts.length-1][0]===t)pts[pts.length-1][1]=c;else pts.push([t,c]);}
+  const W=900,H=230,L=56,R=70,T=14,B=24, t0=pts[0][0], t1=pts[pts.length-1][0];
+  const vmax=Math.max(...pts.map(p=>p[1])), step=vmax>25000?10000:vmax>10000?5000:vmax>2500?1000:500, top=Math.ceil(Math.max(vmax,1)/step)*step;
+  const x=t=>L+(t-t0)/(t1-t0||1)*(W-L-R), y=v=>T+(1-Math.max(0,v)/top)*(H-T-B);
+  let d="";pts.forEach((p,i)=>{d+=(i?"L":"M")+x(p[0]).toFixed(1)+" "+y(i?pts[i-1][1]:p[1]).toFixed(1)+"L"+x(p[0]).toFixed(1)+" "+y(p[1]).toFixed(1);});
+  const area=d+`L${x(t1).toFixed(1)} ${y(0)}L${x(t0).toFixed(1)} ${y(0)}Z`;
+  let g="";for(let v=0;v<=top+1;v+=step)g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${fm0(v)}</text>`;
+  for(let yr=new Date(t0).getUTCFullYear()+1;yr<=new Date(t1).getUTCFullYear();yr++){const tx=Date.UTC(yr,0,1);g+=`<line x1="${x(tx)}" x2="${x(tx)}" y1="${T}" y2="${H-B}" stroke="var(--line)" stroke-dasharray="3 3"/><text x="${x(tx)+4}" y="${H-8}">${yr}</text>`;}
+  const last=pts[pts.length-1];
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Courbe de la trésorerie totale">${g}<path d="${area}" fill="var(--accent)" opacity=".12"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/><circle cx="${x(last[0])}" cy="${y(last[1])}" r="4" fill="var(--accent)"/><text x="${x(last[0])+8}" y="${y(last[1])+4}" style="fill:var(--ink);font-weight:600">${fm0(last[1])}</text></svg>`;
+}
+function renderTresoChart(){$("tresoChart").innerHTML=tresoSvg()||`<p class="muted">Pas assez d'écritures datées.</p>`;}
+function renderEvent(){
+  const sel=$("evSel");
+  sel.innerHTML=[...M.events].reverse().map(e=>`<option value="${esc(e.name)}">${esc(e.name)}</option>`).join("");
+  if(!curEv||!M.events.some(e=>e.name===curEv)){const c=M.events.filter(e=>!e.upcoming);curEv=(c[c.length-1]||M.events[0]||{}).name;}
+  const e=M.events.find(x=>x.name===curEv);
+  if(!e){["evTiles","evRec","evDep","evPay","evSubs","evRatios","evLines","evStatus"].forEach(i=>$(i).innerHTML="");return;}
+  sel.value=curEv;
+  const bg=S.budgets.find(b=>eventKey(b.evenement).parent===e.name);
+  $("evStatus").innerHTML=statusPill(e)+` <span class="muted small">${e.lines.length} écritures, du ${fdate(e.first)} au ${fdate(e.last)}</span>`;
+  $("evTiles").innerHTML=`
+    <div class="tile"><h3>Recettes</h3><div class="v">${fm(e.rec)}</div><div class="s">${bg?"prévu "+fm(bg.recettes):"hors fond de caisse"}</div></div>
+    <div class="tile"><h3>Dépenses</h3><div class="v">${fm(e.dep)}</div><div class="s">${bg?"prévu "+fm(bg.depenses):"hors fond de caisse"}</div></div>
+    <div class="tile ${e.res>=0?"good":"bad"}"><h3>Résultat</h3><div class="v ${cls(e.res)}">${sg(e.res)}</div><div class="s">marge ${pct(e.margin)}${bg?" · prévu "+sg(bg.recettes-bg.depenses):""}</div></div>
+    ${e.subv>0?`<div class="tile ${e.resHS>=0?"good":"bad"}"><h3>Hors subvention</h3><div class="v ${cls(e.resHS)}">${sg(e.resHS)}</div><div class="s">subvention ${fm(e.subv)}</div></div>`:""}`;
+  hbars($("evRec"),e.recCat,"g"); hbars($("evDep"),e.depCat,"b"); hbars($("evPay"),e.pay,"");
+  const R=k=>e.recCat[k]||0, D=k=>e.depCat[k]||0, rows=[];
+  const ratio=(lbl,rec,dep,costOnly)=>{ if((rec>0&&dep>0)||(costOnly&&dep>0)) rows.push(`<tr><td>${lbl}</td><td class="r num">${fm(rec)}</td><td class="r num">${fm(dep)}</td><td class="r num ${cls(rec-dep)}">${sg(rec-dep)}</td><td class="r num">${rec>0?pct(dep/rec):"n/a"}</td></tr>`); };
+  ratio("Buvette : caisse / boissons",R("Buvette & caisse"),D("Boissons"));
+  ratio("Repas : réservations / traiteur, boulangerie",R("Réservations (repas, emplacements)"),D("Traiteur & repas")+D("Boulangerie & desserts"));
+  ratio("Goodies & textile : ventes / achats",R("Goodies & textile"),D("Goodies & textile"));
+  ratio("Encarts & tour du village / impression",R("Encarts publicitaires")+R("Tour du village"),D("Impression & communication"));
+  ratio("Animation, droits d'auteur (coût sec)",0,D("Animation & spectacle")+D("Droits d'auteur (SACEM, SPRE)"),true);
+  ratio("Carte bancaire : encaissements / commissions",e.cb,e.cbFees);
+  $("evRatios").innerHTML=`<thead><tr><th>Activité</th><th class="r">Recettes</th><th class="r">Coûts</th><th class="r">Solde</th><th class="r">Coût / recette</th></tr></thead><tbody>${rows.join("")||`<tr><td colspan="5" class="muted">Pas assez d'écritures.</td></tr>`}</tbody>`;
+  const subs=Object.entries(e.subs);
+  $("evSubs").innerHTML=subs.length>1?`<h3 style="margin:8px 0 6px">Sous-rubriques</h3><div class="scroll"><table><thead><tr><th>Rubrique</th><th class="r">Recettes</th><th class="r">Dépenses</th><th class="r">Résultat</th></tr></thead><tbody>${subs.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="r num">${fm(v.rec)}</td><td class="r num">${fm(v.dep)}</td><td class="r num ${cls(v.rec-v.dep)}">${sg(v.rec-v.dep)}</td></tr>`).join("")}</tbody></table></div>`:"";
+  $("evLines").innerHTML=linesTable(e.lines);
+}
+function renderEditions(){
+  const fam=families(), multi=[...fam.entries()].filter(([,a])=>a.length>1);
+  if(!multi.length){$("famChips").innerHTML="";$("famTable").innerHTML=`<tbody><tr><td class="muted">Il faut au moins deux éditions d'un même événement (même nom, année différente).</td></tr></tbody>`;$("famNotes").innerHTML="";return;}
+  if(!curFam||!multi.some(([k])=>k===curFam))curFam=(multi.find(([k])=>/fete/i.test(k))||multi[0])[0];
+  $("famChips").innerHTML=multi.map(([k])=>`<button type="button" class="chip ${k===curFam?"on":""}" data-f="${esc(k)}">${esc(k)}</button>`).join("");
+  const eds=fam.get(curFam), n=eds.length, a=eds[n-2], z=eds[n-1];
+  const head=`<thead><tr><th>Poste</th>${eds.map(e=>`<th class="r">${esc(e.year||e.name)}${e.upcoming?" (à venir)":""}</th>`).join("")}<th class="r">Écart ${esc(z.year)} / ${esc(a.year)}</th></tr></thead>`;
+  const row=(lbl,f,invert,strong)=>{const d=f(z)-f(a);const c=Math.abs(d)<0.005?"":((d>0)!==!!invert?"pos":"neg");return `<tr class="${strong?"total":""}"><td>${esc(lbl)}</td>${eds.map(e=>`<td class="r num">${Math.abs(f(e))<0.005?"·":fm(f(e))}</td>`).join("")}<td class="r num ${c}">${Math.abs(d)<0.005?"·":sg(d)}</td></tr>`;};
+  const keys=k=>[...new Set(eds.flatMap(e=>Object.keys(e[k])))].sort((x,y)=>(z[k][y]||0)+(a[k][y]||0)-(z[k][x]||0)-(a[k][x]||0));
+  let h=head+`<tbody><tr class="grp"><td colspan="${n+2}">Recettes</td></tr>`;
+  for(const k of keys("recCat"))h+=row(k,e=>e.recCat[k]||0,false);
+  h+=row("Total recettes",e=>e.rec,false,true)+`<tr class="grp"><td colspan="${n+2}">Dépenses</td></tr>`;
+  for(const k of keys("depCat"))h+=row(k,e=>e.depCat[k]||0,true);
+  h+=row("Total dépenses",e=>e.dep,true,true)+row("Résultat",e=>e.res,false,true);
+  if(eds.some(e=>e.subv>0))h+=row("Résultat hors subvention",e=>e.resHS,false,true);
+  $("famTable").innerHTML=h+`</tbody>`;
+  const notes=[], dv=k=>[...new Set([...Object.keys(a[k]),...Object.keys(z[k])])].map(c=>[c,(z[k][c]||0)-(a[k][c]||0)]).filter(x=>Math.abs(x[1])>1).sort((x,y)=>Math.abs(y[1])-Math.abs(x[1])).slice(0,3);
+  if(z.upcoming) notes.push(`${esc(z.name)} n'a pas encore eu lieu : la colonne ne contient que des acomptes.`);
+  const up=dv("depCat"), ur=dv("recCat");
+  if(up.length) notes.push(`Dépenses qui ont le plus bougé entre ${esc(a.year)} et ${esc(z.year)} : ${up.map(([c,v])=>`${esc(c)} ${sg(v)}`).join(" ; ")}.`);
+  if(ur.length) notes.push(`Recettes qui ont le plus bougé : ${ur.map(([c,v])=>`${esc(c)} ${sg(v)}`).join(" ; ")}.`);
+  $("famNotes").innerHTML=notes.map(t=>`<li>${t}</li>`).join("");
+}
+const groupOf=l=>l.kind==="event"?l.parent:l.kind==="interne"?"(Mouvements internes)":"(Hors événements)";
+function fillSelect(sel,first,values){const cur=sel.value;sel.innerHTML=`<option value="">${first}</option>`+values.map(n=>`<option>${esc(n)}</option>`).join("");if(values.includes(cur))sel.value=cur;}
+function renderLines(){
+  fillSelect($("fEv"),"Tous les événements",[...new Set(M.lines.map(groupOf))].sort());
+  fillSelect($("fCat"),"Tous les postes",[...new Set(M.lines.map(l=>l.cat))].sort());
+  const q=strip($("q").value), ev=$("fEv").value, cat=$("fCat").value, acc=$("fAcc").value;
+  const ls=M.lines.filter(l=>(!acc||l.acc===acc)&&(!ev||groupOf(l)===ev)&&(!cat||l.cat===cat)&&(!q||strip(l.des+" "+l.com+" "+l.evt+" "+l.type).includes(q))).reverse();
+  $("lnCount").textContent=`${ls.length} écritures · recettes ${fm(ls.reduce((s,l)=>s+l.rec,0))} · dépenses ${fm(ls.reduce((s,l)=>s+l.dep,0))}`;
+  $("lnTable").innerHTML=linesTable(ls);
+}
+function renderBudget(){
+  const names=[...new Set([...S.budgets.map(b=>eventKey(b.evenement).parent),...M.events.map(e=>e.name)])];
+  const rows=names.map(n=>({n,e:M.events.find(x=>x.name===n),b:S.budgets.find(x=>eventKey(x.evenement).parent===n)})).sort((a,c)=>((c.e&&c.e.first)||"9")<((a.e&&a.e.first)||"9")?-1:1);
+  const w=canWrite();
+  $("bgTable").innerHTML=`<thead><tr><th>Événement</th><th class="r">Recettes prévues</th><th class="r">réalisées</th><th class="r">Dépenses prévues</th><th class="r">réalisées</th><th class="r">Résultat prévu</th><th class="r">réalisé</th><th class="r">Écart</th><th>État</th>${w?"<th></th>":""}</tr></thead><tbody>`+
+  (rows.length?rows.map(({n,e,b})=>{
+    const rr=e?e.rec:0, rd=e?e.dep:0, res=rr-rd, pr=b?b.recettes-b.depenses:null;
+    const st=!b?`<span class="pill neutral">Sans budget</span>`:rd>b.depenses+0.005?`<span class="pill bad">Dépenses dépassées</span>`:(e&&!e.upcoming&&res<pr-0.005)?`<span class="pill warn">Résultat sous le prévu</span>`:`<span class="pill good">Dans le budget</span>`;
+    return `<tr><td><b>${esc(n)}</b>${b&&b.note?`<div class="small muted">${esc(b.note)}</div>`:""}</td><td class="r num">${b?fm(b.recettes):"·"}</td><td class="r num">${e?fm(rr):"·"}</td><td class="r num">${b?fm(b.depenses):"·"}</td><td class="r num">${e?fm(rd):"·"}</td><td class="r num">${b?sg(pr):"·"}</td><td class="r num ${cls(res)}">${e?sg(res):"·"}</td><td class="r num ${b&&e?cls(res-pr):""}">${b&&e?sg(res-pr):"·"}</td><td>${st}</td>${w?`<td><button type="button" class="mini" data-bg="${esc(n)}">${b?"Modifier":"Définir"}</button></td>`:""}</tr>`;
+  }).join(""):`<tr><td colspan="10" class="muted">Aucun événement ni budget.</td></tr>`)+`</tbody>`;
+}
+function rapLines(){const acc=$("rAcc").value;return M.lines.filter(l=>l.acc===acc);}
+function renderRap(){
+  const ls=rapLines(), all=$("rAll").checked, until=$("rUntil").value;
+  const solde=ls.reduce((s,l)=>s+l.rec-l.dep,0), pt=ls.filter(l=>l.pointe).reduce((s,l)=>s+l.rec-l.dep,0), np=ls.filter(l=>!l.pointe);
+  const rel=$("rRel").value.trim()===""?null:parseNum($("rRel").value), ec=rel==null?null:round2(rel-pt);
+  $("rTiles").innerHTML=`
+    <div class="tile acc"><h3>Solde du cahier</h3><div class="v">${fm(solde)}</div><div class="s">${ls.length} écritures</div></div>
+    <div class="tile"><h3>Solde pointé</h3><div class="v">${fm(pt)}</div><div class="s">doit égaler le relevé</div></div>
+    <div class="tile"><h3>Non pointé</h3><div class="v">${sg(solde-pt)}</div><div class="s">${np.length} écriture(s) en attente</div></div>
+    <div class="tile ${ec==null?"":Math.abs(ec)<0.005?"good":"bad"}"><h3>Écart avec le relevé</h3><div class="v ${ec==null?"muted":Math.abs(ec)<0.005?"pos":"neg"}">${ec==null?"·":Math.abs(ec)<0.005?"0,00 €":sg(ec)}</div><div class="s">${ec==null?"saisissez le solde du relevé":Math.abs(ec)<0.005?"rapprochement juste":"relevé − solde pointé"}</div></div>`;
+  const shown=(all?ls:np).filter(l=>!until||!l.iso||l.iso<=until).reverse();
+  $("rTitle").textContent=all?"Toutes les écritures du compte":"Écritures non pointées";
+  const todo=shown.filter(l=>!l.pointe).length;
+  $("rBulk").textContent=`Pointer les ${todo} affichées`; $("rBulk").disabled=!todo;
+  $("rTable").innerHTML=linesTable(shown,{check:true});
+}
+function renderControles(){
+  const sum=f=>M.lines.filter(f).reduce((s,l)=>s+l.rec-l.dep,0);
+  const cc=sum(l=>l.acc==="CC"), la=sum(l=>l.acc==="LA");
+  const open=sum(l=>l.kind==="interne"&&/solde du compte|recuperation du compte/.test(strip(l.des)));
+  const transf=sum(l=>l.kind==="interne")-open, ev=M.events.reduce((s,e)=>s+e.res,0), fon=sum(l=>l.kind==="fonct"), inv=sum(l=>l.kind==="invest"), ok=Math.abs(transf)<0.01;
+  $("ctlRecon").innerHTML=`<tbody>
+    <tr><td>Soldes repris à l'ouverture (ancien bureau)</td><td class="r num">${fm(open)}</td><td></td></tr>
+    <tr><td>Résultat cumulé des événements</td><td class="r num">${sg(ev)}</td><td></td></tr>
+    <tr><td>Fonctionnement (banque, assurance, AG, intérêts)</td><td class="r num">${sg(fon)}</td><td></td></tr>
+    <tr><td>Investissements</td><td class="r num">${sg(inv)}</td><td></td></tr>
+    <tr><td>Virements compte courant ↔ Livret A (doivent s'annuler)</td><td class="r num">${sg(transf)}</td><td>${ok?`<span class="pill good">Équilibrés</span>`:`<span class="pill bad">Écart à corriger</span>`}</td></tr>
+    <tr class="total"><td>Trésorerie totale (compte courant ${fm(cc)} + Livret A ${fm(la)})</td><td class="r num">${fm(cc+la)}</td><td></td></tr></tbody>`;
+  const groups=[], g=(title,ls,why)=>{ if(ls.length)groups.push(`<h3 style="margin:14px 0 6px">${esc(title)} · ${ls.length}</h3><p class="small muted" style="margin:0 0 6px">${why}</p><div class="scroll"><table>${linesTable(ls)}</table></div>`); };
+  g("Sans date",M.lines.filter(l=>!l.iso),"Écritures comptées dans les totaux mais absentes de la courbe de trésorerie. Ouvrez-les pour saisir la date.");
+  g("Nom d'événement avec espaces parasites",M.lines.filter(l=>l.evt!==l.evt.trim()||/\s{2,}/.test(l.evt)),"L'application les regroupe, mais mieux vaut corriger le nom.");
+  g("Sans événement",M.lines.filter(l=>l.acc==="CC"&&!l.evt.trim()),"Classées en fonctionnement par défaut.");
+  g("Recette et dépense sur la même écriture",M.lines.filter(l=>l.rec>0&&l.dep>0),"Une écriture devrait porter un seul sens.");
+  g("Dépenses classées « Divers »",M.lines.filter(l=>l.cat==="Divers"),"La désignation ne permet pas d'identifier le poste (ex. « Cheque »). Préciser le bénéficiaire améliore l'analyse.");
+  $("ctlList").innerHTML=groups.join("")||`<p class="muted">Aucune anomalie détectée.</p>`;
+}
+function tsText(x){const d=x&&x.toDate?x.toDate():x?new Date(x):null;return d&&!isNaN(d)?d.toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"}):"à l'instant";}
+function renderJournal(){
+  $("jTable").innerHTML=`<thead><tr><th>Quand</th><th>Qui</th><th>Opération</th><th>Détail</th></tr></thead><tbody>`+(S.journal.length?S.journal.map(j=>`<tr><td class="num small">${esc(tsText(j.at))}</td><td class="small">${esc(j.nom||"")}</td><td><span class="pill ${j.action==="Suppression"?"bad":j.action==="Modification"?"warn":"neutral"}">${esc(j.action)}</span></td><td class="small">${esc(j.texte||"")}</td></tr>`).join(""):`<tr><td colspan="4" class="muted">Aucune opération enregistrée.</td></tr>`)+`</tbody>`;
+}
+function renderAcces(){
+  if(DEMO){$("dTable").innerHTML=`<tbody><tr><td class="muted">La gestion des accès s'active une fois la connexion configurée.</td></tr></tbody>`;$("mTable").innerHTML="";return;}
+  $("dTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Demandé le</th><th></th></tr></thead><tbody>`+(S.demandes.length?S.demandes.map(d=>`<tr><td>${esc(d.nom||"")}</td><td>${esc(d.email||"")}</td><td class="small num">${esc(tsText(d.at))}</td><td class="row"><button type="button" class="mini primary" data-ok="${esc(d.id)}">Accepter en lecteur</button><button type="button" class="mini" data-no="${esc(d.id)}">Refuser</button></td></tr>`).join(""):`<tr><td colspan="4" class="muted">Aucune demande en attente. Un nouveau membre ouvre l'application, clique sur « Créer mon compte », puis sa demande apparaît ici.</td></tr>`)+`</tbody>`;
+  $("mTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th><th></th></tr></thead><tbody>`+S.membres.map(m=>{const self=m.id===S.user.uid;return `<tr><td>${esc(m.nom||"")}${self?` <span class="muted small">(vous)</span>`:""}</td><td>${esc(m.email||"")}</td><td><select data-role="${esc(m.id)}" ${self?"disabled":""} aria-label="Rôle"><option value="lecteur" ${m.role!=="tresorier"?"selected":""}>Lecteur</option><option value="tresorier" ${m.role==="tresorier"?"selected":""}>Trésorier</option></select></td><td>${self?"":`<button type="button" class="mini danger" data-rm="${esc(m.id)}">Retirer l'accès</button>`}</td></tr>`;}).join("")+`</tbody>`;
+}
+
+/* ================= présentation ================= */
+let pType="event", pKey=null, pIdx=0, pSlides=[], pLabel="";
+const pMem={};
+const nk=()=>"cahier-pres-"+pType+"-"+pKey;
+function getNotes(){ if(nk() in pMem)return pMem[nk()]; try{return localStorage.getItem(nk())||"";}catch(e){return "";} }
+function setNotes(v){ pMem[nk()]=v; try{localStorage.setItem(nk(),v);}catch(e){} }
+const sg0=v=>(v>0.5?"+":"")+fm0(v);
+const tone=v=>v>0.005?"good":v<-0.005?"bad":"";
+const kpi=(l,v,s,t)=>`<div class="kpi ${t||""}"><span>${esc(l)}</span><b>${v}</b><small>${s?esc(s):"&nbsp;"}</small></div>`;
+function sBars(obj,kind,max){
+  let items=Object.entries(obj).filter(([,v])=>v>0.005).sort((a,b)=>b[1]-a[1]);
+  const tot=items.reduce((s,[,v])=>s+v,0); max=max||7;
+  if(items.length>max){const rest=items.slice(max-1).reduce((s,[,v])=>s+v,0);items=items.slice(0,max-1);items.push(["Autres postes",rest]);}
+  const top=Math.max(1,...items.map(([,v])=>v));
+  return items.length?`<div class="sb">${items.map(([k,v])=>`<div>${esc(k)}</div><div class="track"><div class="fill ${kind}" style="width:${v/top*100}%"></div></div><div class="num">${fm0(v)} <i>${pct(v/tot)}</i></div>`).join("")}</div>`:`<p class="muted">Aucune écriture.</p>`;
+}
+function sDiv(evs){
+  const max=Math.max(1,...evs.map(e=>Math.abs(e.res)));
+  return `<div class="sd">${evs.map(e=>`<div>${esc(e.name)}${e.upcoming?" (acomptes)":""}</div><div class="track"><div class="bar ${e.res>=0?"p":"n"}" style="width:${Math.abs(e.res)/max*50}%"></div></div><div class="num ${cls(e.res)}">${sg0(e.res)}</div>`).join("")}</div>`;
+}
+const sl=(eyebrow,title,body)=>`<div class="eyebrow">${esc(eyebrow)}</div><h2>${esc(title)}</h2>${body}`;
+const titleSlide=(over,title,sub)=>`<div class="sl-title"><div class="eyebrow">${esc(over)}</div><h1>${esc(title)}</h1><p>${esc(sub)}</p></div>`;
+function notesSlide(eyebrow,auto){
+  const mine=getNotes().split("\n").map(s=>s.trim()).filter(Boolean);
+  const a=`<div><h3>Constats</h3><ul>${auto.slice(0,5).map(x=>`<li>${x}</li>`).join("")||"<li>Rien à signaler.</li>"}</ul></div>`;
+  return sl(eyebrow,"À retenir",mine.length?`<div class="cols">${a}<div><h3>Pistes d'amélioration</h3><ul>${mine.slice(0,6).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>`:a);
+}
+function ratiosOf(e){
+  const R=k=>e.recCat[k]||0, D=k=>e.depCat[k]||0;
+  return [["Buvette",R("Buvette & caisse"),D("Boissons")],
+    ["Repas",R("Réservations (repas, emplacements)"),D("Traiteur & repas")+D("Boulangerie & desserts")],
+    ["Goodies & textile",R("Goodies & textile"),D("Goodies & textile")],
+    ["Encarts & impression",R("Encarts publicitaires")+R("Tour du village"),D("Impression & communication")],
+    ["Animation & droits",0,D("Animation & spectacle")+D("Droits d'auteur (SACEM, SPRE)")]].filter(r=>(r[1]>0&&r[2]>0)||(r[1]===0&&r[2]>0));
+}
+function deckEvent(e){
+  const b=s=>`<b>${esc(s)}</b>`, prev=(families().get(e.family)||[]).filter(x=>x.year<e.year&&!x.upcoming).pop();
+  const bg=S.budgets.find(x=>eventKey(x.evenement).parent===e.name);
+  const out=[titleSlide(ASSO||"Bilan financier",e.name,`Bilan financier · écritures du ${fdate(e.first)} au ${fdate(e.last)}`)];
+  const verdict=e.upcoming?`L'événement n'a pas encore eu lieu : ${fm(e.dep)} d'acomptes ont été versés.`:e.res>0.005?`L'événement dégage un bénéfice de ${fm(e.res)}, soit ${pct(e.margin)} des recettes.`:e.res<-0.005?`L'événement est déficitaire de ${fm(-e.res)}.`:"L'événement est à l'équilibre.";
+  out.push(sl(e.name,"Chiffres clés",`<div class="kpis">${kpi("Recettes",fm0(e.rec),bg?"prévu "+fm0(bg.recettes):"hors fond de caisse")}${kpi("Dépenses",fm0(e.dep),bg?"prévu "+fm0(bg.depenses):"hors fond de caisse")}${kpi("Résultat",sg0(e.res),e.rec>0?"marge "+pct(e.margin):"",tone(e.res))}${e.subv>0?kpi("Hors subvention",sg0(e.resHS),"subvention "+fm0(e.subv),tone(e.resHS)):prev?kpi("Édition précédente",sg0(prev.res),prev.name,tone(prev.res)):""}</div><p class="lead">${esc(verdict)}</p><p class="note">Les fonds de caisse (retraits puis retours de monnaie) ne sont comptés ni en recette ni en dépense.</p>`));
+  out.push(sl(e.name,"D'où vient l'argent, où part-il",`<div class="cols"><div><h3>Recettes · ${fm0(e.rec)}</h3>${sBars(e.recCat,"g",6)}</div><div><h3>Dépenses · ${fm0(e.dep)}</h3>${sBars(e.depCat,"b",7)}</div></div>`));
+  let mv=[];
+  if(prev){
+    const row=(l,f,inv)=>{const d=f(e)-f(prev);return `<tr><td>${l}</td><td class="r num">${fm(f(prev))}</td><td class="r num">${fm(f(e))}</td><td class="r num ${Math.abs(d)<0.005?"":(d>0)!==!!inv?"pos":"neg"}">${sg(d)}</td></tr>`;};
+    mv=[...new Set([...Object.keys(e.depCat),...Object.keys(prev.depCat)])].map(c=>[c,(e.depCat[c]||0)-(prev.depCat[c]||0)]).filter(x=>Math.abs(x[1])>1).sort((x,y)=>Math.abs(y[1])-Math.abs(x[1])).slice(0,4);
+    out.push(sl(e.name,`Face à ${prev.name}`,`<table class="st"><thead><tr><th></th><th class="r">${esc(prev.year)}</th><th class="r">${esc(e.year)}</th><th class="r">Écart</th></tr></thead><tbody>${row("Recettes",x=>x.rec)}${row("Dépenses",x=>x.dep,true)}${row("<b>Résultat</b>",x=>x.res)}${e.subv>0||prev.subv>0?row("Résultat hors subvention",x=>x.resHS):""}</tbody></table>${mv.length?`<div><h3>Dépenses qui ont le plus bougé</h3><ul>${mv.map(([c,v])=>`<li>${esc(c)} : ${b(sg(v))}</li>`).join("")}</ul></div>`:""}`));
+  }
+  const rt=ratiosOf(e);
+  if(rt.length||Object.keys(e.pay).length) out.push(sl(e.name,"Activité par activité",`<div class="cols"><div><h3>Recettes et coûts directs</h3><table class="st"><thead><tr><th>Activité</th><th class="r">Recettes</th><th class="r">Coûts</th><th class="r">Solde</th></tr></thead><tbody>${rt.map(r=>`<tr><td>${esc(r[0])}</td><td class="r num">${r[1]?fm0(r[1]):"·"}</td><td class="r num">${fm0(r[2])}</td><td class="r num ${cls(r[1]-r[2])}">${sg0(r[1]-r[2])}</td></tr>`).join("")}</tbody></table></div><div><h3>Moyens d'encaissement</h3>${sBars(e.pay,"",5)}</div></div><p class="note">Buvette : caisse face aux boissons. Repas : réservations face au traiteur et à la boulangerie. Ratios indicatifs, une facture de courses peut mélanger repas et buvette.</p>`));
+  const auto=[];
+  auto.push(e.upcoming?`${fm(e.dep)} d'acomptes déjà versés, sans recette en face pour l'instant.`:`Résultat : ${b(sg(e.res))} pour ${fm(e.rec)} de recettes et ${fm(e.dep)} de dépenses.`);
+  if(prev) auto.push(`Par rapport à ${esc(prev.name)} : recettes ${sg(e.rec-prev.rec)}, dépenses ${sg(e.dep-prev.dep)}, résultat ${b(sg(e.res-prev.res))}.`);
+  const topD=Object.entries(e.depCat).sort((x,y)=>y[1]-x[1])[0];
+  if(topD&&e.dep>0) auto.push(`Premier poste de dépense : ${esc(topD[0])}, ${fm(topD[1])} soit ${pct(topD[1]/e.dep)} des dépenses.`);
+  if(mv.length) auto.push(`Plus forte variation de dépense : ${esc(mv[0][0])} (${sg(mv[0][1])}).`);
+  if(bg) auto.push(`Budget : ${fm(bg.depenses)} de dépenses prévues, ${fm(e.dep)} réalisées (${sg(e.dep-bg.depenses)}).`);
+  if(e.subv>0) auto.push(`Sans la subvention de ${fm(e.subv)}, le résultat serait de ${b(sg(e.resHS))}.`);
+  out.push(notesSlide(e.name,auto));
+  return out;
+}
+function deckYear(y){
+  const evs=M.events.filter(e=>e.year===y), done=evs.filter(e=>!e.upcoming), up=evs.filter(e=>e.upcoming);
+  const oth=M.lines.filter(l=>(l.kind==="fonct"||l.kind==="invest")&&l.year===y);
+  const fon=oth.filter(l=>l.kind==="fonct").reduce((s,l)=>s+l.rec-l.dep,0), inv=oth.filter(l=>l.kind==="invest").reduce((s,l)=>s+l.rec-l.dep,0);
+  const resEv=done.reduce((s,e)=>s+e.res,0), subv=done.reduce((s,e)=>s+e.subv,0), acomptes=up.reduce((s,e)=>s+e.res,0), tot=resEv+fon+inv+acomptes;
+  const end=y+"-12-31", cut=M.maxIso&&M.maxIso<end?M.maxIso:end;
+  const bal=acc=>M.lines.filter(l=>l.iso&&l.iso<=cut&&(!acc||l.acc===acc)).reduce((s,l)=>s+l.rec-l.dep,0);
+  const label="Bilan "+y, out=[titleSlide(ASSO||"Bilan financier","Bilan financier "+y,`${done.length} événement(s) · trésorerie au ${fdate(cut)} : ${fm(bal())}`)];
+  out.push(sl(label,"L'année en quatre chiffres",`<div class="kpis">${kpi("Résultat des événements",sg0(resEv),subv>0?sg0(resEv-subv)+" hors subvention":"",tone(resEv))}${kpi("Fonctionnement",sg0(fon),"banque, assurance, AG, intérêts")}${kpi("Investissements",sg0(inv),"matériel durable")}${kpi("Résultat de l'année",sg0(tot),Math.abs(acomptes)>0.005?"dont "+sg0(acomptes)+" d'acomptes":"",tone(tot))}</div><p class="lead">${esc(tot>0.005?`L'année ${y} se termine sur un excédent de ${fm(tot)}.`:tot<-0.005?`L'année ${y} se termine sur un déficit de ${fm(-tot)}.`:`L'année ${y} est à l'équilibre.`)}</p><p class="note">Chaque événement est rattaché à son millésime, y compris les acomptes payés l'année précédente. Les virements entre comptes sont exclus.</p>`));
+  if(evs.length){
+    const sorted=[...evs].sort((a,c)=>c.res-a.res);
+    out.push(sl(label,"Résultat par événement",sDiv(sorted.slice(0,12))));
+    out.push(sl(label,"Recettes et dépenses par événement",`<table class="st"><thead><tr><th>Événement</th><th class="r">Recettes</th><th class="r">Dépenses</th><th class="r">Résultat</th><th class="r">Marge</th></tr></thead><tbody>${evs.slice(0,11).map(e=>`<tr><td>${esc(e.name)}</td><td class="r num">${fm(e.rec)}</td><td class="r num">${fm(e.dep)}</td><td class="r num ${cls(e.res)}"><b>${sg(e.res)}</b></td><td class="r num">${pct(e.margin)}</td></tr>`).join("")}<tr class="total"><td>Total</td><td class="r num">${fm(evs.reduce((s,e)=>s+e.rec,0))}</td><td class="r num">${fm(evs.reduce((s,e)=>s+e.dep,0))}</td><td class="r num ${cls(resEv+acomptes)}">${sg(resEv+acomptes)}</td><td></td></tr></tbody></table>`));
+    const rc={}, dc={}; for(const e of evs){for(const [k,v] of Object.entries(e.recCat))rc[k]=(rc[k]||0)+v; for(const [k,v] of Object.entries(e.depCat))dc[k]=(dc[k]||0)+v;}
+    out.push(sl(label,"D'où vient l'argent, où part-il",`<div class="cols"><div><h3>Recettes des événements</h3>${sBars(rc,"g",7)}</div><div><h3>Dépenses des événements</h3>${sBars(dc,"b",8)}</div></div>`));
+    const pairs=done.map(e=>[e,M.events.find(x=>x.family===e.family&&x.year===y-1&&!x.upcoming)]).filter(p=>p[1]);
+    if(pairs.length) out.push(sl(label,`Face à ${y-1}`,`<table class="st"><thead><tr><th>Événement</th><th class="r">Résultat ${y-1}</th><th class="r">Résultat ${y}</th><th class="r">Écart</th></tr></thead><tbody>${pairs.map(([e,p])=>`<tr><td>${esc(e.family)}</td><td class="r num ${cls(p.res)}">${sg(p.res)}</td><td class="r num ${cls(e.res)}">${sg(e.res)}</td><td class="r num ${cls(e.res-p.res)}"><b>${sg(e.res-p.res)}</b></td></tr>`).join("")}<tr class="total"><td>Total des événements comparables</td><td class="r num">${sg(pairs.reduce((s,p)=>s+p[1].res,0))}</td><td class="r num">${sg(pairs.reduce((s,p)=>s+p[0].res,0))}</td><td class="r num ${cls(pairs.reduce((s,p)=>s+p[0].res-p[1].res,0))}">${sg(pairs.reduce((s,p)=>s+p[0].res-p[1].res,0))}</td></tr></tbody></table>`));
+  }
+  out.push(sl(label,"Trésorerie",`<div class="kpis">${kpi("Trésorerie totale",fm0(bal()),"au "+fdate(cut),"acc")}${kpi("Compte courant",fm0(bal("CC")))}${kpi("Livret A",fm0(bal("LA")))}</div>${tresoSvg(cut)}`));
+  const bgs=evs.map(e=>[e,S.budgets.find(x=>eventKey(x.evenement).parent===e.name)]).filter(p=>p[1]);
+  if(bgs.length) out.push(sl(label,"Budget prévu et réalisé",`<table class="st"><thead><tr><th>Événement</th><th class="r">Dépenses prévues</th><th class="r">réalisées</th><th class="r">Résultat prévu</th><th class="r">réalisé</th><th class="r">Écart</th></tr></thead><tbody>${bgs.slice(0,10).map(([e,g])=>{const pr=g.recettes-g.depenses;return `<tr><td>${esc(e.name)}</td><td class="r num">${fm(g.depenses)}</td><td class="r num ${e.dep>g.depenses+0.005?"neg":""}">${fm(e.dep)}</td><td class="r num">${sg(pr)}</td><td class="r num ${cls(e.res)}">${sg(e.res)}</td><td class="r num ${cls(e.res-pr)}"><b>${sg(e.res-pr)}</b></td></tr>`;}).join("")}</tbody></table>`));
+  const old=season; season=String(y); let auto=[]; try{auto=insights(evs).filter(x=>!/^<b>[^<]+<\/b> : résultat/.test(x));}finally{season=old;}
+  out.push(notesSlide(label,auto));
+  return out;
+}
+const slideHtml=(s,i,n)=>`<div class="slide"><div class="sl-in">${s}</div><div class="sl-foot"><span>${esc(ASSO)}</span><span>${esc(pLabel)} · ${i+1} / ${n}</span></div></div>`;
+function renderPres(){
+  const sel=$("pSel"), years=[...new Set([...seasonsOf(),...M.lines.filter(l=>l.kind!=="event"&&l.kind!=="interne"&&l.year).map(l=>l.year)])].sort();
+  const opts=pType==="event"?[...M.events].reverse().map(e=>e.name):years.map(String).reverse();
+  if(!opts.includes(String(pKey))){
+    if(pType==="event"){const d=M.events.filter(e=>!e.upcoming);pKey=(d[d.length-1]||M.events[0]||{}).name||null;}
+    else{const d=years.filter(y=>M.events.some(e=>e.year===y&&!e.upcoming));pKey=String(d[d.length-1]||years[years.length-1]||"")||null;}
+  }
+  sel.innerHTML=opts.map(o=>`<option>${esc(o)}</option>`).join(""); if(pKey)sel.value=pKey;
+  if(document.activeElement!==$("pNotes"))$("pNotes").value=pKey?getNotes():"";
+  const e=pType==="event"?M.events.find(x=>x.name===pKey):null;
+  pSlides=!pKey?[]:pType==="event"?(e?deckEvent(e):[]):deckYear(+pKey);
+  pLabel=pType==="event"?String(pKey||""):"Bilan "+pKey;
+  $("pCount").textContent=pSlides.length?pSlides.length+" diapositives":"";
+  $("pPlay").disabled=$("pPrint").disabled=!pSlides.length;
+  $("deck").innerHTML=pSlides.length?pSlides.map((s,i)=>slideHtml(s,i,pSlides.length)).join(""):`<p class="muted">Aucune donnée à présenter pour l'instant.</p>`;
+}
+function showAt(i){pIdx=Math.max(0,Math.min(pSlides.length-1,i));$("showSlide").innerHTML=slideHtml(pSlides[pIdx],pIdx,pSlides.length);$("showPos").textContent=`${pIdx+1} / ${pSlides.length}`;}
+function closeShow(){$("show").hidden=true;if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});}
+$("pPlay").onclick=()=>{if(!pSlides.length)return;$("show").hidden=false;showAt(0);try{const r=$("show").requestFullscreen&&$("show").requestFullscreen();if(r&&r.catch)r.catch(()=>{});}catch(e){}};
+$("pPrint").onclick=()=>{$("printDeck").innerHTML=pSlides.map((s,i)=>slideHtml(s,i,pSlides.length)).join("");window.print();};
+$("showSlide").onclick=()=>showAt(pIdx+1); $("shNext").onclick=()=>showAt(pIdx+1); $("shPrev").onclick=()=>showAt(pIdx-1); $("shClose").onclick=closeShow;
+document.addEventListener("keydown",e=>{
+  if($("show").hidden)return;
+  if(["ArrowRight","PageDown"," ","Enter"].includes(e.key)){e.preventDefault();showAt(pIdx+1);}
+  else if(["ArrowLeft","PageUp","Backspace"].includes(e.key)){e.preventDefault();showAt(pIdx-1);}
+  else if(e.key==="Escape")closeShow();
+});
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&!$("show").hidden)closeShow();});
+for(const r of document.querySelectorAll("input[name=pType]"))r.addEventListener("change",()=>{pType=r.value;pKey=null;renderPres();});
+$("pSel").addEventListener("change",e=>{pKey=e.target.value;renderPres();});
+$("pNotes").addEventListener("input",e=>{setNotes(e.target.value);renderPres();});
+
+/* ================= navigation ================= */
+const VIEWS={synthese:renderSynthese,evenement:renderEvent,editions:renderEditions,ecritures:renderLines,budget:renderBudget,rapprochement:renderRap,presentation:renderPres,controles:renderControles,journal:renderJournal,acces:renderAcces};
+function show(){
+  let v=location.hash.replace("#","");
+  if(!VIEWS[v]||(v==="acces"&&!canWrite()))v="synthese";
+  for(const k in VIEWS)$("v-"+k).classList.toggle("on",k===v);
+  for(const a of $("tabs").children)a.classList.toggle("on",a.getAttribute("href")==="#"+v);
+  $("empty").hidden=M.lines.length>0||v==="acces"||v==="journal"||v==="budget";
+  VIEWS[v]();
+}
+function go(v){ if(location.hash==="#"+v)show(); else location.hash=v; }
+let raf=0;
+function render(){
+  cancelAnimationFrame(raf);
+  raf=requestAnimationFrame(()=>{
+    const scr=!S.ready?"scrLoad":!S.user?"scrAuth":!S.role?"scrWait":"app";
+    for(const s of ["scrLoad","scrAuth","scrWait","app"])$(s).hidden=s!==scr;
+    document.body.classList.toggle("can-write",canWrite());
+    if(scr==="scrWait")$("wUid").value=S.user.uid;
+    if(scr!=="app")return;
+    M=build(S.ecr);
+    $("demo").hidden=!DEMO;
+    $("src").textContent=[ASSO,`${M.lines.length} écritures`,M.maxIso?`dernière écriture le ${fdate(M.maxIso)}`:""].filter(Boolean).join(" · ");
+    $("who").textContent=`${S.user.nom} · ${canWrite()?"trésorier":"lecteur"}`;
+    $("evList").innerHTML=[...new Set(S.ecr.map(e=>String(e.evenement||"").replace(/\s+/g," ").trim().toUpperCase()).filter(Boolean))].sort().map(n=>`<option value="${esc(n)}"></option>`).join("");
+    if(season!=="all"&&!seasonsOf().includes(+season))season="all";
+    show();
+  });
+}
+
+/* ================= saisie ================= */
+function openEcriture(id){
+  editing=id?S.ecr.find(e=>e.id===id):null;
+  if(id&&!editing)return;
+  const e=editing||{compte:"CC",date:today(),evenement:"",designation:"",recette:0,depense:0,type:"Virement",commentaire:"",pointe:false};
+  $("eTitle").textContent=editing?"Modifier l'écriture":"Nouvelle écriture";
+  $("eAcc").value=e.compte==="LA"?"LA":"CC"; $("eDate").value=e.date||""; $("eEvt").value=e.evenement||""; $("eDes").value=e.designation||"";
+  const rec=(+e.recette||0)>0; $("eRec").checked=rec; $("eDep").checked=!rec;
+  const amt=rec?+e.recette:+e.depense||0; $("eAmt").value=amt?amt.toFixed(2).replace(".",","):"";
+  const t=$("eType"); if(e.type&&![...t.options].some(o=>o.value===e.type))t.add(new Option(e.type,e.type)); t.value=e.type||"Virement";
+  $("eCom").value=e.commentaire||""; $("ePt").checked=!!e.pointe; $("eDel").hidden=!editing; $("eErr").hidden=true;
+  $("dlgE").showModal(); (editing?$("eDes"):$("eEvt")).focus();
+}
+$("fE").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const amt=round2(parseNum($("eAmt").value)), err=$("eErr");
+  if(!(amt>0)){err.textContent="Le montant doit être un nombre positif, par exemple 125,50.";err.hidden=false;return;}
+  const rec=$("eRec").checked;
+  const data={compte:$("eAcc").value,date:$("eDate").value||null,evenement:$("eEvt").value.replace(/\s+/g," ").trim().toUpperCase(),designation:$("eDes").value.trim(),recette:rec?amt:0,depense:rec?0:amt,type:$("eType").value,commentaire:$("eCom").value.trim(),pointe:$("ePt").checked};
+  if(await run(store.saveEcriture(editing?editing.id:null,data,editing),editing?"Écriture modifiée.":"Écriture enregistrée."))$("dlgE").close();
+});
+$("eCancel").onclick=()=>$("dlgE").close();
+$("eDel").onclick=async()=>{
+  const e=editing; if(!e)return;
+  $("dlgE").close();
+  if(await ask(`Supprimer définitivement cette écriture ?\n${resume(e)}`,"Supprimer"))await run(store.removeEcriture(e),"Écriture supprimée. L'opération reste visible dans le journal.");
+};
+$("bNew").onclick=()=>openEcriture(null);
+$("bTransfer").onclick=()=>{$("tDate").value=today();$("tAmt").value="";$("tErr").hidden=true;$("dlgT").showModal();};
+$("tCancel").onclick=()=>$("dlgT").close();
+$("fT").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const amt=round2(parseNum($("tAmt").value)), toLA=document.querySelector("input[name=tDir]:checked").value==="CC>LA", date=$("tDate").value;
+  if(!(amt>0)){$("tErr").textContent="Le montant doit être un nombre positif.";$("tErr").hidden=false;return;}
+  const base={date,evenement:"TRANSFERT COMPTE",type:"Virement",commentaire:"",pointe:false};
+  const list=[Object.assign({},base,{compte:"CC",designation:toLA?"Virement vers Livret A":"Virement depuis Livret A",recette:toLA?0:amt,depense:toLA?amt:0}),
+              Object.assign({},base,{compte:"LA",designation:toLA?"Virement depuis compte courant":"Virement vers compte courant",recette:toLA?amt:0,depense:toLA?0:amt})];
+  if(await run(store.saveMany(list,`Virement interne du ${fdate(date)} : ${fm(amt)} ${toLA?"du compte courant vers le Livret A":"du Livret A vers le compte courant"}`),"Virement enregistré sur les deux comptes."))$("dlgT").close();
+});
+
+/* ================= budget ================= */
+function openBudget(name){
+  editBudget=name?S.budgets.find(b=>eventKey(b.evenement).parent===name):null;
+  $("bEvt").value=name||""; $("bEvt").readOnly=!!editBudget;
+  $("bRec").value=editBudget?String(editBudget.recettes).replace(".",","):""; $("bDep").value=editBudget?String(editBudget.depenses).replace(".",","):""; $("bNote").value=editBudget?editBudget.note||"":"";
+  $("bDel").hidden=!editBudget; $("dlgB").showModal();
+}
+$("bBudget").onclick=()=>openBudget("");
+$("bCancel").onclick=()=>$("dlgB").close();
+$("fB").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const data={evenement:eventKey($("bEvt").value).parent,recettes:round2(parseNum($("bRec").value)),depenses:round2(parseNum($("bDep").value)),note:$("bNote").value.trim()};
+  if(!data.evenement)return;
+  if(await run(store.saveBudget(data),"Budget enregistré."))$("dlgB").close();
+});
+$("bDel").onclick=async()=>{const b=editBudget;$("dlgB").close();if(b&&await ask(`Supprimer le budget de ${b.evenement} ?`,"Supprimer"))await run(store.removeBudget(b),"Budget supprimé.");};
+
+/* ================= import / export ================= */
+async function readFile(file){
+  if(typeof XLSX==="undefined")throw new Error("La bibliothèque de lecture Excel n'a pas pu se charger. Vérifiez la connexion puis rechargez la page.");
+  const wb=XLSX.read(await file.arrayBuffer(),{type:"array",raw:true});
+  let names=wb.SheetNames.filter(n=>/courant|livret/i.test(n)); if(!names.length)names=[wb.SheetNames[0]];
+  const rows=[]; let noDate=0;
+  for(const n of names){
+    const acc=/livret/i.test(n)?"LA":"CC";
+    for(const r of XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null})){
+      if(!r||!r.length)continue;
+      const R=round2(parseNum(r[3])), D=round2(parseNum(r[4]));
+      if(!(R>0)&&!(D>0))continue;
+      const date=parseDate(r[0]); if(!date)noDate++;
+      const pt=r[7]==null?null:/^(oui|x|✓|true|1)$/i.test(String(r[7]).trim());
+      rows.push({compte:acc,date,evenement:String(r[1]==null?"":r[1]).replace(/\s+/g," ").trim().toUpperCase(),designation:String(r[2]==null?"":r[2]).trim(),recette:R>0?R:0,depense:R>0?0:D,type:String(r[5]==null?"":r[5]).trim(),commentaire:r[6]==null?"":String(r[6]).trim(),pointe:pt});
+    }
+  }
+  if(!rows.length)throw new Error("Aucune écriture trouvée. Le fichier doit garder les colonnes Date, EVENEMENT, Designation, Recettes, Dépenses, Type de Payement, Commentaires.");
+  return {rows,sheets:names.length,noDate,name:file.name};
+}
+async function startImport(file){
+  if(!canWrite())return;
+  try{
+    pendingImport=await readFile(file);
+    const p=pendingImport;
+    $("iInfo").textContent=`${p.name} : ${p.rows.length} écritures lues sur ${p.sheets} feuille(s)`+(p.noDate?`, dont ${p.noDate} sans date lisible.`:".");
+    $("iModeF").hidden=!S.ecr.length; document.querySelector("input[name=iMode][value=add]").checked=true;
+    $("dlgI").showModal();
+  }catch(e){flash(e.message||"Fichier illisible.",true);}
+}
+$("iCancel").onclick=()=>$("dlgI").close();
+$("fI").addEventListener("submit",async ev=>{
+  ev.preventDefault();
+  const p=pendingImport; if(!p)return;
+  const replace=S.ecr.length>0&&document.querySelector("input[name=iMode]:checked").value==="replace", pt=$("iPt").checked;
+  const rows=p.rows.map(r=>Object.assign({},r,{pointe:r.pointe==null?pt:r.pointe}));
+  $("iGo").disabled=true;
+  const ok=await run(store.importRows(rows,replace,`${p.name} : ${rows.length} écritures ${replace?"(remplacement complet)":"ajoutées"}`),`${rows.length} écritures importées.`);
+  $("iGo").disabled=false; if(ok){$("dlgI").close();pendingImport=null;}
+});
+$("file").addEventListener("change",e=>{const f=e.target.files[0];if(f)startImport(f);e.target.value="";});
+function download(blob,name){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);}
+const HEAD=["Date","EVENEMENT","Designation","Recettes (€)","Dépenses (€)","Type de Payement","Commentaires","Pointé"];
+function exportXlsx(){
+  if(typeof XLSX==="undefined"){flash("La bibliothèque Excel n'a pas pu se charger.",true);return;}
+  const wb=XLSX.utils.book_new();
+  for(const [acc,title] of [["CC","Compte Courant"],["LA","Livret A"]]){
+    const aoa=[HEAD,...M.lines.filter(l=>l.acc===acc).map(l=>[l.iso?new Date(l.iso+"T00:00:00Z"):null,l.evt,l.des,l.rec||null,l.dep||null,l.type,l.com,l.pointe?"oui":""])];
+    const ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true,dateNF:"dd/mm/yyyy"});
+    ws["!cols"]=[{wch:12},{wch:24},{wch:48},{wch:13},{wch:13},{wch:16},{wch:40},{wch:8}];
+    XLSX.utils.book_append_sheet(wb,ws,title);
+  }
+  const syn=[["Événement","Début","Fin","Recettes","Dépenses","Résultat","Subvention","Résultat hors subvention"],...M.events.map(e=>[e.name,fdate(e.first),fdate(e.last),round2(e.rec),round2(e.dep),round2(e.res),round2(e.subv),round2(e.resHS)])];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(syn),"Synthèse événements");
+  download(new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),`cahier-des-comptes-${today()}.xlsx`);
+}
+function exportCsv(){
+  const q=v=>`"${String(v==null?"":v).replace(/"/g,'""')}"`, n=v=>v?v.toFixed(2).replace(".",","):"";
+  const rows=[["Compte",...HEAD].map(q).join(";"),...M.lines.map(l=>[l.acc==="LA"?"Livret A":"Compte courant",fdate(l.iso),l.evt,l.des,n(l.rec),n(l.dep),l.type,l.com,l.pointe?"oui":""].map(q).join(";"))];
+  download(new Blob(["﻿"+rows.join("\r\n")],{type:"text/csv;charset=utf-8"}),`cahier-des-comptes-${today()}.csv`);
+}
+$("xXlsx").onclick=exportXlsx; $("xCsv").onclick=exportCsv;
+
+/* ================= événements d'interface ================= */
+document.addEventListener("click",async e=>{
+  let t;
+  if((t=e.target.closest("[data-edit]"))){openEcriture(t.dataset.edit);return;}
+  if((t=e.target.closest("[data-s]"))){season=t.dataset.s;renderSynthese();return;}
+  if((t=e.target.closest("[data-ev]"))){curEv=t.dataset.ev;go("evenement");window.scrollTo(0,0);return;}
+  if((t=e.target.closest("[data-f]"))){curFam=t.dataset.f;renderEditions();return;}
+  if((t=e.target.closest("[data-bg]"))){openBudget(t.dataset.bg);return;}
+  if((t=e.target.closest("[data-ok]"))){const d=S.demandes.find(x=>x.id===t.dataset.ok);if(d)await run(store.setMembre(d.id,{email:d.email||"",nom:d.nom||"",role:"lecteur"}),"Accès accordé en lecture.");return;}
+  if((t=e.target.closest("[data-no]"))){const d=S.demandes.find(x=>x.id===t.dataset.no);if(d)await run(store.refuse(d),"Demande refusée.");return;}
+  if((t=e.target.closest("[data-rm]"))){const m=S.membres.find(x=>x.id===t.dataset.rm);if(m&&await ask(`Retirer l'accès de ${m.nom||m.email} ?`,"Retirer"))await run(store.removeMembre(m),"Accès retiré.");return;}
+});
+document.addEventListener("change",async e=>{
+  const t=e.target;
+  if(t.dataset.pt){const l=M.lines.find(x=>x.id===t.dataset.pt);if(l&&!await run(store.setPointe([l.id],t.checked,resume({date:l.iso,compte:l.acc,evenement:l.evt,designation:l.des,recette:l.rec,depense:l.dep}))))t.checked=!t.checked;return;}
+  if(t.dataset.role){const m=S.membres.find(x=>x.id===t.dataset.role);if(m)await run(store.setMembre(m.id,{email:m.email||"",nom:m.nom||"",role:t.value}),"Rôle modifié.");return;}
+});
+$("rBulk").onclick=async()=>{
+  const until=$("rUntil").value, ids=rapLines().filter(l=>!l.pointe&&(!until||!l.iso||l.iso<=until)).map(l=>l.id);
+  if(ids.length&&await ask(`Pointer ${ids.length} écriture(s) du ${$("rAcc").value==="LA"?"Livret A":"compte courant"}${until?" jusqu'au "+fdate(until):""} ?`,"Pointer"))
+    await run(store.setPointe(ids,true,`${ids.length} écritures pointées en une fois${until?" jusqu'au "+fdate(until):""}`),"Écritures pointées.");
+};
+for(const id of ["rAcc","rAll","rUntil"])$(id).addEventListener("change",renderRap);
+$("rRel").addEventListener("input",renderRap);
+$("evSel").addEventListener("change",e=>{curEv=e.target.value;renderEvent();});
+$("q").addEventListener("input",renderLines); for(const id of ["fEv","fCat","fAcc"])$(id).addEventListener("change",renderLines);
+$("copyEv").addEventListener("click",async()=>{
+  const evs=M.events.filter(inSeason), n=v=>v.toFixed(2).replace(".",",");
+  const t=["Événement\tRecettes\tDépenses\tRésultat\tHors subvention",...evs.map(e=>[e.name,n(e.rec),n(e.dep),n(e.res),n(e.resHS)].join("\t"))].join("\n");
+  try{await navigator.clipboard.writeText(t);flash("Tableau copié : collez-le dans un tableur ou un courriel.");}catch(err){flash("La copie a été refusée par le navigateur.",true);}
+});
+const app=$("app");
+app.addEventListener("dragover",e=>{if(canWrite()){e.preventDefault();app.classList.add("drop");}});
+app.addEventListener("dragleave",()=>app.classList.remove("drop"));
+app.addEventListener("drop",e=>{if(!canWrite())return;e.preventDefault();app.classList.remove("drop");const f=e.dataTransfer.files[0];if(f)startImport(f);});
+window.addEventListener("hashchange",()=>{if(S.user&&S.role)show();});
+
+/* ================= connexion ================= */
+let signup=false;
+function authMsg(t,err){const m=$("authMsg");m.textContent=t||"";m.hidden=!t;m.classList.toggle("err",!!err);}
+$("aSwitch").onclick=()=>{signup=!signup;$("fldNom").hidden=!signup;$("aNom").required=signup;$("aGo").textContent=signup?"Créer mon compte":"Se connecter";$("aSwitch").textContent=signup?"J'ai déjà un compte":"Créer mon compte";$("aPw").autocomplete=signup?"new-password":"current-password";authMsg("");};
+$("fLogin").addEventListener("submit",async e=>{
+  e.preventDefault(); authMsg(""); $("aGo").disabled=true;
+  try{ if(signup)await store.signUp($("aNom").value.trim(),$("aMail").value.trim(),$("aPw").value); else await store.signIn($("aMail").value.trim(),$("aPw").value); }
+  catch(err){authMsg(fbErr(err),true);}
+  $("aGo").disabled=false;
+});
+$("aReset").onclick=async()=>{const m=$("aMail").value.trim();if(!m){authMsg("Saisissez d'abord votre adresse e-mail.",true);return;}try{await store.reset(m);authMsg("Un e-mail de réinitialisation vient d'être envoyé à "+m+".");}catch(err){authMsg(fbErr(err),true);}};
+$("bOut").onclick=()=>store.signOut(); $("wOut").onclick=()=>store.signOut(); $("wRetry").onclick=()=>location.reload();
+
+/* ================= démarrage ================= */
+$("assoA").textContent=ASSO;
+onData=render;
+try{
+  if(DEMO)store=demoStore();
+  else if(typeof firebase==="undefined")throw new Error("Les bibliothèques Firebase n'ont pas pu se charger. Vérifiez la connexion Internet puis rechargez la page.");
+  else store=firebaseStore();
+}catch(e){$("scrLoad").innerHTML=`<div class="msg err">${esc(e.message||e)}</div>`;}
+render();
+</script>
+</body>
+</html>
