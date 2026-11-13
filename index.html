@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cahier des comptes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   /* Registre comptable : papier froid, encre bleue, vert/rouge réservés au résultat. Une colonne, synthèse avant détail. */
@@ -348,8 +348,136 @@ tr[data-row]{cursor:default}
   #v-ecritures .card>p.small{display:none}
   #lastSave{display:none}
 }
+
+/* ================= v8 : nuit de fête ================= */
+html[data-theme=jour]{color-scheme:light;--bg:#f4f6f5;--surface:#ffffff;--ink:#17211e;--muted:#5c6a65;--line:#e1e6e3;--accent:#1d4e89;--accent-soft:#e3ecf6;--good:#1c7a4c;--good-soft:#dff1e7;--bad:#b4372f;--bad-soft:#f8e2df;--warn:#9a6200;--warn-soft:#f7ecd2;--side:rgba(255,255,255,.78);--card:rgba(255,255,255,.86);--a1:rgba(29,78,137,.10);--a2:rgba(255,181,71,.12);--a3:rgba(28,122,76,.08)}
+html[data-theme=nuit]{color-scheme:dark;--bg:#090d1c;--surface:#131a30;--ink:#eef1fb;--muted:#9aa3c2;--line:rgba(255,255,255,.10);--accent:#ffb547;--accent-soft:rgba(255,181,71,.15);--good:#4be3a2;--good-soft:rgba(75,227,162,.15);--bad:#ff7a7a;--bad-soft:rgba(255,122,122,.16);--warn:#ffd166;--warn-soft:rgba(255,209,102,.15);--side:rgba(12,17,36,.66);--card:rgba(21,28,52,.66);--a1:rgba(255,140,60,.20);--a2:rgba(214,70,160,.16);--a3:rgba(50,160,220,.16)}
+:root{--display:"Space Grotesk","IBM Plex Sans",system-ui,sans-serif}
+body{position:relative;min-height:100vh}
+body::before{content:"";position:fixed;inset:-20vmax;z-index:-2;pointer-events:none;background:radial-gradient(38vmax 38vmax at 22% 28%,var(--a1),transparent 70%),radial-gradient(42vmax 42vmax at 82% 18%,var(--a2),transparent 70%),radial-gradient(46vmax 46vmax at 60% 88%,var(--a3),transparent 70%);animation:aur 46s ease-in-out infinite alternate}
+@keyframes aur{to{transform:translate3d(4vmax,-3vmax,0) rotate(8deg) scale(1.08)}}
+html[data-theme=nuit] body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;background-image:radial-gradient(1px 1px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 67% 9%,#fff 50%,transparent 51%),radial-gradient(1.4px 1.4px at 41% 63%,#ffe2ad 50%,transparent 51%),radial-gradient(1px 1px at 88% 52%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 26% 84%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 74% 78%,#bfe3ff 50%,transparent 51%);background-size:420px 380px}
+.shell{background:none !important}
+.side{background:var(--side);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3)}
+.topbar{background:color-mix(in srgb,var(--bg) 72%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+h1,h2,.tile .v,.hero-main>b,.fh-title h2,.brand b{font-family:var(--display)}
+.card,.tile,.fhead{background:var(--card);border-radius:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 30px -18px rgba(0,0,0,.45)}
+.tile{position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
+.tile:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.tile::after{content:"";position:absolute;left:16px;right:16px;top:0;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.55}
+html[data-theme=nuit] .v.pos,html[data-theme=nuit] td.pos{text-shadow:0 0 16px rgba(75,227,162,.35)}
+html[data-theme=nuit] .v.neg{text-shadow:0 0 16px rgba(255,122,122,.3)}
+html[data-theme=nuit] .card a:not(.btn),html[data-theme=nuit] .fhead a{color:var(--accent)}
+html[data-theme=nuit] button.primary,html[data-theme=nuit] .btn.primary{background:linear-gradient(135deg,#ffc56b,#ff9a3d);border-color:transparent;color:#1b1206;font-weight:600;box-shadow:0 6px 22px -8px rgba(255,160,60,.7)}
+html[data-theme=nuit] button.primary:hover{filter:brightness(1.08)}
+html[data-theme=nuit] .chip.on,html[data-theme=nuit] .seg label:has(input:checked),html[data-theme=nuit] .seg input:checked+span{color:#1b1206}
+html[data-theme=nuit] #flash{background:#eef1fb;color:#0b1020}
+html[data-theme=nuit] #flash.err{background:var(--bad);color:#2a0808}
+html[data-theme=nuit] .fill,html[data-theme=nuit] .bar{box-shadow:0 0 14px -2px currentColor}
+html[data-theme=nuit] dialog{background:#121930;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+html[data-theme=nuit] dialog::backdrop{background:rgba(4,6,16,.62);backdrop-filter:blur(6px)}
+html[data-theme=nuit] input,html[data-theme=nuit] select,html[data-theme=nuit] textarea{background:rgba(255,255,255,.05);border-color:var(--line)}
+html[data-theme=nuit] input:focus,html[data-theme=nuit] select:focus,html[data-theme=nuit] textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);outline:0}
+html[data-theme=nuit] select option{background:#131a30}
+html[data-theme=nuit] .pop{background:#141c36}
+html[data-theme=nuit] tr.clk:hover td,html[data-theme=nuit] .evl button:hover,html[data-theme=nuit] #sideNav a:hover,html[data-theme=nuit] #sideNav2 a:hover,html[data-theme=nuit] .navbtn:hover{background:rgba(255,255,255,.05)}
+#sideNav a.on,#sideNav2 a.on{position:relative}
+#sideNav a.on::before,#sideNav2 a.on::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.brand .logo{background:conic-gradient(from 0deg,#ffb547,#ff5fa2,#5fc8ff,#4be3a2,#ffb547);color:#0b1020;border-radius:50%;position:relative;animation:spin 14s linear infinite}
+.brand .logo::after{content:"€";position:absolute;inset:3px;border-radius:50%;background:var(--surface);color:var(--ink);display:grid;place-items:center;animation:spin 14s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+section.view.on>*{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+section.view.on>:nth-child(2){animation-delay:.05s}section.view.on>:nth-child(3){animation-delay:.1s}section.view.on>:nth-child(4){animation-delay:.15s}section.view.on>:nth-child(n+5){animation-delay:.2s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+/* accueil : orbite */
+.hero{display:grid;grid-template-columns:minmax(250px,.8fr) minmax(0,1.5fr);gap:8px;align-items:center;padding:22px 24px 14px;border:1px solid rgba(255,255,255,.10);background:radial-gradient(120% 140% at 85% 10%,#27306a 0%,#141a3c 45%,#0a0e22 100%);box-shadow:0 30px 70px -30px rgba(10,14,40,.9)}
+.hero .hero-main .spark{position:static;width:210px;height:34px;opacity:.6;margin-top:12px;color:#ffd08a}
+.orbit{min-width:0;display:flex;flex-direction:column;align-items:center}
+.orbit svg{max-width:100%;overflow:visible;touch-action:pan-y}
+.oring{fill:none;stroke:rgba(255,255,255,.16);stroke-width:1}
+.oring.fut{stroke:rgba(255,181,71,.45);stroke-dasharray:3 7}
+.ocv{font:600 13px var(--display);fill:#2a1703}
+.opulse{fill:none;stroke:#ffb547;stroke-width:1.5;transform-box:fill-box;transform-origin:center;animation:pulse 3.2s ease-out infinite}
+@keyframes pulse{from{transform:scale(1);opacity:.7}to{transform:scale(2.3);opacity:0}}
+.pl{cursor:pointer;outline:0}
+.pl circle{transition:r .2s}
+.pl.fut circle{fill:rgba(255,181,71,.12);stroke:#ffb547;stroke-width:1.6;stroke-dasharray:3 3}
+.pl .on{font:500 10px var(--body);fill:rgba(255,255,255,.78);letter-spacing:.03em}
+.pl .rs{font:600 10.5px var(--body);opacity:0;transition:opacity .15s}
+.pl.good .rs{fill:#7df0bd}.pl.bad .rs{fill:#ff9a94}.pl.fut .rs{fill:#ffd08a;opacity:.9}
+.pl:hover .rs,.pl:focus .rs{opacity:1}
+.pl:hover circle,.pl:focus circle{stroke:#fff;stroke-width:2;stroke-dasharray:none}
+.pl:hover .on,.pl:focus .on{fill:#fff}
+.oleg{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-size:11.5px;color:rgba(255,255,255,.7);margin-top:2px}
+.oleg .muted{color:rgba(255,255,255,.45)}
+.oleg .d{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.oleg .good{background:#4be3a2}.oleg .bad{background:#ff7a7a}.oleg .fut{border:1.5px dashed #ffb547;width:7px;height:7px}
+.quick button,.hnext button{background:var(--card);transition:transform .15s,border-color .15s}
+.quick button:hover,.hnext button:hover{transform:translateY(-2px)}
+html[data-theme=nuit] .hnext .jj{background:linear-gradient(135deg,#ffc56b,#ff9a3d);color:#1b1206;box-shadow:0 0 22px -4px rgba(255,160,60,.8)}
+/* connexion et chargement */
+#scrLoad{min-height:80vh;display:grid;place-items:center}
+#scrLoad p{font-size:0}
+#scrLoad p::before{content:"";display:block;width:54px;height:54px;border-radius:50%;background:radial-gradient(circle,#fff3d6,#ffb547 45%,transparent 70%);animation:breath 1.4s ease-in-out infinite alternate}
+@keyframes breath{from{transform:scale(.7);opacity:.6}to{transform:scale(1.15);opacity:1}}
+.auth.card{backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:26px}
+@media (max-width:880px){
+  .botnav{background:var(--side);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+  #fab{border-color:var(--bg)}
+  html[data-theme=nuit] #fab{background:linear-gradient(135deg,#ffc56b,#ff8a3d);color:#1b1206;box-shadow:0 0 0 0 rgba(255,170,70,.6);animation:fabp 2.6s ease-out infinite}
+  .hero{grid-template-columns:1fr;padding:16px 14px 12px}
+  .hero .orbit{order:-1}
+  .hero .hero-main .spark{display:none}
+}
+@keyframes fabp{70%{box-shadow:0 0 0 16px rgba(255,170,70,0)}100%{box-shadow:0 0 0 0 rgba(255,170,70,0)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+@media print{html[data-theme]{color-scheme:light;--bg:#fff;--surface:#fff;--ink:#17211e;--muted:#5c6a65;--line:#d8dedb;--accent:#1d4e89;--accent-soft:#e3ecf6;--good:#1c7a4c;--good-soft:#dff1e7;--bad:#b4372f;--bad-soft:#f8e2df;--warn:#9a6200;--warn-soft:#f7ecd2;--card:#fff}body::before,body::after{display:none !important}*{text-shadow:none !important;box-shadow:none !important}}
+
+/* ================= v9 : moins comptable ================= */
+.hchart{min-width:0;align-self:stretch;display:flex;align-items:flex-end}
+.hchart svg{max-width:100%;overflow:visible;touch-action:pan-y}
+.hcl{fill:none;stroke:#ffb547;stroke-width:2.2;stroke-linejoin:round}
+.hcg{stroke:rgba(255,255,255,.10);stroke-dasharray:2 5}
+.hct{font:11px var(--body);fill:rgba(255,255,255,.55)}
+.hcd{fill:#ffb547;stroke:#141a3c;stroke-width:2}
+.hcx{stroke:rgba(255,255,255,.35)}
+.hcv{font:600 12px var(--body);fill:#fff}
+.story{margin:0;font-size:17px;line-height:1.55;max-width:70ch;color:var(--ink)}
+.story .pos{color:var(--good)}.story .neg{color:var(--bad)}
+.io{width:34px;height:34px;border-radius:50%;display:grid;place-items:center}
+.io svg{width:16px;height:16px}
+.io.in{background:var(--good-soft);color:var(--good)}
+.io.out{background:rgba(127,140,170,.16);color:var(--muted)}
+tr.lr .c-dep,#hLast td.neg{color:var(--ink) !important;text-shadow:none !important}
+tr.lr .c-rec::before{content:"+"}tr.lr .c-dep::before{content:"−"}
+@media (min-width:701px){
+  table:has(tr.lr),table:has(tr.lr) tbody,table:has(tr.lr) thead{display:block}
+  table:has(tr.lr) thead tr{display:flex;align-items:center;gap:10px;padding:2px 8px 8px}
+  table:has(tr.lr) thead th{display:none;border:0;padding:0}
+  table:has(tr.lr) thead th.sel{display:flex;align-items:center;gap:10px;width:auto;font-weight:400;text-transform:none;letter-spacing:0;font-size:13px;color:var(--muted)}
+  table:has(tr.lr) thead th.sel::after{content:"Tout sélectionner"}
+  tr.lr{display:grid;grid-template-columns:auto 34px minmax(0,1.8fr) minmax(0,1fr) minmax(0,1fr) 92px 128px 82px auto;column-gap:14px;align-items:center;padding:9px 8px;border-bottom:1px solid var(--line);border-radius:10px}
+  tr.lr:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
+  tr.lr.picked{background:var(--accent-soft)}
+  tr.lr td{border:0;padding:0;background:none !important;min-width:0}
+  tr.lr .sel,tr.lr .c-ptc{grid-column:1;grid-row:1 / span 2;width:auto}
+  tr.lr .c-ic{grid-column:2;grid-row:1 / span 2}
+  tr.lr .c-des{grid-column:3;grid-row:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  tr.lr .c-com{grid-column:3;grid-row:2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  tr.lr .c-evt{grid-column:4;grid-row:1 / span 2;justify-self:start;max-width:100%;padding:3px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box}
+  tr.lr .c-cat{grid-column:5;grid-row:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+  tr.lr .c-type{grid-column:5;grid-row:2;color:var(--muted);font-size:12px}
+  tr.lr .c-date{grid-column:6;grid-row:1 / span 2;color:var(--muted);font-size:13px}
+  tr.lr .c-rec,tr.lr .c-dep{grid-column:7;grid-row:1 / span 2;text-align:right;font-weight:600;font-size:15px}
+  tr.lr .c-rec:empty,tr.lr .c-dep:empty{display:none}
+  tr.lr .c-pt{grid-column:8;grid-row:1 / span 2;color:var(--good);font-size:12px;white-space:nowrap}
+  tr.lr .c-act{grid-column:9;grid-row:1 / span 2;opacity:0;transition:opacity .15s}
+  tr.lr:hover .c-act,tr.lr:focus-within .c-act{opacity:1}
+}
+@media (max-width:700px){tr.lr .c-ic{display:none}.hero .hchart{order:0}}
 @media (display-mode:standalone){.side{padding-top:max(18px,env(safe-area-inset-top))}}
 </style>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('cahier-theme')||'nuit'}catch(e){document.documentElement.dataset.theme='nuit'}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f4f6f5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1513" media="(prefers-color-scheme: dark)">
@@ -402,10 +530,11 @@ tr[data-row]{cursor:default}
       <a href="#evenements" data-sec="evenements"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Événements</a>
       <a href="#stock" data-sec="stock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Stock</a>
       <a href="#encarts" data-sec="encarts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Encarts</a>
-      <a href="#synthese" data-sec="rapports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Rapports</a>
+      <a href="#synthese" data-sec="rapports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Bilans</a>
     </nav>
     <div class="sep"></div>
     <nav id="sideNav2"><a href="#reglages" data-sec="reglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Réglages</a>
+      <button type="button" class="navbtn" data-theme-toggle><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:18px;height:18px"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>Thème clair</button>
       <button type="button" id="bInstall" class="navbtn" hidden>Installer l'application</button></nav>
     <div class="me"><div class="av" id="whoIni" aria-hidden="true"></div><div class="who"><b id="who"></b><span id="whoRole"></span></div><button type="button" class="mini" id="bOut" title="Se déconnecter">Sortir</button></div>
   </aside>
@@ -458,7 +587,7 @@ tr[data-row]{cursor:default}
 
   <div class="card" id="empty" hidden>
     <h2>Le cahier est vide</h2>
-    <p style="margin:0" class="w">Reprenez l'historique : dans Google Sheets, <b>Fichier → Télécharger → Microsoft Excel (.xlsx)</b>, puis importez le fichier ici. Vous pouvez aussi commencer par une première écriture.</p>
+    <p style="margin:0" class="w">Reprenez l'historique : dans Google Sheets, <b>Fichier → Télécharger → Microsoft Excel (.xlsx)</b>, puis importez le fichier ici. Vous pouvez aussi commencer par une première opération.</p>
     <div class="row w"><label class="btn primary" for="file">Importer l'historique (.xlsx)</label></div>
   </div>
   <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
@@ -478,19 +607,20 @@ tr[data-row]{cursor:default}
     </div>
     <div class="card"><h2>Points d'attention</h2><ul class="notes" id="insights"></ul></div>
     <div class="card"><h2>Évolution de la trésorerie</h2><div id="tresoChart"></div>
-      <p class="small muted" style="margin:0">Compte courant + Livret A cumulés, écriture après écriture.</p></div>
+      <p class="small muted" style="margin:0">Compte courant + Livret A cumulés, opération après opération.</p></div>
   </section>
 
   <section class="view" id="v-evenement">
     <div class="row"><label for="evSel" class="muted evpick">Événement</label><select id="evSel" class="evpick"></select><span id="evStatus"></span></div>
+    <p class="story" id="evStory"></p>
     <div class="tiles" id="evTiles"></div>
     <div class="two">
-      <div class="card"><h2>Recettes par poste</h2><div class="hb" id="evRec"></div></div>
-      <div class="card"><h2>Dépenses par poste</h2><div class="hb" id="evDep"></div></div>
+      <div class="card"><h2>D'où vient l'argent</h2><div class="hb" id="evRec"></div></div>
+      <div class="card"><h2>Où part l'argent</h2><div class="hb" id="evDep"></div></div>
     </div>
     <div class="two">
       <div class="card"><h2>Ratios utiles</h2><div class="scroll"><table id="evRatios"></table></div>
-        <p class="small muted" style="margin:0">Ratios indicatifs : ils dépendent du libellé des écritures (une facture de courses peut mélanger repas et buvette).</p></div>
+        <p class="small muted" style="margin:0">Ratios indicatifs : ils dépendent du libellé des opérations (une facture de courses peut mélanger repas et buvette).</p></div>
       <div class="card"><h2>Moyens d'encaissement</h2><div class="hb" id="evPay"></div><div id="evSubs"></div></div>
     </div>
     <div class="card" id="caisseCard" hidden>
@@ -515,7 +645,7 @@ tr[data-row]{cursor:default}
     <div id="recBanner" class="msg" hidden></div>
     <div class="card">
       <div class="row between">
-        <div class="row"><input type="search" id="q" placeholder="Rechercher (désignation, commentaire, poste…)" aria-label="Rechercher dans les opérations" style="min-width:260px"><button type="button" id="fToggle">Filtrer</button></div>
+        <div class="row"><input type="search" id="q" placeholder="Rechercher (intitulé, commentaire, catégorie…)" aria-label="Rechercher dans les opérations" style="min-width:260px"><button type="button" id="fToggle">Filtrer</button></div>
         <details class="menu"><summary class="btn">Importer / exporter</summary><div class="pop">
           <label class="mi w" for="file">Importer un fichier (historique .xlsx ou relevé .csv)</label>
           <button type="button" id="xXlsx">Sauvegarde Excel (format Google Sheet)</button>
@@ -525,22 +655,22 @@ tr[data-row]{cursor:default}
       <div class="row" id="fAdv" hidden>
         <select id="fAcc" aria-label="Filtrer par compte"><option value="">Tous les comptes</option><option value="CC">Compte courant</option><option value="LA">Livret A</option></select>
         <select id="fEv" aria-label="Filtrer par événement"></select>
-        <select id="fCat" aria-label="Filtrer par poste"></select>
-        <select id="fPt" aria-label="Filtrer par pointage"><option value="">Pointées ou non</option><option value="oui">Pointées</option><option value="non">Non pointées</option></select>
+        <select id="fCat" aria-label="Filtrer par catégorie"></select>
+        <select id="fPt" aria-label="Filtrer par vérification"><option value="">Vérifiées ou non</option><option value="oui">Vérifiées</option><option value="non">À vérifier</option></select>
         <label class="small muted" for="fDu">du</label><input type="date" id="fDu">
         <label class="small muted" for="fAu">au</label><input type="date" id="fAu">
         <button type="button" id="fClear">Effacer les filtres</button>
       </div>
       <span class="muted small"><span id="lnCount"></span><span id="lastSave"></span></span>
-      <p class="small muted w" style="margin:0">Cochez des écritures pour les modifier en une fois. Maj + clic coche toute une plage.</p>
+      <p class="small muted w" style="margin:0">Cochez des opérations pour les modifier en une fois. Maj + clic coche toute une plage.</p>
       <div class="scroll"><table id="lnTable"></table></div>
     </div>
     <div class="bulk" id="bulk" hidden>
       <span id="bulkInfo" class="small"></span>
       <div class="row">
         <button type="button" class="primary" id="bkEdit">Modifier…</button>
-        <button type="button" id="bkPt">Pointer</button>
-        <button type="button" id="bkUnpt">Dépointer</button>
+        <button type="button" id="bkPt">Vérifier la banque</button>
+        <button type="button" id="bkUnpt">Marquer non vérifiées</button>
         <button type="button" id="bkDup">Dupliquer</button>
         <button type="button" id="bkCsv">Exporter</button>
         <button type="button" class="danger" id="bkDel">Supprimer</button>
@@ -555,7 +685,7 @@ tr[data-row]{cursor:default}
         <div class="row w"><button type="button" id="evFix" hidden></button><button type="button" id="evAll">Ajouter les événements du cahier</button><button type="button" class="primary" id="evNew">+ Nouvel événement</button></div></div>
       <div class="chips" id="evFilt"></div>
       <div class="scroll"><table id="bgTable"></table></div>
-      <p class="small muted" style="margin:0">Seuls les événements « en cours » sont proposés à la saisie, avec leurs sous-rubriques. Le réalisé neutralise les fonds de caisse. Un écart positif signifie que l'événement fait mieux que prévu. Changer le nom d'un événement renomme toutes ses écritures ; choisir le nom d'un autre événement les fusionne.</p>
+      <p class="small muted" style="margin:0">Seuls les événements « en cours » sont proposés à la saisie, avec leurs sous-rubriques. Le réalisé neutralise les fonds de caisse. Un écart positif signifie que l'événement fait mieux que prévu. Changer le nom d'un événement renomme toutes ses opérations ; choisir le nom d'un autre événement les fusionne.</p>
     </div>
   </section>
 
@@ -567,13 +697,13 @@ tr[data-row]{cursor:default}
       </div>
       <div class="tiles" id="pvTiles"></div>
       <div class="scroll"><table id="pvTable"></table></div>
-      <p class="small muted" style="margin:0">Réalisé : écritures du cahier pour cet événement, par poste. Écart positif : mieux que prévu. « Pour l'équilibre » : quantité à vendre, les autres lignes restant identiques, pour un résultat nul. Une dépense « engagée » correspond à un devis signé ou une commande passée. Le total du prévisionnel devient le budget de l'événement.</p>
+      <p class="small muted" style="margin:0">Réalisé : opérations du cahier pour cet événement, par poste. Écart positif : mieux que prévu. « Pour l'équilibre » : quantité à vendre, les autres lignes restant identiques, pour un résultat nul. Une dépense « engagée » correspond à un devis signé ou une commande passée. Le total du prévisionnel devient le budget de l'événement.</p>
     </div>
     <div class="card" id="prjCard">
       <div class="row between"><h2>Trésorerie prévisionnelle sur 12 mois</h2><span id="prjPill"></span></div>
       <div id="prjChart"></div>
       <div class="scroll"><table id="prjTable"></table></div>
-      <p class="small muted" style="margin:0">Part de la trésorerie actuelle. Au mois de chaque événement en cours, ajoute ce qui reste à encaisser et à payer d'après son prévisionnel ; les dépenses engagées avec une échéance sont placées à leur échéance. Ajoute aussi les écritures récurrentes. Seuil d'alerte réglable dans Réglages.</p>
+      <p class="small muted" style="margin:0">Part de la trésorerie actuelle. Au mois de chaque événement en cours, ajoute ce qui reste à encaisser et à payer d'après son prévisionnel ; les dépenses engagées avec une échéance sont placées à leur échéance. Ajoute aussi les opérations régulières. Seuil d'alerte réglable dans Réglages.</p>
     </div>
   </section>
 
@@ -596,15 +726,15 @@ tr[data-row]{cursor:default}
         <select id="rAcc" aria-label="Compte"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select>
         <div class="field" style="flex-direction:row;align-items:center;gap:8px"><label for="rRel">Solde du relevé bancaire</label><input type="text" inputmode="decimal" id="rRel" placeholder="ex. 2 053,18" style="width:140px"></div>
       </div>
-      <div class="row w"><label class="btn primary" for="relFile">Importer un relevé bancaire (CSV)</label><input type="file" id="relFile" accept=".csv,.txt,.xlsx,.xls" hidden><span class="small muted">Les opérations déjà saisies sont pointées, les nouvelles sont ajoutées au cahier.</span></div>
+      <div class="row w"><label class="btn primary" for="relFile">Importer un relevé bancaire (CSV)</label><input type="file" id="relFile" accept=".csv,.txt,.xlsx,.xls" hidden><span class="small muted">Les opérations déjà saisies sont vérifiées, les nouvelles sont ajoutées au cahier.</span></div>
       <div class="tiles" id="rTiles"></div>
     </div>
     <div class="card">
       <div class="row between">
-        <h2 id="rTitle">Écritures non pointées</h2>
+        <h2 id="rTitle">Opérations pas encore vues en banque</h2>
         <div class="row">
-          <label class="small"><input type="checkbox" id="rAll"> Afficher aussi les écritures pointées</label>
-          <span class="w row"><label for="rUntil" class="small muted">jusqu'au</label><input type="date" id="rUntil"><button type="button" id="rBulk">Pointer</button></span>
+          <label class="small"><input type="checkbox" id="rAll"> Afficher aussi les opérations vérifiées</label>
+          <span class="w row"><label for="rUntil" class="small muted">jusqu'au</label><input type="date" id="rUntil"><button type="button" id="rBulk">Vérifier la banque</button></span>
         </div>
       </div>
       <div class="scroll"><table id="rTable"></table></div>
@@ -630,20 +760,20 @@ tr[data-row]{cursor:default}
 
   <section class="view" id="v-controles">
     <div class="card"><h2>Cohérence des comptes</h2><div class="scroll"><table id="ctlRecon"></table></div></div>
-    <div class="card"><h2>Écritures à vérifier</h2><div id="ctlList"></div></div>
+    <div class="card"><h2>Opérations à vérifier</h2><div id="ctlList"></div></div>
     <div class="card"><h2>Comment les chiffres sont calculés</h2>
       <ul class="notes">
-        <li><b>Événement</b> : champ « Événement » de l'écriture. Les sous-rubriques « FETE 2025 - REPAS », « - GOODIES », « - TEXTILLE » ainsi que « TEXTILLE 2026 » sont rattachées à la fête de la même année.</li>
+        <li><b>Événement</b> : champ « Événement » de l'opération. Les sous-rubriques « FETE 2025 - REPAS », « - GOODIES », « - TEXTILLE » ainsi que « TEXTILLE 2026 » sont rattachées à la fête de la même année.</li>
         <li><b>Fonds de caisse</b> : un retrait (type « Retrait », hors « paiement ») n'est pas une dépense ; il est déduit des recettes de caisse, puisqu'il revient à la banque dans les dépôts.</li>
-        <li><b>Mouvements internes</b> : virements compte courant ↔ Livret A, « TRANSFERT COMPTE », reprises de solde. Ils n'entrent dans aucun résultat. Le bouton « Virement interne » crée les deux écritures d'un coup.</li>
+        <li><b>Mouvements internes</b> : virements compte courant ↔ Livret A, « TRANSFERT COMPTE », reprises de solde. Ils n'entrent dans aucun résultat. Le bouton « Virement interne » crée les deux opérations d'un coup.</li>
         <li><b>Hors événements</b> : « AUTRE » (frais de tenue de compte, assurance…), « REUNION AG », « INVESTISSEMENT », intérêts du Livret A.</li>
-        <li><b>Postes</b> : attribués automatiquement d'après les mots de la désignation (ABD → Boissons, BIARD → Traiteur, SACEM → Droits d'auteur…).</li>
+        <li><b>Postes</b> : attribués automatiquement d'après les mots de l'intitulé (ABD → Boissons, BIARD → Traiteur, SACEM → Droits d'auteur…).</li>
       </ul>
     </div>
   </section>
 
   <section class="view" id="v-journal">
-    <div class="card"><h2>Journal des modifications</h2>
+    <div class="card"><h2>Historique des modifications</h2>
       <p class="small muted" style="margin:0">Les 300 dernières opérations. Le journal ne peut être ni modifié ni effacé depuis l'application.</p>
       <div class="scroll"><table id="jTable"></table></div></div>
   </section>
@@ -713,8 +843,8 @@ tr[data-row]{cursor:default}
     <div class="card w"><h2>Saisie</h2>
       <div class="row"><div class="field" style="max-width:260px"><label for="sFrais">Frais bancaires par virement (€)</label><input type="text" inputmode="decimal" id="sFrais"></div><div class="field" style="max-width:260px"><label for="sSeuil">Seuil d'alerte de trésorerie (€)</label><input type="text" inputmode="decimal" id="sSeuil"></div><button type="button" id="sFraisOk">Enregistrer</button></div>
       <p class="small muted" style="margin:0">Frais : montant proposé par la case « Ajouter aussi les frais de virement » (0 pour masquer la case). Seuil : la trésorerie prévisionnelle vous alerte si elle descend en dessous.</p></div>
-    <div class="card w"><div class="row between"><h2>Écritures récurrentes</h2><button type="button" class="primary" id="uNew">+ Écriture récurrente</button></div>
-      <p class="small muted" style="margin:0">Chaque mois, l'application propose de créer ces écritures (frais de tenue de compte, cotisation carte…).</p>
+    <div class="card w"><div class="row between"><h2>Opérations régulières</h2><button type="button" class="primary" id="uNew">+ Opération régulière</button></div>
+      <p class="small muted" style="margin:0">Chaque mois, l'application propose de créer ces opérations (frais de tenue de compte, cotisation carte…).</p>
       <div class="scroll"><table id="uTable"></table></div></div>
     <div class="card"><h2>Application sur téléphone</h2>
       <p style="margin:0" id="instTxt"></p>
@@ -728,7 +858,7 @@ tr[data-row]{cursor:default}
     <div class="fabw ws"><button type="button" id="fab" aria-label="Nouveau">+</button></div>
     <a href="#evenements" data-sec="evenements"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Événements</a>
     <details class="menu"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg>Plus</summary>
-      <div class="pop"><a href="#stock">Stock</a><a href="#encarts">Encarts</a><a href="#synthese">Rapports</a><a href="#reglages">Réglages</a><button type="button" data-signout="1">Se déconnecter</button></div></details>
+      <div class="pop"><a href="#stock">Stock</a><a href="#encarts">Encarts</a><a href="#synthese">Bilans</a><a href="#reglages">Réglages</a><button type="button" data-theme-toggle><span></span>Thème clair</button><button type="button" data-signout="1">Se déconnecter</button></div></details>
   </nav>
 </div>
 <dialog id="dlgNew" class="sheet"><h2>Nouveau</h2><div class="grid">
@@ -740,7 +870,7 @@ tr[data-row]{cursor:default}
   <button type="button" class="ws" data-quick="inventaire"><span class="ic">≡</span>Inventaire</button>
   <button type="button" class="w" data-quick="evenement"><span class="ic">★</span>Événement</button>
   <button type="button" class="w" data-quick="annonceur"><span class="ic">@</span>Annonceur</button>
-  <button type="button" class="w" data-quick="releve"><span class="ic">✓</span>Pointer</button>
+  <button type="button" class="w" data-quick="releve"><span class="ic">✓</span>Vérifier la banque</button>
 </div></dialog>
 <dialog id="dlgKeys"><h2>Raccourcis clavier</h2><table><tbody>
   <tr><td><kbd class="k">N</kbd></td><td>Nouvelle dépense</td><td><kbd class="k">R</kbd></td><td>Nouvelle recette</td></tr>
@@ -753,25 +883,25 @@ tr[data-row]{cursor:default}
 <div id="show" hidden><div id="showSlide"></div><div class="showbar"><button type="button" id="shPrev" aria-label="Diapositive précédente">‹</button><span id="showPos"></span><button type="button" id="shNext" aria-label="Diapositive suivante">›</button><button type="button" id="shClose">Quitter</button></div></div>
 <div id="printDeck"></div>
 
-<!-- écriture -->
+<!-- opération -->
 <dialog id="dlgE"><form id="fE">
-  <h2 id="eTitle">Nouvelle écriture</h2>
+  <h2 id="eTitle">Nouvelle opération</h2>
   <div class="grid2">
     <div class="field"><label for="eAcc">Compte</label><select id="eAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
     <div class="field"><label for="eDate">Date</label><input type="date" id="eDate" required><div class="dq"><button type="button" class="link small" data-dset="0">Aujourd'hui</button><button type="button" class="link small" data-dset="-1">Hier</button></div></div>
   </div>
   <div class="field"><label for="eEvt">Événement</label><select id="eEvt" class="evsel" required></select></div>
-  <div class="field"><label for="eDes">Désignation</label><input type="text" id="eDes" list="desList" required autocomplete="off" placeholder="ex. ABD - Boissons - Facture 2600123"><datalist id="desList"></datalist></div>
+  <div class="field"><label for="eDes">Intitulé</label><input type="text" id="eDes" list="desList" required autocomplete="off" placeholder="ex. ABD - Boissons - Facture 2600123"><datalist id="desList"></datalist></div>
   <div class="grid2">
     <div class="field"><label>Sens</label><div class="seg"><label><input type="radio" name="eSens" value="rec" id="eRec"><span>Recette</span></label><label><input type="radio" name="eSens" value="dep" id="eDep" checked><span>Dépense</span></label></div></div>
     <div class="field"><label for="eAmt">Montant (€)</label><input type="text" inputmode="decimal" id="eAmt" required placeholder="0,00"></div>
   </div>
   <div class="grid2">
-    <div class="field"><label for="ePoste">Poste</label><select id="ePoste"></select></div>
-    <div class="field"><label for="eType">Type de paiement</label><select id="eType"></select></div>
+    <div class="field"><label for="ePoste">Catégorie</label><select id="ePoste"></select></div>
+    <div class="field"><label for="eType">Moyen de paiement</label><select id="eType"></select></div>
   </div>
   <div class="field"><label for="eCom">Commentaire, n° de chèque, lien de la pièce</label><input type="text" id="eCom"></div>
-  <label class="small"><input type="checkbox" id="ePt"> Écriture pointée (vue sur le relevé bancaire)</label>
+  <label class="small"><input type="checkbox" id="ePt"> Opération vérifiée (vue sur le relevé bancaire)</label>
   <label class="small" id="eFraisL"><input type="checkbox" id="eFrais" checked> Ajouter aussi les frais de virement (<span id="eFraisM"></span>)</label>
   <div id="eErr" class="msg err" hidden></div>
   <div class="row between">
@@ -788,7 +918,7 @@ tr[data-row]{cursor:default}
     <div class="field"><label for="tDate">Date</label><input type="date" id="tDate" required></div>
     <div class="field"><label for="tAmt">Montant (€)</label><input type="text" inputmode="decimal" id="tAmt" required></div>
   </div>
-  <p class="small muted" style="margin:0">Deux écritures sont créées, une par compte. Elles n'entrent dans le résultat d'aucun événement.</p>
+  <p class="small muted" style="margin:0">Deux opérations sont créées, une par compte. Elles n'entrent dans le résultat d'aucun événement.</p>
   <div id="tErr" class="msg err" hidden></div>
   <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
 </form></dialog>
@@ -818,24 +948,24 @@ tr[data-row]{cursor:default}
 
 <!-- modification de masse -->
 <dialog id="dlgK"><form id="fK">
-  <h2 id="kTitle">Modifier les écritures</h2>
+  <h2 id="kTitle">Modifier les opérations</h2>
   <p class="small muted" style="margin:0">Cochez les champs à modifier. Les autres restent inchangés.</p>
   <div class="kf"><label><input type="checkbox" id="kOnEvt"> Événement</label><select id="kEvt" class="evsel" aria-label="Événement"></select></div>
   <div class="kf"><label><input type="checkbox" id="kOnPoste"> Poste</label><select id="kPoste" aria-label="Poste"></select></div>
-  <div class="kf"><label><input type="checkbox" id="kOnType"> Paiement</label><select id="kType" aria-label="Type de paiement"></select></div>
+  <div class="kf"><label><input type="checkbox" id="kOnType"> Paiement</label><select id="kType" aria-label="Moyen de paiement"></select></div>
   <div class="kf"><label><input type="checkbox" id="kOnAcc"> Compte</label><select id="kAcc" aria-label="Compte"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
   <div class="kf"><label><input type="checkbox" id="kOnDate"> Date</label><input type="date" id="kDate" aria-label="Date"></div>
-  <div class="kf"><label><input type="checkbox" id="kOnPt"> Pointage</label><select id="kPt" aria-label="Pointage"><option value="oui">Pointées</option><option value="non">Non pointées</option></select></div>
+  <div class="kf"><label><input type="checkbox" id="kOnPt"> Vérification</label><select id="kPt" aria-label="Vérification"><option value="oui">Vérifiées</option><option value="non">À vérifier</option></select></div>
   <div class="kf"><label><input type="checkbox" id="kOnCom"> Commentaire</label><div class="row"><select id="kComMode" aria-label="Mode"><option value="add">Ajouter à la fin</option><option value="set">Remplacer par</option></select><input type="text" id="kCom" aria-label="Commentaire" style="flex:1"></div></div>
-  <div class="kf"><label><input type="checkbox" id="kOnDes"> Désignation</label><div class="row"><input type="text" id="kFind" placeholder="Remplacer…" aria-label="Texte à remplacer" style="flex:1"><input type="text" id="kRepl" placeholder="par…" aria-label="Remplacer par" style="flex:1"></div></div>
+  <div class="kf"><label><input type="checkbox" id="kOnDes"> Intitulé</label><div class="row"><input type="text" id="kFind" placeholder="Remplacer…" aria-label="Texte à remplacer" style="flex:1"><input type="text" id="kRepl" placeholder="par…" aria-label="Remplacer par" style="flex:1"></div></div>
   <div id="kErr" class="msg err" hidden></div>
   <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Appliquer</button></div>
 </form></dialog>
 
-<!-- écriture récurrente -->
+<!-- opération régulière -->
 <dialog id="dlgU"><form id="fU">
-  <h2>Écriture récurrente</h2>
-  <div class="field"><label for="uDes">Désignation</label><input type="text" id="uDes" required placeholder="ex. Tenue de compte"></div>
+  <h2>Opération régulière</h2>
+  <div class="field"><label for="uDes">Intitulé</label><input type="text" id="uDes" required placeholder="ex. Tenue de compte"></div>
   <div class="grid2">
     <div class="field"><label for="uAcc">Compte</label><select id="uAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
     <div class="field"><label for="uEvt">Événement</label><select id="uEvt" class="evsel" required></select></div>
@@ -845,7 +975,7 @@ tr[data-row]{cursor:default}
     <div class="field"><label for="uAmt">Montant (€)</label><input type="text" inputmode="decimal" id="uAmt" required></div>
   </div>
   <div class="grid2">
-    <div class="field"><label for="uType">Type de paiement</label><select id="uType"></select></div>
+    <div class="field"><label for="uType">Moyen de paiement</label><select id="uType"></select></div>
     <div class="field"><label for="uPoste">Poste</label><select id="uPoste"></select></div>
   </div>
   <div class="grid2">
@@ -856,12 +986,12 @@ tr[data-row]{cursor:default}
   <div class="row between"><button type="button" class="danger" id="uDel">Supprimer</button><div class="row"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div></div>
 </form></dialog>
 
-<!-- génération des récurrentes -->
+<!-- génération des régulières -->
 <dialog id="dlgG"><form id="fG">
-  <h2>Écritures récurrentes à créer</h2>
+  <h2>Opérations régulières à créer</h2>
   <p class="small muted" style="margin:0">Les lignes décochées sont ignorées et ne seront plus proposées.</p>
   <div class="scroll" style="max-height:50vh;overflow-y:auto"><table id="gTable"></table></div>
-  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Plus tard</button><button type="submit" class="primary">Créer les écritures cochées</button></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Plus tard</button><button type="submit" class="primary">Créer les opérations cochées</button></div>
 </form></dialog>
 
 <!-- relevé : colonnes -->
@@ -891,7 +1021,7 @@ tr[data-row]{cursor:default}
   <div class="row">
     <label for="r2Evt" class="small">Événement des nouvelles lignes cochées</label>
     <select id="r2Evt" class="evsel"></select><button type="button" id="r2Apply">Appliquer</button>
-    <label class="small"><input type="checkbox" id="r2Hide" checked> Masquer les opérations déjà pointées</label>
+    <label class="small"><input type="checkbox" id="r2Hide" checked> Masquer les opérations déjà vérifiées</label>
   </div>
   <div class="scroll" style="max-height:56vh;overflow-y:auto"><table id="r2Table"></table></div>
   <div id="r2Err" class="msg err" hidden></div>
@@ -908,7 +1038,7 @@ tr[data-row]{cursor:default}
   </div>
   <div class="grid2">
     <div class="field"><label for="fdAcc">Compte</label><select id="fdAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
-    <div class="field"><label for="fdDes">Désignation</label><input type="text" id="fdDes" required></div>
+    <div class="field"><label for="fdDes">Intitulé</label><input type="text" id="fdDes" required></div>
   </div>
   <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer le retrait</button></div>
 </form></dialog>
@@ -950,7 +1080,7 @@ tr[data-row]{cursor:default}
   </div>
   <div class="grid2">
     <div class="field"><label for="pdAcc">Compte</label><select id="pdAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
-    <div class="field"><label for="pdDes">Désignation de la recette</label><input type="text" id="pdDes" required></div>
+    <div class="field"><label for="pdDes">Intitulé de la recette</label><input type="text" id="pdDes" required></div>
   </div>
   <p class="small" style="margin:0" id="pdRest"></p>
   <div id="pdErr" class="msg err" hidden></div>
@@ -989,7 +1119,7 @@ tr[data-row]{cursor:default}
     <div class="field"><label for="apAcc">Compte</label><select id="apAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
   </div>
   <div class="field"><label for="apCom">Commentaire, n° de chèque</label><input type="text" id="apCom"></div>
-  <label class="small"><input type="checkbox" id="apCreate" checked> Créer l'écriture dans le cahier (<span id="apEvt"></span>)</label>
+  <label class="small"><input type="checkbox" id="apCreate" checked> Créer l'opération dans le cahier (<span id="apEvt"></span>)</label>
   <div id="apErr" class="msg err" hidden></div>
   <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
 </form></dialog>
@@ -1056,11 +1186,11 @@ tr[data-row]{cursor:default}
   <div class="row"><div class="chips" id="sCats"></div><input type="search" id="sQ" placeholder="Filtrer les articles" aria-label="Filtrer les articles"></div>
   <div class="scroll" style="max-height:46vh;overflow-y:auto"><table id="sTable"></table></div>
   <div id="sCahier" hidden>
-    <label class="small"><input type="checkbox" id="sEcr" checked> Créer aussi la dépense dans le cahier (une écriture par poste : boissons, courses…)</label>
+    <label class="small"><input type="checkbox" id="sEcr" checked> Créer aussi la dépense dans le cahier (une opération par poste : boissons, courses…)</label>
     <div class="grid5">
       <div class="field"><label for="sAcc">Compte</label><select id="sAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
       <div class="field"><label for="sType">Paiement</label><select id="sType"></select></div>
-      <div class="field"><label for="sDes">Désignation</label><input type="text" id="sDes" placeholder="ex. ABD - Facture 2600123"></div>
+      <div class="field"><label for="sDes">Intitulé</label><input type="text" id="sDes" placeholder="ex. ABD - Facture 2600123"></div>
     </div>
   </div>
   <p class="small" style="margin:0" id="sSum"></p>
@@ -1075,18 +1205,18 @@ tr[data-row]{cursor:default}
   <div class="field"><label>Ces achats</label>
     <label class="small"><input type="radio" name="bviMode" value="conso" checked> ont été consommés pendant l'événement (le stock ne change pas ; choix pour une fête passée)</label>
     <label class="small"><input type="radio" name="bviMode" value="stock"> entrent dans le stock (vous ferez ensuite les sorties vers l'événement)</label></div>
-  <p class="small muted" style="margin:0">Les articles inconnus sont créés. Une quantité négative correspond à un retour au fournisseur ou un avoir. Aucune écriture n'est créée dans le cahier : les factures y sont déjà.</p>
+  <p class="small muted" style="margin:0">Les articles inconnus sont créés. Une quantité négative correspond à un retour au fournisseur ou un avoir. Aucune opération n'est créée dans le cahier : les factures y sont déjà.</p>
   <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Importer</button></div>
 </form></dialog>
 
 <!-- import -->
 <dialog id="dlgI"><form id="fI">
-  <h2>Importer des écritures</h2>
+  <h2>Importer des opérations</h2>
   <p id="iInfo" style="margin:0"></p>
-  <div class="field" id="iModeF"><label>Le cahier contient déjà des écritures</label>
+  <div class="field" id="iModeF"><label>Le cahier contient déjà des opérations</label>
     <div class="seg"><label><input type="radio" name="iMode" value="add" checked><span>Ajouter à la suite</span></label><label><input type="radio" name="iMode" value="replace"><span>Tout remplacer</span></label></div></div>
   <label class="small" id="iExtraL" hidden><input type="checkbox" id="iExtra" checked> <span id="iExtraT"></span></label>
-  <label class="small"><input type="checkbox" id="iPt" checked> Marquer les écritures importées comme pointées (elles viennent des relevés bancaires)</label>
+  <label class="small"><input type="checkbox" id="iPt" checked> Marquer les opérations importées comme vérifiées (elles viennent des relevés bancaires)</label>
   <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary" id="iGo">Importer</button></div>
 </form></dialog>
 
@@ -1253,7 +1383,7 @@ function build(ecr){
 }
 
 /* ================= stockage : Firebase ou démonstration ================= */
-// Toutes les écritures en base passent par commit(ops, journal) : une liste d'opérations
+// Toutes les opérations en base passent par commit(ops, journal) : une liste d'opérations
 // {t:"set"|"update"|"merge"|"delete", col, id, data} appliquées par lots, plus les lignes du journal.
 const S={ready:false,user:null,role:null,ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},pending:0,previsions:[],articles:[],mouvements:[]};
 let onData=()=>{};
@@ -1431,7 +1561,7 @@ function setEv(sel,cur,date){sel.innerHTML=eventOptions(cur,date);sel.value=norm
 function hbars(el,obj,kind){
   const items=Object.entries(obj).filter(([,v])=>Math.abs(v)>0.005).sort((a,b)=>b[1]-a[1]);
   const max=Math.max(1,...items.map(([,v])=>Math.abs(v))), tot=items.reduce((s,[,v])=>s+v,0);
-  el.innerHTML=items.length?items.map(([k,v])=>`<div class="lbl">${esc(k)}</div><div class="track"><div class="fill ${kind||""}" style="width:${Math.max(0,v)/max*100}%"></div></div><div class="val num">${fm(v)}${tot>0?` <span class="muted small">${pct(v/tot)}</span>`:""}</div>`).join(""):`<div class="muted">Aucune écriture.</div>`;
+  el.innerHTML=items.length?items.map(([k,v])=>`<div class="lbl">${esc(k)}</div><div class="track"><div class="fill ${kind||""}" style="width:${Math.max(0,v)/max*100}%"></div></div><div class="val num">${fm(v)}${tot>0?` <span class="muted small">${pct(v/tot)}</span>`:""}</div>`).join(""):`<div class="muted">Aucune opération.</div>`;
 }
 function statusPill(e){
   if(e.upcoming)return `<span class="pill neutral">À venir</span>`;
@@ -1441,22 +1571,22 @@ function statusPill(e){
 }
 function linesTable(ls,opt){
   opt=opt||{}; const w=canWrite(), sel=!!opt.sel&&w;
-  const head=`<thead><tr>${sel?`<th class="sel"><input type="checkbox" id="selAll" aria-label="Tout sélectionner"></th>`:""}${opt.check?"<th>Pointé</th>":""}<th>Date</th><th>Événement</th><th>Désignation</th><th>Poste</th><th class="r">Recette</th><th class="r">Dépense</th><th>Paiement</th><th>Commentaire</th>${opt.check?"":"<th>Pointé</th>"}${w?"<th></th>":""}</tr></thead>`;
+  const head=`<thead><tr>${sel?`<th class="sel"><input type="checkbox" id="selAll" aria-label="Tout sélectionner"></th>`:""}${opt.check?"<th>Vérifié</th>":""}<th></th><th>Date</th><th>Événement</th><th>Intitulé</th><th>Catégorie</th><th class="r">Recette</th><th class="r">Dépense</th><th>Paiement</th><th>Commentaire</th>${opt.check?"":"<th>Vérifié</th>"}${w?"<th></th>":""}</tr></thead>`;
   const rows=ls.map(l=>{
     const u=/https?:\/\/\S+/.exec(l.com);
     const com=u?(esc(l.com.replace(u[0],"").replace(/[:\s]+$/,""))+` <a href="${esc(u[0])}" target="_blank" rel="noopener">pièce</a>`):esc(l.com);
-    const chk=opt.check?`<td class="c-ptc"><input type="checkbox" data-pt="${esc(l.id)}" ${l.pointe?"checked":""} ${w?"":"disabled"} aria-label="Pointer"></td>`:"";
+    const chk=opt.check?`<td class="c-ptc"><input type="checkbox" data-pt="${esc(l.id)}" ${l.pointe?"checked":""} ${w?"":"disabled"} aria-label="Vu en banque"></td>`:"";
     const s=sel?`<td class="sel"><input type="checkbox" data-sel="${esc(l.id)}" ${SEL.has(l.id)?"checked":""} aria-label="Sélectionner"></td>`:"";
-    return `<tr class="lr ${sel&&SEL.has(l.id)?"picked":""}" data-row="${esc(l.id)}">${s}${chk}<td class="num c-date">${fdate(l.iso)}</td><td class="small c-evt">${l.acc==="LA"?"Livret A · ":""}${esc(l.evt.trim())}</td><td class="c-des">${esc(l.des)}</td><td class="small c-cat ${l.poste?"":"muted"}">${esc(l.cat)}</td><td class="r num pos c-rec">${l.rec?fm(l.rec):""}</td><td class="r num neg c-dep">${l.dep?fm(l.dep):""}</td><td class="small c-type">${esc(l.type)}</td><td class="small muted c-com">${com}</td>${opt.check?"":`<td class="small c-pt">${l.pointe?"✓ pointé":""}</td>`}${w?`<td class="c-act"><button type="button" class="mini" data-edit="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
+    return `<tr class="lr ${sel&&SEL.has(l.id)?"picked":""}" data-row="${esc(l.id)}">${s}${chk}<td class="c-ic"><span class="io ${l.rec?"in":"out"}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${l.rec?"M17 7L7 17M7 9v8h8":"M7 17L17 7M9 7h8v8"}"/></svg></span></td><td class="num c-date">${fdate(l.iso)}</td><td class="small c-evt">${l.acc==="LA"?"Livret A · ":""}${esc(l.evt.trim())}</td><td class="c-des">${esc(l.des)}</td><td class="small c-cat ${l.poste?"":"muted"}">${esc(l.cat)}</td><td class="r num pos c-rec">${l.rec?fm(l.rec):""}</td><td class="r num neg c-dep">${l.dep?fm(l.dep):""}</td><td class="small c-type">${esc(l.type)}</td><td class="small muted c-com">${com}</td>${opt.check?"":`<td class="small c-pt">${l.pointe?"✓ vérifié":""}</td>`}${w?`<td class="c-act"><button type="button" class="mini" data-edit="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
   }).join("");
-  return head+`<tbody>${rows||`<tr><td colspan="12" class="muted">Aucune écriture.</td></tr>`}</tbody>`;
+  return head+`<tbody>${rows||`<tr><td colspan="13" class="muted">Aucune opération.</td></tr>`}</tbody>`;
 }
 function renderSynthese(){
   const cc=M.lines.filter(l=>l.acc==="CC").reduce((s,l)=>s+l.rec-l.dep,0), la=M.lines.filter(l=>l.acc==="LA").reduce((s,l)=>s+l.rec-l.dep,0);
   $("treso").innerHTML=`
     <div class="tile acc"><h3>Trésorerie totale</h3><div class="v">${fm(cc+la)}</div><div class="s">au ${fdate(M.maxIso)}</div></div>
-    <div class="tile"><h3>Compte courant</h3><div class="v">${fm(cc)}</div><div class="s">${M.lines.filter(l=>l.acc==="CC").length} écritures</div></div>
-    <div class="tile"><h3>Livret A</h3><div class="v">${fm(la)}</div><div class="s">${M.lines.filter(l=>l.acc==="LA").length} écritures</div></div>`;
+    <div class="tile"><h3>Compte courant</h3><div class="v">${fm(cc)}</div><div class="s">${M.lines.filter(l=>l.acc==="CC").length} opérations</div></div>
+    <div class="tile"><h3>Livret A</h3><div class="v">${fm(la)}</div><div class="s">${M.lines.filter(l=>l.acc==="LA").length} opérations</div></div>`;
   const ys=seasonsOf();
   $("seasons").innerHTML=[["all","Toutes les saisons"],...ys.map(y=>[String(y),String(y)])].map(([v,t])=>`<button type="button" class="chip ${season===v?"on":""}" data-s="${v}">${t}</button>`).join("");
   const evs=M.events.filter(inSeason), done=evs.filter(e=>!e.upcoming);
@@ -1465,7 +1595,7 @@ function renderSynthese(){
   const fon=other.filter(l=>l.kind==="fonct").reduce((s,l)=>s+l.rec-l.dep,0), inv=other.filter(l=>l.kind==="invest").reduce((s,l)=>s+l.rec-l.dep,0);
   const up=evs.filter(e=>e.upcoming).reduce((s,e)=>s+e.res,0), tot=resEv+fon+inv+up;
   $("seasonTiles").innerHTML=`
-    <div class="tile ${resEv>=0?"good":"bad"}"><h3>Résultat des événements</h3><div class="v ${cls(resEv)}">${sg(resEv)}</div><div class="s">${done.length} événement(s) · ${sg(resEv-subv)} hors subvention</div></div>
+    <div class="tile ${resEv>=0?"good":"bad"}"><h3>Bilan des événements</h3><div class="v ${cls(resEv)}">${sg(resEv)}</div><div class="s">${done.length} événement(s) · ${sg(resEv-subv)} hors subvention</div></div>
     <div class="tile"><h3>Fonctionnement</h3><div class="v ${cls(fon)}">${sg(fon)}</div><div class="s">banque, assurance, AG, intérêts</div></div>
     <div class="tile"><h3>Investissements</h3><div class="v ${cls(inv)}">${sg(inv)}</div><div class="s">matériel durable</div></div>
     <div class="tile ${tot>=0?"good":"bad"}"><h3>Résultat ${season==="all"?"cumulé":"saison "+season}</h3><div class="v ${cls(tot)}">${sg(tot)}</div><div class="s">${Math.abs(up)>0.005?"dont "+sg(up)+" d'acomptes sur événements à venir":"événements + fonctionnement + investissements"}</div></div>`;
@@ -1501,7 +1631,7 @@ function insights(evs){
   for(const bg of S.budgets){const e=M.events.find(x=>x.name===eventKey(bg.evenement).parent); if(e&&inSeason(e)&&e.dep>bg.depenses+0.005) out.push(`${b(e.name)} dépasse son budget de dépenses de ${fm(e.dep-bg.depenses)} (${fm(e.dep)} pour ${fm(bg.depenses)} prévus).`);}
   const fees=M.lines.filter(l=>l.cat==="Frais bancaires"&&l.kind!=="interne"&&lineInSeason(l)), ft=fees.reduce((s,l)=>s+l.dep,0);
   const cb=done.reduce((s,e)=>s+e.cb,0), cbf=done.reduce((s,e)=>s+e.cbFees,0);
-  if(ft>0) out.push(`Frais bancaires : ${b(fm(ft))} sur ${fees.length} écritures${cb>0?`, dont ${fm(cbf)} de commissions carte pour ${fm(cb)} encaissés (${(cbf/cb*100).toFixed(2).replace(".",",")} %)`:""}.`);
+  if(ft>0) out.push(`Frais bancaires : ${b(fm(ft))} sur ${fees.length} opérations${cb>0?`, dont ${fm(cbf)} de commissions carte pour ${fm(cb)} encaissés (${(cbf/cb*100).toFixed(2).replace(".",",")} %)`:""}.`);
   const dep={}; for(const e of done)for(const [k,v] of Object.entries(e.depCat))dep[k]=(dep[k]||0)+v;
   const top=Object.entries(dep).sort((a,c)=>c[1]-a[1]).slice(0,3), td=Object.values(dep).reduce((s,v)=>s+v,0);
   if(top.length) out.push(`Trois premiers postes de dépense : ${top.map(([k,v])=>`${esc(k)} ${fm0(v)} (${pct(v/td)})`).join(", ")}.`);
@@ -1525,16 +1655,17 @@ function tresoSvg(until){
   const last=pts[pts.length-1];
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Courbe de la trésorerie totale">${g}<path d="${area}" fill="var(--accent)" opacity=".12"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/><circle cx="${x(last[0])}" cy="${y(last[1])}" r="4" fill="var(--accent)"/><text x="${x(last[0])+8}" y="${y(last[1])+4}" style="fill:var(--ink);font-weight:600">${fm0(last[1])}</text></svg>`;
 }
-function renderTresoChart(){$("tresoChart").innerHTML=tresoSvg()||`<p class="muted">Pas assez d'écritures datées.</p>`;}
+function renderTresoChart(){$("tresoChart").innerHTML=tresoSvg()||`<p class="muted">Pas assez d'opérations datées.</p>`;}
 function renderEvent(){
   const sel=$("evSel");
   sel.innerHTML=[...M.events].reverse().map(e=>`<option value="${esc(e.name)}">${esc(e.name)}</option>`).join("");
   if(!curEv||!M.events.some(e=>e.name===curEv)){const c=M.events.filter(e=>!e.upcoming);curEv=(c[c.length-1]||M.events[0]||{}).name;}
   const e=M.events.find(x=>x.name===curEv);
-  if(!e){["evTiles","evRec","evDep","evPay","evSubs","evRatios","evLines","evStatus"].forEach(i=>$(i).innerHTML="");$("caisseCard").hidden=true;return;}
+  if(!e){["evTiles","evRec","evDep","evPay","evSubs","evRatios","evLines","evStatus","evStory"].forEach(i=>$(i).innerHTML="");$("caisseCard").hidden=true;return;}
   sel.value=curEv;
   const bg=S.budgets.find(b=>eventKey(b.evenement).parent===e.name);
-  $("evStatus").innerHTML=statusPill(e)+` <span class="muted small">${e.lines.length} écritures, du ${fdate(e.first)} au ${fdate(e.last)}</span>`;
+  $("evStatus").innerHTML=statusPill(e)+` <span class="muted small">${e.lines.length} opérations, du ${fdate(e.first)} au ${fdate(e.last)}</span>`;
+  $("evStory").innerHTML=evStory(e);
   $("evTiles").innerHTML=`
     <div class="tile"><h3>Recettes</h3><div class="v">${fm(e.rec)}</div><div class="s">${bg?"prévu "+fm(bg.recettes):"hors fond de caisse"}</div></div>
     <div class="tile"><h3>Dépenses</h3><div class="v">${fm(e.dep)}</div><div class="s">${bg?"prévu "+fm(bg.depenses):"hors fond de caisse"}</div></div>
@@ -1549,7 +1680,7 @@ function renderEvent(){
   ratio("Encarts & tour du village / impression",R("Encarts publicitaires")+R("Tour du village"),D("Impression & communication"));
   ratio("Animation, droits d'auteur (coût sec)",0,D("Animation & spectacle")+D("Droits d'auteur (SACEM, SPRE)"),true);
   ratio("Carte bancaire : encaissements / commissions",e.cb,e.cbFees);
-  $("evRatios").innerHTML=`<thead><tr><th>Activité</th><th class="r">Recettes</th><th class="r">Coûts</th><th class="r">Solde</th><th class="r">Coût / recette</th></tr></thead><tbody>${rows.join("")||`<tr><td colspan="5" class="muted">Pas assez d'écritures.</td></tr>`}</tbody>`;
+  $("evRatios").innerHTML=`<thead><tr><th>Activité</th><th class="r">Recettes</th><th class="r">Coûts</th><th class="r">Solde</th><th class="r">Coût / recette</th></tr></thead><tbody>${rows.join("")||`<tr><td colspan="5" class="muted">Pas assez d'opérations.</td></tr>`}</tbody>`;
   const subs=Object.entries(e.subs);
   $("evSubs").innerHTML=subs.length>1?`<h3 style="margin:8px 0 6px">Sous-rubriques</h3><div class="scroll"><table><thead><tr><th>Rubrique</th><th class="r">Recettes</th><th class="r">Dépenses</th><th class="r">Résultat</th></tr></thead><tbody>${subs.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="r num">${fm(v.rec)}</td><td class="r num">${fm(v.dep)}</td><td class="r num ${cls(v.rec-v.dep)}">${sg(v.rec-v.dep)}</td></tr>`).join("")}</tbody></table></div>`:"";
   $("evLines").innerHTML=linesTable(e.lines);
@@ -1583,12 +1714,12 @@ const groupOf=l=>l.kind==="event"?l.parent:l.kind==="interne"?"(Mouvements inter
 function fillSelect(sel,first,values){const cur=sel.value;sel.innerHTML=`<option value="">${first}</option>`+values.map(n=>`<option>${esc(n)}</option>`).join("");if(values.includes(cur))sel.value=cur;}
 function renderLines(){
   fillSelect($("fEv"),"Tous les événements",[...new Set(M.lines.map(groupOf))].sort());
-  fillSelect($("fCat"),"Tous les postes",[...new Set(M.lines.map(l=>l.cat))].sort());
+  fillSelect($("fCat"),"Toutes les catégories",[...new Set(M.lines.map(l=>l.cat))].sort());
   const q=strip($("q").value), acc=$("fAcc").value, ev=$("fEv").value, cat=$("fCat").value, pt=$("fPt").value, du=$("fDu").value, au=$("fAu").value;
   const ls=M.lines.filter(l=>(!acc||l.acc===acc)&&(!ev||groupOf(l)===ev)&&(!cat||l.cat===cat)&&(!pt||(pt==="oui")===l.pointe)&&(!du||(l.iso&&l.iso>=du))&&(!au||(l.iso&&l.iso<=au))&&(!q||strip(l.des+" "+l.com+" "+l.evt+" "+l.type+" "+l.cat).includes(q))).reverse();
   shownIds=ls.map(l=>l.id);
   const ids=new Set(S.ecr.map(e=>e.id)); for(const id of [...SEL]) if(!ids.has(id))SEL.delete(id);
-  $("lnCount").textContent=`${ls.length} écritures · recettes ${fm(sumOf(ls,l=>l.rec))} · dépenses ${fm(sumOf(ls,l=>l.dep))}`;
+  $("lnCount").textContent=`${ls.length} opérations · recettes ${fm(sumOf(ls,l=>l.rec))} · dépenses ${fm(sumOf(ls,l=>l.dep))}`;
   let sv=null; try{sv=localStorage.getItem("cahier-derniere-sauvegarde");}catch(e){}
   $("lastSave").textContent=sv?` · dernière sauvegarde Excel depuis cet appareil le ${fdate(sv)}`:" · aucune sauvegarde Excel faite depuis cet appareil";
   $("lnTable").innerHTML=linesTable(ls,{sel:true});
@@ -1601,7 +1732,7 @@ function syncSel(){
   const b=$("bulk"); b.hidden=!SEL.size||!canWrite();
   if(SEL.size){
     const ls=M.lines.filter(l=>SEL.has(l.id)), shown=new Set(shownIds), hid=ls.filter(l=>!shown.has(l.id)).length;
-    $("bulkInfo").innerHTML=`<b>${SEL.size} écriture(s) sélectionnée(s)</b> · recettes ${fm(sumOf(ls,l=>l.rec))} · dépenses ${fm(sumOf(ls,l=>l.dep))}${hid?` · dont ${hid} hors du filtre affiché`:""}`;
+    $("bulkInfo").innerHTML=`<b>${SEL.size} opération(s) sélectionnée(s)</b> · recettes ${fm(sumOf(ls,l=>l.rec))} · dépenses ${fm(sumOf(ls,l=>l.dep))}${hid?` · dont ${hid} hors du filtre affiché`:""}`;
   }
   document.querySelectorAll("#lnTable [data-sel]").forEach(c=>{c.checked=SEL.has(c.dataset.sel);c.closest("tr").classList.toggle("picked",c.checked);});
 }
@@ -1640,14 +1771,14 @@ function renderRap(){
   const solde=ls.reduce((s,l)=>s+l.rec-l.dep,0), pt=ls.filter(l=>l.pointe).reduce((s,l)=>s+l.rec-l.dep,0), np=ls.filter(l=>!l.pointe);
   const rel=$("rRel").value.trim()===""?null:parseNum($("rRel").value), ec=rel==null?null:round2(rel-pt);
   $("rTiles").innerHTML=`
-    <div class="tile acc"><h3>Solde du cahier</h3><div class="v">${fm(solde)}</div><div class="s">${ls.length} écritures</div></div>
-    <div class="tile"><h3>Solde pointé</h3><div class="v">${fm(pt)}</div><div class="s">doit égaler le relevé</div></div>
-    <div class="tile"><h3>Non pointé</h3><div class="v">${sg(solde-pt)}</div><div class="s">${np.length} écriture(s) en attente</div></div>
-    <div class="tile ${ec==null?"":Math.abs(ec)<0.005?"good":"bad"}"><h3>Écart avec le relevé</h3><div class="v ${ec==null?"muted":Math.abs(ec)<0.005?"pos":"neg"}">${ec==null?"·":Math.abs(ec)<0.005?"0,00 €":sg(ec)}</div><div class="s">${ec==null?"saisissez le solde du relevé":Math.abs(ec)<0.005?"rapprochement juste":"relevé − solde pointé"}</div></div>`;
+    <div class="tile acc"><h3>Solde du cahier</h3><div class="v">${fm(solde)}</div><div class="s">${ls.length} opérations</div></div>
+    <div class="tile"><h3>Solde vérifié</h3><div class="v">${fm(pt)}</div><div class="s">doit égaler le relevé</div></div>
+    <div class="tile"><h3>Non vérifié</h3><div class="v">${sg(solde-pt)}</div><div class="s">${np.length} opération(s) en attente</div></div>
+    <div class="tile ${ec==null?"":Math.abs(ec)<0.005?"good":"bad"}"><h3>Écart avec le relevé</h3><div class="v ${ec==null?"muted":Math.abs(ec)<0.005?"pos":"neg"}">${ec==null?"·":Math.abs(ec)<0.005?"0,00 €":sg(ec)}</div><div class="s">${ec==null?"saisissez le solde du relevé":Math.abs(ec)<0.005?"rapprochement juste":"relevé − solde vérifié"}</div></div>`;
   const shown=(all?ls:np).filter(l=>!until||!l.iso||l.iso<=until).reverse();
-  $("rTitle").textContent=all?"Toutes les écritures du compte":"Écritures non pointées";
+  $("rTitle").textContent=all?"Toutes les opérations du compte":"Opérations pas encore vues en banque";
   const todo=shown.filter(l=>!l.pointe).length;
-  $("rBulk").textContent=`Pointer les ${todo} affichées`; $("rBulk").disabled=!todo;
+  $("rBulk").textContent=`Marquer les ${todo} affichées comme vues en banque`; $("rBulk").disabled=!todo;
   $("rTable").innerHTML=linesTable(shown,{check:true});
 }
 function renderControles(){
@@ -1663,18 +1794,18 @@ function renderControles(){
     <tr><td>Virements compte courant ↔ Livret A (doivent s'annuler)</td><td class="r num">${sg(transf)}</td><td>${ok?`<span class="pill good">Équilibrés</span>`:`<span class="pill bad">Écart à corriger</span>`}</td></tr>
     <tr class="total"><td>Trésorerie totale (compte courant ${fm(cc)} + Livret A ${fm(la)})</td><td class="r num">${fm(cc+la)}</td><td></td></tr></tbody>`;
   const groups=[], g=(title,ls,why)=>{ if(ls.length)groups.push(`<h3 style="margin:14px 0 6px">${esc(title)} · ${ls.length}</h3><p class="small muted" style="margin:0 0 6px">${why}</p><div class="scroll"><table>${linesTable(ls)}</table></div>`); };
-  g("Sans date",M.lines.filter(l=>!l.iso),"Écritures comptées dans les totaux mais absentes de la courbe de trésorerie. Ouvrez-les pour saisir la date.");
+  g("Sans date",M.lines.filter(l=>!l.iso),"Opérations comptées dans les totaux mais absentes de la courbe de trésorerie. Ouvrez-les pour saisir la date.");
   g("Nom d'événement avec espaces parasites",M.lines.filter(l=>l.evt!==l.evt.trim()||/\s{2,}/.test(l.evt)),"L'application les regroupe, mais mieux vaut corriger le nom.");
   g("Sans événement",M.lines.filter(l=>l.acc==="CC"&&!l.evt.trim()),"Classées en fonctionnement par défaut.");
-  g("Recette et dépense sur la même écriture",M.lines.filter(l=>l.rec>0&&l.dep>0),"Une écriture devrait porter un seul sens.");
-  g("Dépenses classées « Divers »",M.lines.filter(l=>l.cat==="Divers"),"La désignation ne permet pas d'identifier le poste (ex. « Cheque »). Choisissez le poste dans la fiche de l'écriture, ou en une fois : onglet Écritures, filtre « Divers », cochez les lignes puis « Modifier… ».");
+  g("Recette et dépense sur la même opération",M.lines.filter(l=>l.rec>0&&l.dep>0),"Une opération devrait porter un seul sens.");
+  g("Dépenses classées « Divers »",M.lines.filter(l=>l.cat==="Divers"),"L'intitulé ne permet pas d'identifier le poste (ex. « Cheque »). Choisissez le poste dans la fiche de l'opération, ou en une fois : onglet Opérations, filtre « Divers », cochez les lignes puis « Modifier… ».");
   $("ctlList").innerHTML=groups.join("")||`<p class="muted">Aucune anomalie détectée.</p>`;
 }
 function tsText(x){const d=x&&x.toDate?x.toDate():x?new Date(x):null;return d&&!isNaN(d)?d.toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"}):"à l'instant";}
 function renderJournal(){
   $("jTable").innerHTML=`<thead><tr><th>Quand</th><th>Qui</th><th>Opération</th><th>Détail</th></tr></thead><tbody>`+(S.journal.length?S.journal.map(j=>`<tr><td class="num small">${esc(tsText(j.at))}</td><td class="small">${esc(j.nom||"")}</td><td><span class="pill ${j.action==="Suppression"?"bad":j.action==="Modification"?"warn":"neutral"}">${esc(j.action)}</span></td><td class="small">${esc(j.texte||"")}</td></tr>`).join(""):`<tr><td colspan="4" class="muted">Aucune opération enregistrée.</td></tr>`)+`</tbody>`;
 }
-/* ---------- écritures récurrentes ---------- */
+/* ---------- opérations régulières ---------- */
 function recPending(){
   const t=today(), cur=t.slice(0,7), out=[];
   for(const r of P().recurrentes||[]){
@@ -1691,7 +1822,7 @@ function renderRecBanner(id){
   const el=$(id); if(!el)return;
   const p=canWrite()?recPending():[];
   el.hidden=!p.length;
-  if(p.length) el.innerHTML=`${p.length} écriture(s) récurrente(s) à créer : ${esc(p.slice(0,3).map(x=>x.r.designation+" "+monthLabel(x.ym)).join(", "))}${p.length>3?"…":""} <button type="button" class="mini primary" data-gen="1">Voir et créer</button>`;
+  if(p.length) el.innerHTML=`${p.length} opération(s) régulière(s) à créer : ${esc(p.slice(0,3).map(x=>x.r.designation+" "+monthLabel(x.ym)).join(", "))}${p.length>3?"…":""} <button type="button" class="mini primary" data-gen="1">Voir et créer</button>`;
 }
 
 /* ---------- réglages ---------- */
@@ -1700,12 +1831,12 @@ function renderReglages(){
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
   $("instTxt").innerHTML=standalone?"L'application est installée sur cet appareil.":installEvt?"Installez l'application pour l'ouvrir depuis l'écran d'accueil, comme une application.":ios?"Sur iPhone ou iPad : ouvrez l'adresse dans Safari, touchez <b>Partager</b> puis <b>Sur l'écran d'accueil</b>.":"Dans le menu du navigateur, choisissez <b>Installer l'application</b> ou <b>Ajouter à l'écran d'accueil</b>.";
   $("instBtn").hidden=!installEvt||standalone;
-  $("offTxt").textContent=DEMO?"En mode démonstration, les données restent sur cet appareil.":"Hors connexion, l'application reste utilisable : les écritures saisies sont gardées sur l'appareil puis envoyées au retour du réseau. Il faut s'être connecté au moins une fois sur l'appareil avec Internet.";
+  $("offTxt").textContent=DEMO?"En mode démonstration, les données restent sur cet appareil.":"Hors connexion, l'application reste utilisable : les opérations saisies sont gardées sur l'appareil puis envoyées au retour du réseau. Il faut s'être connecté au moins une fois sur l'appareil avec Internet.";
   if(!canWrite())return;
   if(document.activeElement!==$("sFrais"))$("sFrais").value=String(P().fraisVirement).replace(".",",");
   if(document.activeElement!==$("sSeuil"))$("sSeuil").value=String(P().seuilTreso).replace(".",",");
   const rs=P().recurrentes||[];
-  $("uTable").innerHTML=`<thead><tr><th>Désignation</th><th>Compte</th><th>Événement</th><th class="r">Montant</th><th>Paiement</th><th>Jour</th><th>Depuis</th><th>Dernière créée</th><th></th></tr></thead><tbody>${rs.length?rs.map(r=>`<tr><td>${esc(r.designation)}</td><td class="small">${r.compte==="LA"?"Livret A":"Compte courant"}</td><td class="small">${esc(r.evenement)}</td><td class="r num ${r.sens==="rec"?"pos":"neg"}">${r.sens==="rec"?"+":"−"}${fm(+r.montant||0)}</td><td class="small">${esc(r.type)}</td><td class="num">${esc(r.jour)}</td><td class="small num">${esc(monthLabel(r.depuis))}</td><td class="small num">${esc(monthLabel(r.derniere))}</td><td><button type="button" class="mini" data-uedit="${esc(r.id)}">Modifier</button></td></tr>`).join(""):`<tr><td colspan="9" class="muted">Aucune écriture récurrente. Exemple : tenue de compte, 5,65 € le 11 de chaque mois.</td></tr>`}</tbody>`;
+  $("uTable").innerHTML=`<thead><tr><th>Intitulé</th><th>Compte</th><th>Événement</th><th class="r">Montant</th><th>Paiement</th><th>Jour</th><th>Depuis</th><th>Dernière créée</th><th></th></tr></thead><tbody>${rs.length?rs.map(r=>`<tr><td>${esc(r.designation)}</td><td class="small">${r.compte==="LA"?"Livret A":"Compte courant"}</td><td class="small">${esc(r.evenement)}</td><td class="r num ${r.sens==="rec"?"pos":"neg"}">${r.sens==="rec"?"+":"−"}${fm(+r.montant||0)}</td><td class="small">${esc(r.type)}</td><td class="num">${esc(r.jour)}</td><td class="small num">${esc(monthLabel(r.depuis))}</td><td class="small num">${esc(monthLabel(r.derniere))}</td><td><button type="button" class="mini" data-uedit="${esc(r.id)}">Modifier</button></td></tr>`).join(""):`<tr><td colspan="9" class="muted">Aucune opération régulière. Exemple : tenue de compte, 5,65 € le 11 de chaque mois.</td></tr>`}</tbody>`;
   if(DEMO){$("dTable").innerHTML=`<tbody><tr><td class="muted">La gestion des accès s'active une fois la connexion configurée.</td></tr></tbody>`;$("mTable").innerHTML="";return;}
   $("dTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Demandé le</th><th></th></tr></thead><tbody>`+(S.demandes.length?S.demandes.map(d=>`<tr><td>${esc(d.nom||"")}</td><td>${esc(d.email||"")}</td><td class="small num">${esc(tsText(d.at))}</td><td><button type="button" class="mini primary" data-ok="${esc(d.id)}">Accepter en lecteur</button><button type="button" class="mini" data-no="${esc(d.id)}">Refuser</button></td></tr>`).join(""):`<tr><td colspan="4" class="muted">Aucune demande en attente. Un nouveau membre ouvre l'application, clique sur « Créer mon compte », puis sa demande apparaît ici.</td></tr>`)+`</tbody>`;
   $("mTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th><th></th></tr></thead><tbody>`+S.membres.map(m=>{const self=m.id===S.user.uid;return `<tr><td>${esc(m.nom||"")}${self?` <span class="muted small">(vous)</span>`:""}</td><td>${esc(m.email||"")}</td><td><select data-role="${esc(m.id)}" ${self?"disabled":""} aria-label="Rôle"><option value="lecteur" ${m.role!=="tresorier"&&m.role!=="stock"?"selected":""}>Lecteur</option><option value="stock" ${m.role==="stock"?"selected":""}>Gestionnaire de stock</option><option value="tresorier" ${m.role==="tresorier"?"selected":""}>Trésorier</option></select></td><td>${self?"":`<button type="button" class="mini danger" data-rm="${esc(m.id)}">Retirer l'accès</button>`}</td></tr>`;}).join("")+`</tbody>`;
@@ -1865,7 +1996,7 @@ function sBars(obj,kind,max){
   const tot=items.reduce((s,[,v])=>s+v,0); max=max||7;
   if(items.length>max){const rest=items.slice(max-1).reduce((s,[,v])=>s+v,0);items=items.slice(0,max-1);items.push(["Autres postes",rest]);}
   const top=Math.max(1,...items.map(([,v])=>v));
-  return items.length?`<div class="sb">${items.map(([k,v])=>`<div>${esc(k)}</div><div class="track"><div class="fill ${kind}" style="width:${v/top*100}%"></div></div><div class="num">${fm0(v)} <i>${pct(v/tot)}</i></div>`).join("")}</div>`:`<p class="muted">Aucune écriture.</p>`;
+  return items.length?`<div class="sb">${items.map(([k,v])=>`<div>${esc(k)}</div><div class="track"><div class="fill ${kind}" style="width:${v/top*100}%"></div></div><div class="num">${fm0(v)} <i>${pct(v/tot)}</i></div>`).join("")}</div>`:`<p class="muted">Aucune opération.</p>`;
 }
 function sDiv(evs){
   const max=Math.max(1,...evs.map(e=>Math.abs(e.res)));
@@ -1889,7 +2020,7 @@ function ratiosOf(e){
 function deckEvent(e){
   const b=s=>`<b>${esc(s)}</b>`, prev=(families().get(e.family)||[]).filter(x=>x.year<e.year&&!x.upcoming).pop();
   const bg=S.budgets.find(x=>eventKey(x.evenement).parent===e.name);
-  const out=[titleSlide(ASSO||"Bilan financier",e.name,`Bilan financier · écritures du ${fdate(e.first)} au ${fdate(e.last)}`)];
+  const out=[titleSlide(ASSO||"Bilan financier",e.name,`Bilan financier · opérations du ${fdate(e.first)} au ${fdate(e.last)}`)];
   const verdict=e.upcoming?`L'événement n'a pas encore eu lieu : ${fm(e.dep)} d'acomptes ont été versés.`:e.res>0.005?`L'événement dégage un bénéfice de ${fm(e.res)}, soit ${pct(e.margin)} des recettes.`:e.res<-0.005?`L'événement est déficitaire de ${fm(-e.res)}.`:"L'événement est à l'équilibre.";
   out.push(sl(e.name,"Chiffres clés",`<div class="kpis">${kpi("Recettes",fm0(e.rec),bg?"prévu "+fm0(bg.recettes):"hors fond de caisse")}${kpi("Dépenses",fm0(e.dep),bg?"prévu "+fm0(bg.depenses):"hors fond de caisse")}${kpi("Résultat",sg0(e.res),e.rec>0?"marge "+pct(e.margin):"",tone(e.res))}${e.subv>0?kpi("Hors subvention",sg0(e.resHS),"subvention "+fm0(e.subv),tone(e.resHS)):prev?kpi("Édition précédente",sg0(prev.res),prev.name,tone(prev.res)):""}</div><p class="lead">${esc(verdict)}</p><p class="note">Les fonds de caisse (retraits puis retours de monnaie) ne sont comptés ni en recette ni en dépense.</p>`));
   out.push(sl(e.name,"D'où vient l'argent, où part-il",`<div class="cols"><div><h3>Recettes · ${fm0(e.rec)}</h3>${sBars(e.recCat,"g",6)}</div><div><h3>Dépenses · ${fm0(e.dep)}</h3>${sBars(e.depCat,"b",7)}</div></div>`));
@@ -1920,7 +2051,7 @@ function deckYear(y){
   const end=y+"-12-31", cut=M.maxIso&&M.maxIso<end?M.maxIso:end;
   const bal=acc=>M.lines.filter(l=>l.iso&&l.iso<=cut&&(!acc||l.acc===acc)).reduce((s,l)=>s+l.rec-l.dep,0);
   const label="Bilan "+y, out=[titleSlide(ASSO||"Bilan financier","Bilan financier "+y,`${done.length} événement(s) · trésorerie au ${fdate(cut)} : ${fm(bal())}`)];
-  out.push(sl(label,"L'année en quatre chiffres",`<div class="kpis">${kpi("Résultat des événements",sg0(resEv),subv>0?sg0(resEv-subv)+" hors subvention":"",tone(resEv))}${kpi("Fonctionnement",sg0(fon),"banque, assurance, AG, intérêts")}${kpi("Investissements",sg0(inv),"matériel durable")}${kpi("Résultat de l'année",sg0(tot),Math.abs(acomptes)>0.005?"dont "+sg0(acomptes)+" d'acomptes":"",tone(tot))}</div><p class="lead">${esc(tot>0.005?`L'année ${y} se termine sur un excédent de ${fm(tot)}.`:tot<-0.005?`L'année ${y} se termine sur un déficit de ${fm(-tot)}.`:`L'année ${y} est à l'équilibre.`)}</p><p class="note">Chaque événement est rattaché à son millésime, y compris les acomptes payés l'année précédente. Les virements entre comptes sont exclus.</p>`));
+  out.push(sl(label,"L'année en quatre chiffres",`<div class="kpis">${kpi("Bilan des événements",sg0(resEv),subv>0?sg0(resEv-subv)+" hors subvention":"",tone(resEv))}${kpi("Fonctionnement",sg0(fon),"banque, assurance, AG, intérêts")}${kpi("Investissements",sg0(inv),"matériel durable")}${kpi("Résultat de l'année",sg0(tot),Math.abs(acomptes)>0.005?"dont "+sg0(acomptes)+" d'acomptes":"",tone(tot))}</div><p class="lead">${esc(tot>0.005?`L'année ${y} se termine sur un excédent de ${fm(tot)}.`:tot<-0.005?`L'année ${y} se termine sur un déficit de ${fm(-tot)}.`:`L'année ${y} est à l'équilibre.`)}</p><p class="note">Chaque événement est rattaché à son millésime, y compris les acomptes payés l'année précédente. Les virements entre comptes sont exclus.</p>`));
   if(evs.length){
     const sorted=[...evs].sort((a,c)=>c.res-a.res);
     out.push(sl(label,"Résultat par événement",sDiv(sorted.slice(0,12))));
@@ -1975,24 +2106,24 @@ $("pNotes").addEventListener("input",e=>{setNotes(e.target.value);renderPres();}
 const ROUTES={
   accueil:{sec:"accueil",view:"accueil",title:"Accueil"},
   operations:{sec:"operations",view:"ecritures",title:"Opérations",sub:"ops"},
-  rapprochement:{sec:"operations",view:"rapprochement",title:"Rapprochement bancaire",sub:"ops"},
+  rapprochement:{sec:"operations",view:"rapprochement",title:"Relevé de banque",sub:"ops"},
   evenements:{sec:"evenements",view:"evenements",title:"Événements"},
   stock:{sec:"stock",view:"stock",title:"Stock",sub:"stock"},
   mouvements:{sec:"stock",view:"mouvements",title:"Mouvements de stock",sub:"stock"},
   buvette:{sec:"stock",view:"buvette",title:"Analyse buvette",sub:"stock"},
   encarts:{sec:"encarts",view:"encarts",title:"Encarts publicitaires"},
-  synthese:{sec:"rapports",view:"synthese",title:"Synthèse annuelle",sub:"rap"},
+  synthese:{sec:"rapports",view:"synthese",title:"Bilan de l'année",sub:"rap"},
   editions:{sec:"rapports",view:"editions",title:"Comparer les éditions",sub:"rap"},
   tresorerie:{sec:"rapports",view:"previsionnel",title:"Trésorerie prévisionnelle",sub:"rap"},
   presentation:{sec:"rapports",view:"presentation",title:"Présentation",sub:"rap"},
-  controles:{sec:"rapports",view:"controles",title:"Contrôles",sub:"rap"},
-  journal:{sec:"rapports",view:"journal",title:"Journal des modifications",sub:"rap"},
+  controles:{sec:"rapports",view:"controles",title:"Vérifications",sub:"rap"},
+  journal:{sec:"rapports",view:"journal",title:"Historique des modifications",sub:"rap"},
   reglages:{sec:"reglages",view:"reglages",title:"Réglages"}
 };
 const SUBS={
-  ops:[["operations","Opérations"],["rapprochement","Rapprochement"]],
+  ops:[["operations","Opérations"],["rapprochement","Relevé de banque"]],
   stock:[["stock","Articles"],["mouvements","Mouvements"],["buvette","Analyse buvette"]],
-  rap:[["synthese","Synthèse annuelle"],["editions","Comparer les éditions"],["tresorerie","Trésorerie prévisionnelle"],["presentation","Présentation"],["controles","Contrôles"],["journal","Journal"]]
+  rap:[["synthese","Bilan de l'année"],["editions","Comparer les éditions"],["tresorerie","Trésorerie prévisionnelle"],["presentation","Présentation"],["controles","Vérifications"],["journal","Historique"]]
 };
 const FICHE_TABS=[["apercu","Vue d'ensemble"],["budget","Budget"],["caisse","Caisse"],["buvette","Buvette"],["stock","Stock"],["comparer","Comparer"],["ops","Opérations"]];
 const ALIAS={ecritures:"operations",budget:"evenements",previsionnel:"evenements",acces:"reglages",stockev:"stock",evenement:"evenements"};
@@ -2091,7 +2222,7 @@ function openEcriture(id,preset){
   if(id&&!editing)return;
   const e=editing||Object.assign({compte:"CC",date:today(),evenement:"",designation:"",recette:0,depense:0,type:"Virement",commentaire:"",pointe:false,poste:""},preset||{});
   eTouched=new Set(editing?["type","poste","sens"]:[]);
-  $("eTitle").textContent=editing?"Modifier l'écriture":"Nouvelle écriture";
+  $("eTitle").textContent=editing?"Modifier l'opération":"Nouvelle opération";
   $("eAcc").value=e.compte==="LA"?"LA":"CC"; $("eDate").value=e.date||"";
   setEv($("eEvt"),e.evenement,e.date);
   $("eDes").value=e.designation||"";
@@ -2109,7 +2240,7 @@ function openEcriture(id,preset){
   (editing||$("eEvt").value?$("eDes"):$("eEvt")).focus();
 }
 function prefillFromHistory(){
-  // reprend le type, le sens, le poste et le montant de la dernière écriture de même désignation
+  // reprend le type, le sens, le poste et le montant de la dernière opération de même intitulé
   const k=strip($("eDes").value); if(!k)return;
   const p=S.ecr.filter(x=>strip(x.designation)===k).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")))[0]; if(!p)return;
   if(!eTouched.has("type")&&p.type)$("eType").innerHTML=typeOptions(p.type);
@@ -2123,7 +2254,7 @@ async function saveE(next){
   const err=$("eErr"), amt=round2(parseNum($("eAmt").value)), evt=$("eEvt").value;
   const fail=t=>{err.textContent=t;err.hidden=false;};
   if(!evt||evt==="__new")return fail("Choisissez l'événement.");
-  if(!$("eDes").value.trim())return fail("Saisissez une désignation.");
+  if(!$("eDes").value.trim())return fail("Saisissez un intitulé.");
   if(!(amt>0))return fail("Le montant doit être un nombre positif, par exemple 125,50.");
   const rec=$("eRec").checked;
   const data={compte:$("eAcc").value,date:$("eDate").value||null,evenement:evt,designation:$("eDes").value.trim(),recette:rec?amt:0,depense:rec?0:amt,type:$("eType").value,commentaire:$("eCom").value.trim(),pointe:$("ePt").checked,poste:$("ePoste").value};
@@ -2136,7 +2267,7 @@ async function saveE(next){
       ops.push(opNewEcr(f,1));jr.push({action:"Création",texte:resume(f)});
     }
   }
-  const ok=await run(store.commit(ops,jr),editing?"Écriture modifiée.":ops.length>1?"Écriture et frais de virement enregistrés.":"Écriture enregistrée.");
+  const ok=await run(store.commit(ops,jr),editing?"Opération modifiée.":ops.length>1?"Opération et frais de virement enregistrés.":"Opération enregistrée.");
   if(!ok)return;
   if(next)openEcriture(null,{compte:data.compte,date:data.date,evenement:data.evenement,type:data.type});
   else $("dlgE").close();
@@ -2151,10 +2282,10 @@ $("eDup").onclick=()=>{
 $("eDel").onclick=async()=>{
   const e=editing; if(!e)return;
   $("dlgE").close();
-  if(await ask(`Supprimer définitivement cette écriture ?\n${resume(e)}`,"Supprimer"))
+  if(await ask(`Supprimer définitivement cette opération ?\n${resume(e)}`,"Supprimer"))
     if(await run(store.commit([{t:"delete",col:"ecritures",id:e.id}],{action:"Suppression",texte:resume(e)}))){
       const data=Object.assign({},e); delete data.id;
-      flashUndo("Écriture supprimée.",()=>run(store.commit([{t:"set",col:"ecritures",id:e.id,data}],{action:"Création",texte:"Suppression annulée : "+resume(e)}),"Écriture rétablie."));
+      flashUndo("Opération supprimée.",()=>run(store.commit([{t:"set",col:"ecritures",id:e.id,data}],{action:"Création",texte:"Suppression annulée : "+resume(e)}),"Opération rétablie."));
     }
 };
 $("bNew").onclick=()=>openEcriture(null);
@@ -2192,14 +2323,14 @@ $("fV").addEventListener("submit",async ev=>{
   const name=eventKey($("vNom").value).parent, from=evFrom, err=$("vErr");
   const fail=t=>{err.textContent=t;err.hidden=false;};
   if(!name)return fail("Saisissez le nom de l'événement, avec l'année (ex. FETE 2027).");
-  if(HORS_RE.test(name))return fail("Ce nom est réservé aux écritures hors événement.");
+  if(HORS_RE.test(name))return fail("Ce nom est réservé aux opérations hors événement.");
   if(!$("vDeb").value)return fail("Saisissez la date de l'événement : elle sert au classement et à la trésorerie prévisionnelle.");
   if($("vFin").value&&$("vFin").value<$("vDeb").value)return fail("Le dernier jour est avant la date de l'événement.");
   if(!from&&evList().some(x=>x.name===name&&x.managed))return fail("Cet événement existe déjà dans la liste.");
   const ops=[], jr=[];
   if(from&&name!==from){
     const ls=S.ecr.filter(e=>eventKey(e.evenement).parent===from), merge=evList().some(x=>x.name===name);
-    if(!await ask(`${merge?"Fusionner":"Renommer"} « ${from} » ${merge?"avec":"en"} « ${name} » ? ${ls.length} écriture(s) seront modifiées.`,merge?"Fusionner":"Renommer"))return;
+    if(!await ask(`${merge?"Fusionner":"Renommer"} « ${from} » ${merge?"avec":"en"} « ${name} » ? ${ls.length} opération(s) seront modifiées.`,merge?"Fusionner":"Renommer"))return;
     for(const e of ls){const k=eventKey(e.evenement);ops.push({t:"update",col:"ecritures",id:e.id,data:{evenement:k.sub?name+" - "+k.sub:name}});}
     ops.push({t:"delete",col:"evenements",id:slug(from)});
     const ob=S.budgets.find(b=>eventKey(b.evenement).parent===from); if(ob)ops.push({t:"delete",col:"budgets",id:ob.id});
@@ -2207,7 +2338,7 @@ $("fV").addEventListener("submit",async ev=>{
     if(oc){if(!S.caisses.some(c=>c.id===slug(name)))ops.push({t:"set",col:"caisses",id:slug(name),data:{evenement:name,sessions:oc.sessions||[]}});ops.push({t:"delete",col:"caisses",id:slug(from)});}
     const op=pvDoc(from); if(op){if(!pvDoc(name))ops.push({t:"set",col:"previsions",id:slug(name),data:{evenement:name,lignes:op.lignes||[]}});ops.push({t:"delete",col:"previsions",id:op.id});}
     S.mouvements.filter(m=>m.evenement&&eventKey(m.evenement).parent===from).forEach(m=>{const k=eventKey(m.evenement);ops.push({t:"update",col:"mouvements",id:m.id,data:{evenement:k.sub?name+" - "+k.sub:name}});});
-    jr.push({action:"Modification",texte:`Événement « ${from} » ${merge?"fusionné avec":"renommé en"} « ${name} » (${ls.length} écritures)`});
+    jr.push({action:"Modification",texte:`Événement « ${from} » ${merge?"fusionné avec":"renommé en"} « ${name} » (${ls.length} opérations)`});
   }
   const doc={nom:name,debut:$("vDeb").value||null,fin:$("vFin").value||null,statut:$("vStat").value,sous:[...new Set($("vSous").value.split(/[,;]/).map(normEv).filter(Boolean))],note:$("vNote").value.trim()};
   ops.push({t:"set",col:"evenements",id:slug(name),data:doc});
@@ -2221,7 +2352,7 @@ $("fV").addEventListener("submit",async ev=>{
 });
 $("vDel").onclick=async()=>{
   const n=evFrom; $("dlgV").close();
-  if(n&&await ask(`Retirer ${n} de la liste des événements ? Les écritures et le budget sont conservés.`,"Retirer"))
+  if(n&&await ask(`Retirer ${n} de la liste des événements ? Les opérations et le budget sont conservés.`,"Retirer"))
     await run(store.commit([{t:"delete",col:"evenements",id:slug(n)}],{action:"Événement",texte:`${n} retiré de la liste`}),"Événement retiré de la liste.");
 };
 $("evFix").onclick=async()=>{
@@ -2233,7 +2364,7 @@ $("evFix").onclick=async()=>{
 };
 $("evAll").onclick=async()=>{
   const add=evList().filter(x=>!x.managed&&x.ev); if(!add.length)return;
-  if(!await ask(`Ajouter ${add.length} événement(s) du cahier à la liste ? Ceux sans écriture depuis plus de 45 jours sont marqués « clos ». La date retenue est le jour qui compte le plus d'opérations : vérifiez-la ensuite.`,"Ajouter"))return;
+  if(!await ask(`Ajouter ${add.length} événement(s) du cahier à la liste ? Ceux sans opération depuis plus de 45 jours sont marqués « clos ». La date retenue est le jour qui compte le plus d'opérations : vérifiez-la ensuite.`,"Ajouter"))return;
   const lim=new Date(Date.now()-45*864e5).toISOString().slice(0,10);
   const ops=add.map(x=>({t:"set",col:"evenements",id:slug(x.name),data:{nom:x.name,debut:peakOk(x)?peakDate(x.ev):null,fin:null,statut:x.ev.upcoming||(x.ev.last&&x.ev.last>=lim)?"ouvert":"clos",sous:Object.keys(x.ev.subs).filter(k=>k!=="Général"),note:""}}));
   await run(store.commit(ops,{action:"Événement",texte:`${add.length} événements ajoutés à la liste`}),`${add.length} événement(s) ajouté(s) à la liste.`);
@@ -2244,23 +2375,23 @@ const selRaw=()=>S.ecr.filter(e=>SEL.has(e.id));
 $("bkNone").onclick=()=>{SEL.clear();renderLines();};
 async function bulkPoint(v){
   const ls=selRaw().filter(e=>!!e.pointe!==v); if(!ls.length){flash("Rien à changer.");return;}
-  await run(store.commit(ls.map(e=>({t:"update",col:"ecritures",id:e.id,data:{pointe:v}})),{action:v?"Pointage":"Dépointage",texte:`${ls.length} écritures ${v?"pointées":"dépointées"} (sélection)`}),`${ls.length} écriture(s) ${v?"pointée(s)":"dépointée(s)"}.`);
+  await run(store.commit(ls.map(e=>({t:"update",col:"ecritures",id:e.id,data:{pointe:v}})),{action:v?"Vérification":"Dévérification",texte:`${ls.length} opérations ${v?"vérifiées":"dévérifiées"} (sélection)`}),`${ls.length} opération(s) ${v?"vérifiée(s)":"dévérifiée(s)"}.`);
 }
 $("bkPt").onclick=()=>bulkPoint(true); $("bkUnpt").onclick=()=>bulkPoint(false);
 $("bkDel").onclick=async()=>{
   const raw=selRaw(); if(!raw.length)return;
-  if(!await ask(`Supprimer définitivement ${raw.length} écriture(s) ?\nRecettes ${fm(sumOf(raw,e=>+e.recette||0))}, dépenses ${fm(sumOf(raw,e=>+e.depense||0))}.`,"Supprimer"))return;
-  if(await run(store.commit(raw.map(e=>({t:"delete",col:"ecritures",id:e.id})),{action:"Suppression",texte:`${raw.length} écritures supprimées : `+raw.slice(0,20).map(resume).join(" | ")+(raw.length>20?" | …":"")}),`${raw.length} écriture(s) supprimée(s). Le détail reste dans le journal.`))SEL.clear();
+  if(!await ask(`Supprimer définitivement ${raw.length} opération(s) ?\nRecettes ${fm(sumOf(raw,e=>+e.recette||0))}, dépenses ${fm(sumOf(raw,e=>+e.depense||0))}.`,"Supprimer"))return;
+  if(await run(store.commit(raw.map(e=>({t:"delete",col:"ecritures",id:e.id})),{action:"Suppression",texte:`${raw.length} opérations supprimées : `+raw.slice(0,20).map(resume).join(" | ")+(raw.length>20?" | …":"")}),`${raw.length} opération(s) supprimée(s). Le détail reste dans le journal.`))SEL.clear();
 };
 $("bkDup").onclick=async()=>{
   const raw=selRaw(); if(!raw.length)return;
   const ops=raw.map((e,i)=>opNewEcr({compte:e.compte,date:e.date,evenement:e.evenement,designation:e.designation,recette:+e.recette||0,depense:+e.depense||0,type:e.type||"",commentaire:e.commentaire||"",pointe:false,poste:e.poste||""},i));
-  if(await run(store.commit(ops,{action:"Création",texte:`${ops.length} écritures dupliquées : `+raw.slice(0,20).map(resume).join(" | ")}),`${ops.length} copie(s) créée(s) et sélectionnée(s) : « Modifier… » pour changer leur date ou leur événement.`)){SEL.clear();ops.forEach(o=>SEL.add(o.id));render();}
+  if(await run(store.commit(ops,{action:"Création",texte:`${ops.length} opérations dupliquées : `+raw.slice(0,20).map(resume).join(" | ")}),`${ops.length} copie(s) créée(s) et sélectionnée(s) : « Modifier… » pour changer leur date ou leur événement.`)){SEL.clear();ops.forEach(o=>SEL.add(o.id));render();}
 };
 $("bkCsv").onclick=()=>exportCsv(M.lines.filter(l=>SEL.has(l.id)));
 $("bkEdit").onclick=()=>{
   const n=SEL.size; if(!n)return;
-  $("kTitle").textContent=`Modifier ${n} écriture(s)`;
+  $("kTitle").textContent=`Modifier ${n} opération(s)`;
   for(const id of ["kOnEvt","kOnPoste","kOnType","kOnAcc","kOnDate","kOnPt","kOnCom","kOnDes"])$(id).checked=false;
   setEv($("kEvt"),"",today()); $("kPoste").innerHTML=posteOptions("",""); $("kType").innerHTML=typeOptions("Virement");
   $("kAcc").value="CC"; $("kDate").value=""; $("kPt").value="oui"; $("kComMode").value="add"; $("kCom").value=""; $("kFind").value=""; $("kRepl").value="";
@@ -2274,16 +2405,16 @@ $("fK").addEventListener("submit",async ev=>{
   const evt=$("kEvt").value, poste=$("kPoste").value, type=$("kType").value, acc=$("kAcc").value, date=$("kDate").value, pt=$("kPt").value==="oui", com=$("kCom").value.trim(), find=$("kFind").value, repl=$("kRepl").value;
   if(on("kOnEvt")&&(!evt||evt==="__new"))return fail("Choisissez l'événement.");
   if(on("kOnDate")&&!date)return fail("Choisissez la date.");
-  if(on("kOnDes")&&!find)return fail("Indiquez le texte à remplacer dans la désignation.");
+  if(on("kOnDes")&&!find)return fail("Indiquez le texte à remplacer dans l'intitulé.");
   const parts=[];
   if(on("kOnEvt"))parts.push("événement → "+evt);
   if(on("kOnPoste"))parts.push("poste → "+(poste||"automatique"));
   if(on("kOnType"))parts.push("paiement → "+type);
   if(on("kOnAcc"))parts.push("compte → "+(acc==="LA"?"Livret A":"compte courant"));
   if(on("kOnDate"))parts.push("date → "+fdate(date));
-  if(on("kOnPt"))parts.push(pt?"pointées":"non pointées");
+  if(on("kOnPt"))parts.push(pt?"vérifiées":"pas encore vues en banque");
   if(on("kOnCom"))parts.push(($("kComMode").value==="add"?"commentaire complété : ":"commentaire remplacé : ")+com);
-  if(on("kOnDes"))parts.push(`désignation « ${find} » → « ${repl} »`);
+  if(on("kOnDes"))parts.push(`intitulé « ${find} » → « ${repl} »`);
   if(!parts.length)return fail("Cochez au moins un champ à modifier.");
   const ops=[];
   for(const e of selRaw()){
@@ -2298,11 +2429,11 @@ $("fK").addEventListener("submit",async ev=>{
     if(on("kOnDes")){const v=String(e.designation||"").split(find).join(repl);if(v!==e.designation)d.designation=v;}
     if(Object.keys(d).length)ops.push({t:"update",col:"ecritures",id:e.id,data:d});
   }
-  if(!ops.length)return fail("Aucune écriture n'est modifiée : elles ont déjà ces valeurs.");
-  if(await run(store.commit(ops,{action:"Modification",texte:`Modification groupée de ${ops.length} écritures : ${parts.join(" ; ")}`}),`${ops.length} écriture(s) modifiée(s).`))$("dlgK").close();
+  if(!ops.length)return fail("Aucune opération n'est modifiée : elles ont déjà ces valeurs.");
+  if(await run(store.commit(ops,{action:"Modification",texte:`Modification groupée de ${ops.length} opérations : ${parts.join(" ; ")}`}),`${ops.length} opération(s) modifiée(s).`))$("dlgK").close();
 });
 
-/* ================= écritures récurrentes ================= */
+/* ================= opérations régulières ================= */
 let uEditing=null, GEN=[];
 function openRec(id){
   uEditing=id?(P().recurrentes||[]).find(r=>r.id===id):null;
@@ -2322,26 +2453,26 @@ $("fU").addEventListener("submit",async ev=>{
   if(!depuis){err.textContent="Indiquez le mois de départ, par exemple 2026-11.";err.hidden=false;return;}
   const r={id:uEditing?uEditing.id:"r"+Date.now().toString(36),designation:$("uDes").value.trim(),compte:$("uAcc").value,evenement:evt,sens:$("uRec").checked?"rec":"dep",montant:amt,type:$("uType").value,poste:$("uPoste").value,jour:Math.min(Math.max(parseInt($("uJour").value)||1,1),28),depuis,derniere:uEditing&&uEditing.depuis===depuis?uEditing.derniere||null:null};
   const list=(P().recurrentes||[]).filter(x=>x.id!==r.id).concat([r]);
-  if(await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{recurrentes:list}}],{action:"Réglages",texte:`Écriture récurrente « ${r.designation} » : ${fm(r.montant)} le ${r.jour} de chaque mois, depuis ${monthLabel(r.depuis)}`}),"Écriture récurrente enregistrée."))$("dlgU").close();
+  if(await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{recurrentes:list}}],{action:"Réglages",texte:`Opération régulière « ${r.designation} » : ${fm(r.montant)} le ${r.jour} de chaque mois, depuis ${monthLabel(r.depuis)}`}),"Opération régulière enregistrée."))$("dlgU").close();
 });
 $("uDel").onclick=async()=>{
   const r=uEditing; $("dlgU").close();
-  if(r&&await ask(`Supprimer l'écriture récurrente « ${r.designation} » ? Les écritures déjà créées sont conservées.`,"Supprimer"))
-    await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{recurrentes:(P().recurrentes||[]).filter(x=>x.id!==r.id)}}],{action:"Réglages",texte:`Écriture récurrente « ${r.designation} » supprimée`}),"Écriture récurrente supprimée.");
+  if(r&&await ask(`Supprimer l'opération régulière « ${r.designation} » ? Les opérations déjà créées sont conservées.`,"Supprimer"))
+    await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{recurrentes:(P().recurrentes||[]).filter(x=>x.id!==r.id)}}],{action:"Réglages",texte:`Opération régulière « ${r.designation} » supprimée`}),"Opération régulière supprimée.");
 };
 $("sFraisOk").onclick=()=>{const v=round2(parseNum($("sFrais").value)), s=round2(parseNum($("sSeuil").value));run(store.commit([{t:"merge",col:"parametres",id:"general",data:{fraisVirement:v,seuilTreso:s}}],{action:"Réglages",texte:`Frais par virement : ${fm(v)} · seuil d'alerte de trésorerie : ${fm(s)}`}),"Réglages enregistrés.");};
 function openGen(){
   GEN=recPending(); if(!GEN.length)return;
-  $("gTable").innerHTML=`<thead><tr><th></th><th>Date</th><th>Désignation</th><th>Événement</th><th class="r">Montant</th></tr></thead><tbody>${GEN.map((x,i)=>`<tr><td><input type="checkbox" data-gi="${i}" checked aria-label="Créer"></td><td class="num">${fdate(x.iso)}</td><td>${esc(x.r.designation)}</td><td class="small">${esc(x.r.evenement)}</td><td class="r num ${x.r.sens==="rec"?"pos":"neg"}">${x.r.sens==="rec"?"+":"−"}${fm(+x.r.montant)}</td></tr>`).join("")}</tbody>`;
+  $("gTable").innerHTML=`<thead><tr><th></th><th>Date</th><th>Intitulé</th><th>Événement</th><th class="r">Montant</th></tr></thead><tbody>${GEN.map((x,i)=>`<tr><td><input type="checkbox" data-gi="${i}" checked aria-label="Créer"></td><td class="num">${fdate(x.iso)}</td><td>${esc(x.r.designation)}</td><td class="small">${esc(x.r.evenement)}</td><td class="r num ${x.r.sens==="rec"?"pos":"neg"}">${x.r.sens==="rec"?"+":"−"}${fm(+x.r.montant)}</td></tr>`).join("")}</tbody>`;
   $("dlgG").showModal();
 }
 $("fG").addEventListener("submit",async ev=>{
   ev.preventDefault();
   const chosen=GEN.filter((x,i)=>$("gTable").querySelector(`[data-gi="${i}"]`).checked);
-  const ops=chosen.map((x,i)=>opNewEcr({compte:x.r.compte,date:x.iso,evenement:x.r.evenement,designation:x.r.designation,recette:x.r.sens==="rec"?+x.r.montant:0,depense:x.r.sens==="rec"?0:+x.r.montant,type:x.r.type,commentaire:"Écriture récurrente",pointe:false,poste:x.r.poste||""},i));
+  const ops=chosen.map((x,i)=>opNewEcr({compte:x.r.compte,date:x.iso,evenement:x.r.evenement,designation:x.r.designation,recette:x.r.sens==="rec"?+x.r.montant:0,depense:x.r.sens==="rec"?0:+x.r.montant,type:x.r.type,commentaire:"Opération régulière",pointe:false,poste:x.r.poste||""},i));
   const last={}; GEN.forEach(x=>{if(!last[x.r.id]||x.ym>last[x.r.id])last[x.r.id]=x.ym;});
   ops.push({t:"merge",col:"parametres",id:"general",data:{recurrentes:(P().recurrentes||[]).map(r=>last[r.id]?Object.assign({},r,{derniere:last[r.id]}):r)}});
-  if(await run(store.commit(ops,{action:"Création",texte:`${chosen.length} écritures récurrentes créées${GEN.length>chosen.length?`, ${GEN.length-chosen.length} ignorées`:""}`}),`${chosen.length} écriture(s) récurrente(s) créée(s).`))$("dlgG").close();
+  if(await run(store.commit(ops,{action:"Création",texte:`${chosen.length} opérations régulières créées${GEN.length>chosen.length?`, ${GEN.length-chosen.length} ignorées`:""}`}),`${chosen.length} opération(s) régulière(s) créée(s).`))$("dlgG").close();
 });
 
 /* ================= caisse d'un événement ================= */
@@ -2433,7 +2564,7 @@ $("fA").addEventListener("submit",async ev=>{
 });
 $("anDel").onclick=async()=>{
   const a=aEditing; $("dlgA").close();
-  if(a&&await ask(`Supprimer l'annonceur ${a.nom} et son historique d'encarts ? Les écritures du cahier sont conservées.`,"Supprimer"))
+  if(a&&await ask(`Supprimer l'annonceur ${a.nom} et son historique d'encarts ? Les opérations du cahier sont conservées.`,"Supprimer"))
     await run(store.commit([{t:"delete",col:"annonceurs",id:a.id}],{action:"Encarts",texte:`${a.nom} : annonceur supprimé`}),"Annonceur supprimé.");
 };
 function openPay(id){
@@ -2451,7 +2582,7 @@ $("fA2").addEventListener("submit",async ev=>{
   if(create){const o=opNewEcr({compte:$("apAcc").value,date,evenement:"ENCART PUB "+aYear,designation:"Encart "+payA.nom,recette:amt,depense:0,type:$("apType").value,commentaire:$("apCom").value.trim(),pointe:false,poste:"Encarts publicitaires"});eid=o.id;ops.push(o);}
   const enc=Object.assign({},payA.encarts||{}); enc[aYear]={montant:amt,statut:"paye",date,ecriture:eid};
   ops.push({t:"update",col:"annonceurs",id:payA.id,data:{encarts:enc}});
-  if(await run(store.commit(ops,{action:"Encarts",texte:`${payA.nom} : encart ${aYear} payé ${fm(amt)}${create?", écriture créée":""}`}),`Encart de ${payA.nom} encaissé.`))$("dlgA2").close();
+  if(await run(store.commit(ops,{action:"Encarts",texte:`${payA.nom} : encart ${aYear} payé ${fm(amt)}${create?", opération créée":""}`}),`Encart de ${payA.nom} encaissé.`))$("dlgA2").close();
 });
 $("aRenew").onclick=async()=>{
   const y=aYear, py=y-1, list=S.annonceurs.filter(a=>{const p=(a.encarts||{})[py];return p&&["paye","promis"].includes(p.statut)&&!(a.encarts||{})[y];});
@@ -2475,7 +2606,7 @@ $("aSeed").onclick=async()=>{
   }
   const keys=new Set([...touched].map(x=>x.split("|")[0]));
   if(!keys.size){flash("Tous les encarts du cahier sont déjà repris.");return;}
-  if(!await ask(`Reprendre ${keys.size} annonceur(s) depuis les écritures « ENCART PUB » (dont ${created.size} nouveaux) ? Vérifiez ensuite les lignes qui regroupent plusieurs annonceurs.`,"Reprendre"))return;
+  if(!await ask(`Reprendre ${keys.size} annonceur(s) depuis les opérations « ENCART PUB » (dont ${created.size} nouveaux) ? Vérifiez ensuite les lignes qui regroupent plusieurs annonceurs.`,"Reprendre"))return;
   const ops=[...keys].map(k=>{const a=by.get(k);return {t:"set",col:"annonceurs",id:a.id,data:{nom:a.nom,contact:a.contact||"",tel:a.tel||"",email:a.email||"",note:a.note||"",encarts:a.encarts}};});
   await run(store.commit(ops,{action:"Encarts",texte:`${keys.size} annonceurs repris du cahier`}),`${keys.size} annonceur(s) repris du cahier.`);
 };
@@ -2533,20 +2664,20 @@ function buildRelItems(){
   });
 }
 const relAuto=x=>classify({acc:REL.acc,iso:x.iso,evt:x.evt||"",des:x.des||x.lib,rec:x.amt>0?x.amt:0,dep:x.amt<0?-x.amt:0,type:x.type,com:"",poste:""}).cat;
-function relSum(){const it=REL.items;$("r2Sum").textContent=`${it.filter(x=>x.check&&x.state==="new").length} écriture(s) à créer, ${it.filter(x=>x.check&&x.state==="point").length} à pointer`;}
+function relSum(){const it=REL.items;$("r2Sum").textContent=`${it.filter(x=>x.check&&x.state==="new").length} opération(s) à créer, ${it.filter(x=>x.check&&x.state==="point").length} à vérifier`;}
 function renderRelReview(){
   const it=REL.items, hide=$("r2Hide").checked, n={new:0,point:0,done:0}; it.forEach(x=>n[x.state]++);
   $("r2Head").textContent=`${REL.name} · ${REL.acc==="LA"?"Livret A":"Compte courant"} · ${it.length} opérations`;
-  $("r2Tiles").innerHTML=`<span class="pill neutral">${n.new} nouvelle(s)</span> <span class="pill warn">${n.point} à pointer</span> <span class="pill good">${n.done} déjà pointée(s)</span>`;
+  $("r2Tiles").innerHTML=`<span class="pill neutral">${n.new} nouvelle(s)</span> <span class="pill warn">${n.point} à vérifier</span> <span class="pill good">${n.done} déjà vérifiée(s)</span>`;
   const rows=it.map((x,i)=>{
     if(hide&&x.state==="done")return "";
-    const st=x.state==="new"?`<span class="pill neutral">Nouvelle</span>`:x.state==="point"?`<span class="pill warn">À pointer</span>`:`<span class="pill good">Déjà pointée</span>`;
+    const st=x.state==="new"?`<span class="pill neutral">Nouvelle</span>`:x.state==="point"?`<span class="pill warn">À vérifier</span>`:`<span class="pill good">Déjà vérifiée</span>`;
     const right=x.state==="new"
-      ?`<td><select class="evsel ${x.check&&!x.evt?"req":""}" data-ri="${i}" data-rk="evt" aria-label="Événement">${eventOptions(x.evt,x.iso)}</select></td><td><input type="text" data-ri="${i}" data-rk="des" value="${esc(x.des)}" aria-label="Désignation" style="min-width:200px"></td><td><select data-ri="${i}" data-rk="poste" aria-label="Poste">${posteOptions(relAuto(x),x.poste)}</select></td>`
+      ?`<td><select class="evsel ${x.check&&!x.evt?"req":""}" data-ri="${i}" data-rk="evt" aria-label="Événement">${eventOptions(x.evt,x.iso)}</select></td><td><input type="text" data-ri="${i}" data-rk="des" value="${esc(x.des)}" aria-label="Intitulé" style="min-width:200px"></td><td><select data-ri="${i}" data-rk="poste" aria-label="Poste">${posteOptions(relAuto(x),x.poste)}</select></td>`
       :`<td colspan="3" class="small">${esc(x.match.evenement)} · ${esc(x.match.designation)} <span class="muted">(${fdate(x.match.date)})</span></td>`;
     return `<tr><td><input type="checkbox" data-ri="${i}" data-rk="check" ${x.check?"checked":""} ${x.state==="done"?"disabled":""} aria-label="Retenir"></td><td class="num small">${fdate(x.iso)}</td><td class="small" style="max-width:280px">${esc(x.lib)}</td><td class="r num ${cls(x.amt)}">${sg(x.amt)}</td><td>${st}</td>${right}</tr>`;
   }).join("");
-  $("r2Table").innerHTML=`<thead><tr><th></th><th>Date</th><th>Libellé de la banque</th><th class="r">Montant</th><th>État</th><th>Événement</th><th>Désignation</th><th>Poste</th></tr></thead><tbody>${rows||`<tr><td colspan="8" class="muted">Rien à afficher.</td></tr>`}</tbody>`;
+  $("r2Table").innerHTML=`<thead><tr><th></th><th>Date</th><th>Libellé de la banque</th><th class="r">Montant</th><th>État</th><th>Événement</th><th>Intitulé</th><th>Poste</th></tr></thead><tbody>${rows||`<tr><td colspan="8" class="muted">Rien à afficher.</td></tr>`}</tbody>`;
   $("r2Table").querySelectorAll("select[data-rk=evt]").forEach(s=>{const x=REL.items[+s.dataset.ri];s.value=normEv(x.evt);s.dataset.prev=s.value;});
   relSum(); $("r2Err").hidden=true;
 }
@@ -2574,14 +2705,14 @@ $("fR2").addEventListener("submit",async e=>{
   if(!news.length&&!pts.length){$("dlgR2").close();return;}
   const ops=news.map((x,i)=>opNewEcr({compte:REL.acc,date:x.iso,evenement:x.evt,designation:(x.des||x.lib).trim(),recette:x.amt>0?x.amt:0,depense:x.amt<0?round2(-x.amt):0,type:x.type,commentaire:"Relevé : "+x.lib.slice(0,140),pointe:true,poste:x.poste||"",releveRef:x.ref},i))
     .concat(pts.map(x=>({t:"update",col:"ecritures",id:x.match.id,data:{pointe:true,releveRef:x.ref}})));
-  if(await run(store.commit(ops,{action:"Import relevé",texte:`${REL.name} (${REL.acc==="LA"?"Livret A":"compte courant"}) : ${news.length} écritures créées, ${pts.length} pointées`}),`Relevé importé : ${news.length} écriture(s) créée(s), ${pts.length} pointée(s).`))$("dlgR2").close();
+  if(await run(store.commit(ops,{action:"Import relevé",texte:`${REL.name} (${REL.acc==="LA"?"Livret A":"compte courant"}) : ${news.length} opérations créées, ${pts.length} vérifiées`}),`Relevé importé : ${news.length} opération(s) créée(s), ${pts.length} vérifiée(s).`))$("dlgR2").close();
 });
 
 /* ================= rapprochement ================= */
 $("rBulk").onclick=async()=>{
   const until=$("rUntil").value, ls=rapLines().filter(l=>!l.pointe&&(!until||!l.iso||l.iso<=until));
-  if(ls.length&&await ask(`Pointer ${ls.length} écriture(s) du ${$("rAcc").value==="LA"?"Livret A":"compte courant"}${until?" jusqu'au "+fdate(until):""} ?`,"Pointer"))
-    await run(store.commit(ls.map(l=>({t:"update",col:"ecritures",id:l.id,data:{pointe:true}})),{action:"Pointage",texte:`${ls.length} écritures pointées en une fois${until?" jusqu'au "+fdate(until):""}`}),"Écritures pointées.");
+  if(ls.length&&await ask(`Marquer comme vues en banque ${ls.length} opération(s) du ${$("rAcc").value==="LA"?"Livret A":"compte courant"}${until?" jusqu'au "+fdate(until):""} ?`,"Banque"))
+    await run(store.commit(ls.map(l=>({t:"update",col:"ecritures",id:l.id,data:{pointe:true}})),{action:"Vérification",texte:`${ls.length} opérations vérifiées en une fois${until?" jusqu'au "+fdate(until):""}`}),"Opérations vérifiées.");
 };
 for(const id of ["rAcc","rAll","rUntil"])$(id).addEventListener("change",renderRap);
 $("rRel").addEventListener("input",renderRap);
@@ -2604,7 +2735,7 @@ async function readFile(file){
       rows.push({compte:acc,date,evenement:normEv(r[1]),designation:String(r[2]==null?"":r[2]).trim(),recette:R>0?R:0,depense:R>0?0:D,type:String(r[5]==null?"":r[5]).trim(),commentaire:r[6]==null?"":String(r[6]).trim(),pointe:pt,poste:POSTES_ALL.includes(poste)?poste:""});
     }
   }
-  if(!rows.length)throw new Error("Aucune écriture trouvée. Le fichier doit garder les colonnes Date, EVENEMENT, Designation, Recettes, Dépenses, Type de Payement, Commentaires.");
+  if(!rows.length)throw new Error("Aucune opération trouvée. Le fichier doit garder les colonnes Date, EVENEMENT, Designation, Recettes, Dépenses, Type de Payement, Commentaires.");
   const sh=n=>wb.Sheets[n]?XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}).slice(1).filter(r=>r&&r.some(v=>v!=null&&v!=="")):null;
   const extra={ev:sh("Événements"),ann:sh("Annonceurs"),cpt:sh("Comptages de caisse"),rec:sh("Récurrentes"),reg:sh("Réglages"),pv:sh("Prévisionnel"),art:sh("Articles"),mvt:sh("Mouvements de stock"),tg:sh("Grille buvette")};
   return {rows,sheets:names.length,noDate,name:file.name,extra};
@@ -2663,8 +2794,8 @@ async function startImport(file){
   try{
     pendingImport=await readFile(file);
     const p=pendingImport, x=p.extra, parts=[];
-    $("iInfo").textContent=`${p.name} : ${p.rows.length} écritures lues sur ${p.sheets} feuille(s)`+(p.noDate?`, dont ${p.noDate} sans date lisible.`:".");
-    if(x.ev)parts.push(`${x.ev.length} événement(s)`); if(x.ann)parts.push(`${new Set(x.ann.map(r=>strip(r[0]))).size} annonceur(s)`); if(x.cpt)parts.push(`${x.cpt.length} comptage(s) de caisse`); if(x.rec)parts.push(`${x.rec.length} écriture(s) récurrente(s)`); if(x.pv)parts.push(`${x.pv.length} ligne(s) de prévisionnel`); if(x.art)parts.push(`${x.art.length} article(s) de stock`); if(x.mvt)parts.push(`${x.mvt.length} mouvement(s) de stock`);
+    $("iInfo").textContent=`${p.name} : ${p.rows.length} opérations lues sur ${p.sheets} feuille(s)`+(p.noDate?`, dont ${p.noDate} sans date lisible.`:".");
+    if(x.ev)parts.push(`${x.ev.length} événement(s)`); if(x.ann)parts.push(`${new Set(x.ann.map(r=>strip(r[0]))).size} annonceur(s)`); if(x.cpt)parts.push(`${x.cpt.length} comptage(s) de caisse`); if(x.rec)parts.push(`${x.rec.length} opération(s) récurrente(s)`); if(x.pv)parts.push(`${x.pv.length} ligne(s) de prévisionnel`); if(x.art)parts.push(`${x.art.length} article(s) de stock`); if(x.mvt)parts.push(`${x.mvt.length} mouvement(s) de stock`);
     $("iExtraL").hidden=!parts.length&&!x.reg; $("iExtra").checked=true;
     $("iExtraT").textContent=`Restaurer aussi les autres données de la sauvegarde : ${parts.join(", ")||"réglages"} (remplace les listes actuelles)`;
     $("iModeF").hidden=!S.ecr.length; document.querySelector("input[name=iMode][value=add]").checked=true;
@@ -2680,7 +2811,7 @@ $("fI").addEventListener("submit",async ev=>{
   const extra=!$("iExtraL").hidden&&$("iExtra").checked;
   if(extra)ops.push(...restoreOps(p.extra));
   $("iGo").disabled=true;
-  const ok=await run(store.commit(ops,{action:"Import",texte:`${p.name} : ${p.rows.length} écritures ${replace?"(remplacement complet)":"ajoutées"}${extra?", autres données restaurées":""}`}),`${p.rows.length} écritures importées${extra?" et autres données restaurées":""}.`);
+  const ok=await run(store.commit(ops,{action:"Import",texte:`${p.name} : ${p.rows.length} opérations ${replace?"(remplacement complet)":"ajoutées"}${extra?", autres données restaurées":""}`}),`${p.rows.length} opérations importées${extra?" et autres données restaurées":""}.`);
   $("iGo").disabled=false; if(ok){$("dlgI").close();pendingImport=null;}
 });
 $("file").addEventListener("change",e=>{const f=e.target.files[0];if(f)startImport(f);e.target.value="";});
@@ -2773,7 +2904,7 @@ document.addEventListener("change",async e=>{
   }
   if(t.dataset.pt){
     const l=M.lines.find(x=>x.id===t.dataset.pt);
-    if(l&&!await run(store.commit([{t:"update",col:"ecritures",id:l.id,data:{pointe:t.checked}}],{action:t.checked?"Pointage":"Dépointage",texte:resume({date:l.iso,compte:l.acc,evenement:l.evt,designation:l.des,recette:l.rec,depense:l.dep})})))t.checked=!t.checked;
+    if(l&&!await run(store.commit([{t:"update",col:"ecritures",id:l.id,data:{pointe:t.checked}}],{action:t.checked?"Vérification":"Dévérification",texte:resume({date:l.iso,compte:l.acc,evenement:l.evt,designation:l.des,recette:l.rec,depense:l.dep})})))t.checked=!t.checked;
     return;
   }
   if(t.dataset.role){const m=S.membres.find(x=>x.id===t.dataset.role);if(m)await run(store.commit([{t:"merge",col:"membres",id:m.id,data:{role:t.value}}],{action:"Accès",texte:`${m.nom||m.email} : ${ROLE_LBL[t.value]||t.value}`}),"Rôle modifié.");return;}
@@ -3375,13 +3506,13 @@ function renderAccueil(){
   const up=M.events.filter(e=>e.upcoming), acompte=sumOf(up,e=>e.rec-e.dep);
   renderHero(cc,la);
   $("hTiles").innerHTML=`
-    <div class="tile"><h3>Résultat des événements ${y}</h3><div class="v ${cls(resY)}">${sg(resY)}</div><div class="s">${evY.length} événement(s) passé(s)</div></div>
-    <div class="tile"><h3>Événements à venir</h3><div class="v ${cls(acompte)}">${sg(acompte)}</div><div class="s">${up.length?"déjà au cahier pour "+up.map(e=>e.name).join(", "):"aucun événement à venir"}</div></div>`;
+    <div class="tile"><h3>Bilan des événements ${y}</h3><div class="v ${cls(resY)}">${sg(resY)}</div><div class="s">${evY.length} événement(s) passé(s)</div></div>
+    <div class="tile"><h3>Déjà engagé pour la suite</h3><div class="v ${cls(acompte)}">${sg(acompte)}</div><div class="s">${up.length?"déjà au cahier pour "+up.map(e=>e.name).join(", "):"aucun événement à venir"}</div></div>`;
   // À faire
   const T=[], w=canWrite(), add=(n,txt,href,lvl,btn)=>T.push(`<li><span class="pill ${lvl||"warn"}">${n}</span><span class="tx">${txt}</span>${btn||`<a href="${href}" class="btn mini">Voir</a>`}</li>`);
-  if(w){const p=recPending(); if(p.length)add(p.length,`écriture(s) récurrente(s) à créer (${esc(p.slice(0,2).map(x=>x.r.designation).join(", "))}${p.length>2?"…":""})`,"",null,`<button type="button" class="mini primary" data-gen="1">Créer</button>`);}
+  if(w){const p=recPending(); if(p.length)add(p.length,`opération(s) régulière(s) à créer (${esc(p.slice(0,2).map(x=>x.r.designation).join(", "))}${p.length>2?"…":""})`,"",null,`<button type="button" class="mini primary" data-gen="1">Créer</button>`);}
   const lim=new Date(Date.now()-30*864e5).toISOString().slice(0,10), np=M.lines.filter(l=>l.acc==="CC"&&!l.pointe&&l.iso&&l.iso<lim);
-  if(np.length)add(np.length,`opération(s) non pointée(s) depuis plus de 30 jours (${fm(sumOf(np,l=>l.rec-l.dep))})`,"#rapprochement");
+  if(np.length)add(np.length,`opération(s) pas encore vue(s) en banque depuis plus de 30 jours (${fm(sumOf(np,l=>l.rec-l.dep))})`,"#rapprochement");
   for(const e of M.events){const c=caisseOf(e.name);if(c.sessions.length&&c.reste>0.005)add(fm(c.reste),`à déposer en banque pour ${esc(e.name)}`,ficheHash(e.name,"caisse"),"bad");}
   const ay=aYear||y, rel=S.annonceurs.filter(a=>{const c=(a.encarts||{})[ay];return c&&(c.statut==="relancer"||c.statut==="promis");});
   if(rel.length)add(rel.length,`encart(s) ${ay} à relancer ou promis (${fm(sumOf(rel,a=>+a.encarts[ay].montant||0))})`,"#encarts");
@@ -3402,7 +3533,7 @@ function renderAccueil(){
     return `<button type="button" data-ev="${esc(x.name)}"><span><b>${esc(x.name)}</b><span class="small muted">${d?fdate(d):"date à fixer"}${e?` · ${e.lines.length} opération(s)`:""}</span></span><span class="r"><b class="num ${e?cls(e.res):""}">${e?sg(e.res):"—"}</b><span class="small muted">${prev!=null?"prévu "+sg(prev):"pas de budget"}</span></span></button>`;}).join("")}</div>`
     :`<p class="muted" style="margin:0">Aucun événement en cours.</p>${w?`<div class="row"><button type="button" class="primary" data-newev="1">+ Créer un événement</button></div>`:""}`;
   const last=M.lines.filter(l=>l.iso).slice(-8).reverse();
-  $("hLast").innerHTML=`<tbody>${last.map(l=>`<tr${w?` class="clk" data-edit="${esc(l.id)}"`:""}><td class="num small">${fdate(l.iso)}</td><td>${esc(l.des)}<div class="small muted">${esc(l.evt.trim())}${l.acc==="LA"?" · Livret A":""}</div></td><td class="small muted">${esc(l.cat)}</td><td class="r num ${l.rec?"pos":"neg"}">${l.rec?"+"+fm(l.rec):"−"+fm(l.dep)}</td><td class="small">${l.pointe?`<span class="pill good">Pointé</span>`:""}</td></tr>`).join("")||`<tr><td class="muted">Aucune opération.</td></tr>`}</tbody>`;
+  $("hLast").innerHTML=`<tbody>${last.map(l=>`<tr${w?` class="clk" data-edit="${esc(l.id)}"`:""}><td class="num small">${fdate(l.iso)}</td><td>${esc(l.des)}<div class="small muted">${esc(l.evt.trim())}${l.acc==="LA"?" · Livret A":""}</div></td><td class="small muted">${esc(l.cat)}</td><td class="r num ${l.rec?"pos":"neg"}">${l.rec?"+"+fm(l.rec):"−"+fm(l.dep)}</td><td class="small">${l.pointe?`<span class="pill good">Vérifié</span>`:""}</td></tr>`).join("")||`<tr><td class="muted">Aucune opération.</td></tr>`}</tbody>`;
 }
 
 /* ================= création d'événement, fiche ================= */
@@ -3433,7 +3564,7 @@ document.addEventListener("click",e=>{
 
 /* ================= opérations : vues rapides ================= */
 let opView="all";
-const OPV=[["all","Toutes"],["np","Non pointées"],["mois","Ce mois"],["cc","Compte courant"],["la","Livret A"],["divers","À classer"]];
+const OPV=[["all","Toutes"],["np","À vérifier"],["mois","Ce mois"],["cc","Compte courant"],["la","Livret A"],["divers","À classer"]];
 function setOpView(v){
   opView=v; $("q").value=""; for(const id of ["fEv","fCat","fAcc","fPt","fDu","fAu"])$(id).value="";
   if(v==="np")$("fPt").value="non"; else if(v==="mois")$("fDu").value=today().slice(0,8)+"01";
@@ -3555,11 +3686,13 @@ function renderHero(cc,la){
   const delta=sumOf(M.lines.filter(l=>l.iso&&l.iso>d30),l=>l.rec-l.dep), sp=sparkPath(600,90);
   let sv=null; try{sv=localStorage.getItem("cahier-derniere-sauvegarde");}catch(e){}
   const old=!sv||(Date.now()-Date.parse(sv))>30*864e5;
-  $("hero").innerHTML=`<div class="hero-main"><span class="hl">Trésorerie</span><b class="num">${fm(cc+la)}</b><span class="hd">${delta>=0?"▲":"▼"} ${sg(delta)} sur 30 jours</span>
+  $("hero").innerHTML=`<div class="hero-main"><span class="hl">Disponible aujourd'hui</span><b class="num" id="heroNum">${fm(cc+la)}</b><span class="hd" id="heroYr"></span>
       <div class="hacc"><span>Compte courant<b class="num">${fm(cc)}</b></span><span>Livret A<b class="num">${fm(la)}</b></span></div></div>
-    ${sp?`<svg class="spark" viewBox="0 0 600 90" preserveAspectRatio="none" aria-hidden="true"><path d="${sp}" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`:""}`;
+    <div class="hchart" id="hchart"></div>`;
+  const dy=heroChart(); $("heroYr").textContent=`${sg(delta)} sur 30 jours · ${sg(dy||0)} sur un an`;
+  countUp($("heroNum"),cc+la);
   const qa=(k,l,ic)=>`<button type="button" data-quick="${k}"><span class="ic" aria-hidden="true">${ic}</span>${l}</button>`;
-  $("hQuick").innerHTML=(w?qa("depense","Dépense","−")+qa("recette","Recette","+")+qa("virement","Virement","⇄")+qa("releve","Pointer","✓"):"")+(s?qa("reception","Réception","↓")+qa("sortie","Sortie stock","↑"):"")+(w?`<button type="button" data-quick="sauvegarde" class="${old?"due":""}"><span class="ic" aria-hidden="true">⤓</span>Sauvegarde${old?`<i>${sv?"+30 j":"jamais"}</i>`:""}</button>`:"");
+  $("hQuick").innerHTML=(w?qa("depense","Dépense","−")+qa("recette","Recette","+")+qa("virement","Virement","⇄")+qa("releve","Banque","✓"):"")+(s?qa("reception","Réception","↓")+qa("sortie","Sortie stock","↑"):"")+(w?`<button type="button" data-quick="sauvegarde" class="${old?"due":""}"><span class="ic" aria-hidden="true">⤓</span>Sauvegarde${old?`<i>${sv?"+30 j":"jamais"}</i>`:""}</button>`:"");
   $("hQuick").hidden=!w&&!s;
   // prochain événement
   const nx=evList().filter(x=>x.managed&&x.managed.debut&&(x.managed.fin||x.managed.debut)>=t&&!dateSuspecte(x)).sort((a,b)=>a.managed.debut.localeCompare(b.managed.debut))[0];
@@ -3567,6 +3700,70 @@ function renderHero(cc,la){
     $("hNext").hidden=false;
     $("hNext").innerHTML=`<button type="button" data-ev="${esc(nx.name)}"><span class="jj">${j>0?"J−"+j:"Jour J"}</span><span class="nx"><b>${esc(nx.name)}</b><span class="small">${fdate(nx.managed.debut)}${L.length?" · budget prêt":" · budget à préparer"}</span></span><span aria-hidden="true">›</span></button>`;
   } else $("hNext").hidden=true;
+}
+
+/* ================= v8 : thème et orbite des événements ================= */
+function setTheme(t){
+  document.documentElement.dataset.theme=t; try{localStorage.setItem("cahier-theme",t);}catch(e){}
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{m.removeAttribute("media");m.content=t==="nuit"?"#090d1c":"#f4f6f5";});
+  document.querySelectorAll("[data-theme-toggle]").forEach(b=>{b.lastChild.textContent=t==="nuit"?"Thème clair":"Thème nuit";});
+}
+setTheme(document.documentElement.dataset.theme||"nuit");
+document.addEventListener("click",e=>{if(e.target.closest("[data-theme-toggle]"))setTheme(document.documentElement.dataset.theme==="nuit"?"jour":"nuit");});
+const calm=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+let heroShown=false;
+function countUp(el,to){
+  if(!el)return; if(heroShown||calm()){el.textContent=fm(to);return;}
+  heroShown=true; const t0=performance.now(), D=1100;
+  const step=t=>{const p=Math.min(1,(t-t0)/D), k=1-Math.pow(1-p,3);el.textContent=fm(to*k);if(p<1)requestAnimationFrame(step);};
+  requestAnimationFrame(step);
+}
+let hRz=0; window.addEventListener("resize",()=>{clearTimeout(hRz);hRz=setTimeout(()=>{if(S.role&&$("v-accueil").classList.contains("on"))renderAccueil();},200);});
+
+/* ================= v9 : courbe de trésorerie ================= */
+const MOISC=["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+function tresoSeries(){
+  const ls=M.lines.filter(l=>l.iso).slice().sort((a,b)=>a.iso.localeCompare(b.iso));
+  const end=today(), d0=new Date(Date.now()-365*864e5).toISOString().slice(0,10); let bal=0,i=0; const pts=[];
+  while(i<ls.length&&ls[i].iso<d0){bal+=ls[i].rec-ls[i].dep;i++;}
+  pts.push([d0,bal]);
+  for(;i<ls.length&&ls[i].iso<=end;i++){bal+=ls[i].rec-ls[i].dep;const p=pts[pts.length-1];if(p[0]===ls[i].iso)p[1]=bal;else pts.push([ls[i].iso,bal]);}
+  pts.push([end,bal]); return pts;
+}
+function heroChart(){
+  const box=$("hchart"); if(!box)return;
+  const pts=tresoSeries(), W=Math.max(260,Math.round(box.clientWidth||560)), H=W<480?170:230, L=8, Rm=8, T=14, B=24;
+  const t=s=>Date.parse(s), x0=t(pts[0][0]), x1=t(pts[pts.length-1][0]), vals=pts.map(p=>p[1]), lo=Math.min(...vals,0), hi=Math.max(...vals,1);
+  const X=s=>L+((t(s)-x0)/(x1-x0||1))*(W-L-Rm), Y=v=>T+(1-(v-lo)/(hi-lo||1))*(H-T-B);
+  let d=""; pts.forEach((p,j)=>{d+=(j?"L":"M")+X(p[0]).toFixed(1)+" "+Y(p[1]).toFixed(1);if(j<pts.length-1)d+="L"+X(pts[j+1][0]).toFixed(1)+" "+Y(p[1]).toFixed(1);});
+  const area=d+`L${X(pts[pts.length-1][0]).toFixed(1)} ${H-B}L${L} ${H-B}Z`;
+  let g=`<defs><linearGradient id="hcG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb547" stop-opacity=".38"/><stop offset="1" stop-color="#ffb547" stop-opacity="0"/></linearGradient></defs>`;
+  for(const v of [hi,(hi+lo)/2]){g+=`<line x1="${L}" x2="${W-Rm}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" class="hcg"/><text x="${L+2}" y="${(Y(v)-5).toFixed(1)}" class="hct">${esc(fm0(v))}</text>`;}
+  const dt=new Date(x0); dt.setDate(1); dt.setMonth(dt.getMonth()+1); const step=W<480?3:2; let k=0;
+  while(dt.getTime()<x1){if(k%step===0){const xx=L+((dt.getTime()-x0)/(x1-x0||1))*(W-L-Rm);if(xx<W-40)g+=`<text x="${xx.toFixed(1)}" y="${H-6}" class="hct">${MOISC[dt.getMonth()]}${dt.getMonth()===0?" "+dt.getFullYear():""}</text>`;}dt.setMonth(dt.getMonth()+1);k++;}
+  const lx=X(pts[pts.length-1][0]), ly=Y(pts[pts.length-1][1]);
+  g+=`<path d="${area}" fill="url(#hcG)"/><path d="${d}" class="hcl"/><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="4.5" class="hcd"/>
+    <g id="hcTip" visibility="hidden"><line y1="${T}" y2="${H-B}" class="hcx"/><circle r="4" class="hcd"/><text class="hcv" y="${T-2}"></text></g>`;
+  box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Évolution de la trésorerie sur douze mois">${g}</svg>`;
+  const svg=box.firstChild, tip=svg.querySelector("#hcTip");
+  svg.onpointermove=e=>{const r=svg.getBoundingClientRect(), px=(e.clientX-r.left)*(W/r.width), tt=x0+Math.max(0,Math.min(1,(px-L)/(W-L-Rm)))*(x1-x0);
+    let p=pts[0]; for(const q of pts){if(t(q[0])<=tt)p=q;else break;}
+    const xx=L+((tt-x0)/(x1-x0||1))*(W-L-Rm), tx=tip.querySelector("text");
+    tip.setAttribute("visibility","visible"); tip.querySelector("line").setAttribute("x1",xx);tip.querySelector("line").setAttribute("x2",xx);
+    tip.querySelector("circle").setAttribute("cx",xx);tip.querySelector("circle").setAttribute("cy",Y(p[1]));
+    tx.textContent=fdate(new Date(tt).toISOString().slice(0,10))+" · "+fm(p[1]); tx.setAttribute("x",xx); tx.setAttribute("text-anchor",xx>W-150?"end":xx<150?"start":"middle");};
+  svg.onpointerleave=()=>tip.setAttribute("visibility","hidden");
+  return pts[pts.length-1][1]-pts[0][1];
+}
+// phrase de bilan d'un événement, en clair
+function evStory(e){
+  const top=o=>Object.entries(o).filter(([,v])=>v>0.005).sort((a,b)=>b[1]-a[1])[0], r=top(e.recCat), d=top(e.depCat), out=[];
+  if(e.upcoming)out.push(`<b>${esc(e.name)}</b> est en préparation : ${fm(e.dep)} déjà payés${e.rec>0?" et "+fm(e.rec)+" déjà reçus":""}.`);
+  else out.push(Math.abs(e.res)<0.005?`<b>${esc(e.name)}</b> est à l'équilibre.`:`<b>${esc(e.name)}</b> a ${e.res>0?"rapporté":"coûté"} <b class="${cls(e.res)}">${fm(Math.abs(e.res))}</b> au comité.`);
+  if(r)out.push(`Ce qui a le plus rapporté : ${esc(r[0].toLowerCase())} (${fm(r[1])}).`);
+  if(d)out.push(`Ce qui a le plus coûté : ${esc(d[0].toLowerCase())} (${fm(d[1])}).`);
+  if(e.subv>0&&!e.upcoming)out.push(`Sans la subvention de ${fm(e.subv)}, le résultat serait de ${sg(e.resHS)}.`);
+  return out.join(" ");
 }
 
 /* ================= connexion ================= */
