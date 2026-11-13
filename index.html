@@ -599,6 +599,8 @@ details.pvs[open]>summary{margin-bottom:10px}
 td.sv{width:22%}.svb{height:8px;border-radius:4px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden}
 .svb>div{height:100%;border-radius:4px;background:var(--accent)}.svb>div.over{background:var(--bad)}
 .pxin{width:76px;text-align:right;padding:4px 8px}.pxin.own{border-color:var(--accent)}
+details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}details.arh>summary{cursor:pointer;font-weight:600}details.arh[open]>summary{margin-bottom:8px}
+#bvPrix td:first-child{cursor:pointer}
 @media (display-mode:standalone){.side{padding-top:max(18px,env(safe-area-inset-top))}}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('cahier-theme')||'nuit'}catch(e){document.documentElement.dataset.theme='nuit'}</script>
@@ -1303,6 +1305,7 @@ td.sv{width:22%}.svb{height:8px;border-radius:4px;background:color-mix(in srgb,v
   </div>
   <div class="field" id="arInitF"><label for="arInit">Stock actuel (enregistré comme inventaire du jour)</label><input type="text" inputmode="decimal" id="arInit"></div>
   <div class="field"><label for="arNote">Note</label><input type="text" id="arNote"></div>
+  <details class="arh" id="arHist" hidden><summary id="arHistS">Historique des prix d'achat</summary><div class="scroll"><table id="arHistT"></table></div></details>
   <label class="small" id="arActL"><input type="checkbox" id="arAct" checked> Article actif (décocher pour le masquer sans perdre l'historique)</label>
   <div id="arErr" class="msg err" hidden></div>
   <div class="row between"><button type="button" class="danger" id="arDel">Supprimer</button><div class="row"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div></div>
@@ -3330,7 +3333,7 @@ function renderStock(){
   $("stCount").textContent=`${rows.length} article(s) affiché(s)`;
   $("stTable").innerHTML=`<thead><tr><th>Article</th><th>Catégorie</th><th class="r">Stock</th><th class="r">Seuil</th><th class="r">Prix d'achat</th><th class="r">Valeur</th><th>Dernier mouvement</th><th>État</th>${ws?"<th></th>":""}</tr></thead><tbody>${rows.length?rows.map(a=>{
     const s=st.get(a.id), [l,c]=artStatus(a,s.qty);
-    return `<tr><td><b>${esc(a.nom)}</b>${a.lieu?`<div class="small muted">${esc(a.lieu)}</div>`:""}</td><td class="small">${esc(a.categorie||"")}</td><td class="r num"><b>${qfmt(s.qty)}</b> <span class="small muted">${esc(a.unite||"")}</span></td><td class="r num">${+a.seuil?qfmt(a.seuil):"·"}</td><td class="r num">${+a.prixAchat?fm(+a.prixAchat):"·"}</td><td class="r num">${fm(Math.max(0,s.qty)*(+a.prixAchat||0))}</td><td class="small num">${s.last?fdate(s.last):"·"}</td><td><span class="pill ${c}">${l}</span></td>${ws?`<td><button type="button" class="mini" data-artmv="${esc(a.id)}">Mouvement</button><button type="button" class="mini" data-arted="${esc(a.id)}">Modifier</button></td>`:""}</tr>`;
+    return `<tr><td><button type="button" class="link" data-arted="${esc(a.id)}"><b>${esc(a.nom)}</b></button>${a.lieu?`<div class="small muted">${esc(a.lieu)}</div>`:""}</td><td class="small">${esc(a.categorie||"")}</td><td class="r num"><b>${qfmt(s.qty)}</b> <span class="small muted">${esc(a.unite||"")}</span></td><td class="r num">${+a.seuil?qfmt(a.seuil):"·"}</td><td class="r num">${+a.prixAchat?fm(+a.prixAchat):"·"}</td><td class="r num">${fm(Math.max(0,s.qty)*(+a.prixAchat||0))}</td><td class="small num">${s.last?fdate(s.last):"·"}</td><td><span class="pill ${c}">${l}</span></td>${ws?`<td><button type="button" class="mini" data-artmv="${esc(a.id)}">Mouvement</button><button type="button" class="mini" data-arted="${esc(a.id)}">Modifier</button></td>`:""}</tr>`;
   }).join(""):`<tr><td colspan="9" class="muted">${S.articles.length?"Aucun article pour ce filtre.":"Aucun article. Créez-les un par un, ou importez votre liste depuis Excel (bouton « Modèle d'import » pour le format)."}</td></tr>`}</tbody>`;
 }
 function renderMvts(){
@@ -3457,8 +3460,20 @@ function openArt(id){
   $("arNom").value=a.nom||""; $("arCat").innerHTML=CATS.map(c=>`<option ${c===a.categorie?"selected":""}>${esc(c)}</option>`).join("");
   $("arUnite").value=a.unite||""; $("arSeuil").value=a.seuil?String(a.seuil).replace(".",","):""; $("arPA").value=dec(a.prixAchat); $("arPV").value=dec(a.prixVente);
   $("arLieu").value=a.lieu||""; $("arNote").value=a.note||""; $("arTarif").innerHTML=tarifOptions(a.tarif||""); $("arRend").value=a.rendement?String(a.rendement).replace(".",","):""; $("arAct").checked=a.actif!==false; $("arInit").value="";
+  renderArtHist(arEditing);
   $("arInitF").hidden=!!arEditing; $("arActL").hidden=!arEditing; $("arDel").hidden=!arEditing; $("arErr").hidden=true;
   $("dlgArt").showModal(); $("arNom").focus();
+}
+// tous les achats d'un article : date, événement, fournisseur, facture, prix unitaire
+function renderArtHist(a){
+  const box=$("arHist"), ms=a?S.mouvements.filter(m=>m.article===a.id&&m.type==="entree"&&+m.pu>0).sort((x,y)=>String(y.date).localeCompare(String(x.date))):[];
+  box.hidden=!ms.length; if(!ms.length)return;
+  const pus=ms.map(m=>+m.pu), mn=Math.min(...pus), mx=Math.max(...pus), last=ms[0], prev=ms.find(m=>Math.abs(+m.pu-+last.pu)>0.005&&m.date<last.date);
+  const ev=prev?(+last.pu/+prev.pu-1):null;
+  $("arHistS").innerHTML=`Historique des prix d'achat <span class="small muted">· ${ms.length} achat(s) · dernier ${fm(+last.pu)}${mn<mx-0.005?` · de ${fm(mn)} à ${fm(mx)}`:""}</span>${ev!=null?` <span class="pill ${ev>0.03?"bad":ev<-0.03?"good":"neutral"}">${ev>0?"+":""}${(ev*100).toFixed(0)} %</span>`:""}`;
+  const w=Math.max(...pus);
+  $("arHistT").innerHTML=`<thead><tr><th>Date</th><th>Événement</th><th>Fournisseur</th><th>Facture</th><th class="r">Quantité</th><th class="r">Prix unitaire TTC</th><th></th></tr></thead><tbody>${ms.map(m=>`<tr><td class="num small">${fdate(m.date)}</td><td class="small">${esc(m.evenement?eventKey(m.evenement).parent:"stock")}</td><td class="small">${esc(m.fournisseur||"")}</td><td class="small muted">${esc(m.facture||"")}</td><td class="r num">${qfmt(+m.qte||0)}</td><td class="r num"><b>${fm(+m.pu)}</b></td><td style="width:22%"><div class="svb"><div style="width:${+m.pu/w*100}%" class="${Math.abs(+m.pu-mx)<0.005&&mn<mx-0.005?"over":""}"></div></div></td></tr>`).join("")}</tbody>`;
+  box.open=true;
 }
 $("stNew").onclick=()=>openArt(null);
 $("fArt").addEventListener("submit",async ev=>{
@@ -3626,7 +3641,8 @@ function renderBuvette(){
 }
 function renderPrixAchat(){
   // prix d'achat moyen de chaque article, par événement et par fournisseur
-  const evs=bvEvents().slice().reverse(), A=new Map(S.articles.map(a=>[a.id,a])), map=new Map();
+  const d0={}; for(const m of S.mouvements){if(m.type!=="entree"||!m.evenement)continue;const e=eventKey(m.evenement).parent;if(!d0[e]||String(m.date)<d0[e])d0[e]=String(m.date);}
+  const evs=bvEvents().slice().sort((a,b)=>(d0[a]||"9").localeCompare(d0[b]||"9")), A=new Map(S.articles.map(a=>[a.id,a])), map=new Map();
   for(const m of S.mouvements){
     if(m.type!=="entree"||!m.evenement||!(+m.pu>0))continue;
     const e=eventKey(m.evenement).parent, k=m.article, x=map.get(k)||{};
@@ -3636,7 +3652,7 @@ function renderPrixAchat(){
   $("bvPrix").innerHTML=rows.length?`<thead><tr><th>Article</th>${evs.map(e=>`<th class="r">${esc(e)}</th>`).join("")}<th class="r">Évolution</th></tr></thead><tbody>${rows.map(r=>{
     const vals=evs.map(e=>r.x[e]&&r.x[e].q>0?r.x[e].v/r.x[e].q:null), known=vals.filter(v=>v!=null);
     const ev=known.length>1?known[known.length-1]/known[known.length-2]-1:null;
-    return `<tr><td>${esc(r.a.nom)} <span class="small muted">${esc(r.a.unite||"")}</span></td>${evs.map((e,i)=>`<td class="r num">${vals[i]!=null?fm(vals[i]):"·"}${r.x[e]&&r.x[e].f.size?`<div class="small muted">${esc([...r.x[e].f].join(", "))}</div>`:""}</td>`).join("")}<td class="r">${ev!=null?`<span class="pill ${ev>0.03?"bad":ev<-0.03?"good":"neutral"}">${ev>0?"+":""}${(ev*100).toFixed(0)} %</span>`:"·"}</td></tr>`;
+    return `<tr><td><button type="button" class="link" data-arted="${esc(r.a.id)}">${esc(r.a.nom)}</button> <span class="small muted">${esc(r.a.unite||"")}</span></td>${evs.map((e,i)=>`<td class="r num">${vals[i]!=null?fm(vals[i]):"·"}${r.x[e]&&r.x[e].f.size?`<div class="small muted">${esc([...r.x[e].f].join(", "))}</div>`:""}</td>`).join("")}<td class="r">${ev!=null?`<span class="pill ${ev>0.03?"bad":ev<-0.03?"good":"neutral"}">${ev>0?"+":""}${(ev*100).toFixed(0)} %</span>`:"·"}</td></tr>`;
   }).join("")}</tbody>`:`<tbody><tr><td class="muted">Aucun achat avec prix.</td></tr></tbody>`;
 }
 function renderGrille(){
