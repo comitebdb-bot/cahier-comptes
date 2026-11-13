@@ -844,11 +844,15 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
     <div class="card">
       <div class="row between">
         <div class="row"><h2>Encarts publicitaires</h2><select id="aYear" aria-label="Année"></select></div>
-        <div class="row w"><button type="button" id="aSeed">Reprendre les annonceurs du cahier</button><button type="button" id="aRenew">Reconduire</button><button type="button" class="primary" id="aNew">+ Annonceur</button></div>
+        <div class="row"><details class="menu w"><summary class="btn">Importer / exporter</summary><div class="pop">
+          <label class="mi" for="aFile">Importer une liste d'encarts (Excel)</label>
+          <button type="button" id="aExport">Exporter la liste de l'année (Excel)</button>
+          <button type="button" id="aSeed">Reprendre les annonceurs du cahier</button></div></details><input type="file" id="aFile" accept=".xlsx,.xls,.csv" hidden>
+          <button type="button" class="w" id="aRenew">Reconduire</button><button type="button" class="primary w" id="aNew">+ Annonceur</button></div>
       </div>
       <div class="tiles" id="aTiles"></div>
       <div class="row between"><div class="chips" id="aFilt"></div>
-        <div class="row"><input type="search" id="aQ" placeholder="Rechercher un annonceur" aria-label="Rechercher un annonceur"><button type="button" id="aCopy">Copier la liste à relancer</button></div></div>
+        <div class="row"><select id="aRef" aria-label="Qui le fait"><option value="">Tous les membres</option></select><input type="search" id="aQ" placeholder="Rechercher un annonceur" aria-label="Rechercher un annonceur"><button type="button" id="aCopy">Copier la liste à relancer</button></div></div>
       <div class="scroll"><table id="aTable"></table></div>
     </div>
   </section>
@@ -1231,15 +1235,34 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
     <div class="field"><label for="anContact">Contact</label><input type="text" id="anContact"></div>
     <div class="field"><label for="anTel">Téléphone</label><input type="text" id="anTel" inputmode="tel"></div>
   </div>
-  <div class="field"><label for="anMail">E-mail</label><input type="email" id="anMail"></div>
+  <div class="grid2">
+    <div class="field"><label for="anMail">E-mail</label><input type="email" id="anMail"></div>
+    <div class="field"><label for="anRef">Qui s'en occupe au comité</label><input type="text" id="anRef" list="anRefList"><datalist id="anRefList"></datalist></div>
+  </div>
+  <label class="small"><input type="checkbox" id="anLogo"> Logo reçu et stocké</label>
   <div class="grid2">
     <div class="field"><label for="anMont">Montant de l'encart <span id="anYearL"></span> (€)</label><input type="text" inputmode="decimal" id="anMont"></div>
     <div class="field"><label for="anStat">Statut <span id="anYearL2"></span></label><select id="anStat"><option value="">Pas d'encart</option><option value="relancer">À relancer</option><option value="promis">Promis</option><option value="paye">Payé</option><option value="refuse">Refusé</option></select></div>
   </div>
-  <div class="field"><label for="anNote">Note</label><textarea id="anNote" rows="2"></textarea></div>
+  <div class="grid2">
+    <div class="field"><label for="anType">Paiement <span id="anYearL3"></span></label><select id="anType"></select></div>
+    <div class="field"><label for="anDate">Payé le</label><input type="date" id="anDate"></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="anCerfa">Reçu fiscal (CERFA)</label><select id="anCerfa"><option value="">·</option><option value="afaire">Reçu à faire</option><option value="mail">Envoyé par mail</option><option value="papier">Remis papier</option><option value="refuse">Ne veut pas de reçu</option></select></div>
+    <div class="field"><label for="anCom">Commentaire de l'année</label><input type="text" id="anCom"></div>
+  </div>
+  <div class="field"><label for="anNote">Note sur l'annonceur</label><textarea id="anNote" rows="2"></textarea></div>
   <p class="small muted" style="margin:0">Pour enregistrer un paiement dans le cahier, utilisez plutôt « Encaisser ».</p>
   <div id="anErr" class="msg err" hidden></div>
   <div class="row between"><button type="button" class="danger" id="anDel">Supprimer</button><div class="row"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div></div>
+</form></dialog>
+
+<dialog id="dlgAI"><form id="fAI">
+  <h2>Importer une liste d'encarts</h2>
+  <p style="margin:0" id="aiInfo"></p>
+  <p class="small muted" style="margin:0">Les annonceurs sont rapprochés par leur nom. Pour l'année de la liste : un montant avec une date de paiement devient « Payé », un montant sans date « Promis » (ou « Payé » si le paiement est retrouvé au cahier), 0 ou « pas cette année » « Refusé », une ligne vide avec un responsable « À relancer ». Les colonnes des années précédentes complètent l'historique sans écraser ce qui existe. Aucune opération n'est créée dans le cahier.</p>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Importer</button></div>
 </form></dialog>
 
 <!-- encaissement d'un encart -->
@@ -2041,18 +2064,21 @@ function renderEncarts(){
     <div class="tile good"><h3>Payé ${y}</h3><div class="v">${fm(tot("paye"))}</div><div class="s">${by("paye").length} annonceur(s) · au cahier ${fm(cah)}</div></div>
     <div class="tile"><h3>Promis</h3><div class="v">${fm(tot("promis"))}</div><div class="s">${by("promis").length} annonceur(s) à encaisser</div></div>
     <div class="tile acc"><h3>À relancer</h3><div class="v">${by("relancer").length}</div><div class="s">${fm(tot("relancer"))} attendus</div></div>
-    <div class="tile"><h3>Payé ${py}</h3><div class="v">${fm(tot("paye",py))}</div><div class="s">${by("paye",py).length} annonceur(s)</div></div>`;
+    <div class="tile"><h3>Payé ${py}</h3><div class="v">${fm(tot("paye",py))}</div><div class="s">${by("paye",py).length} annonceur(s) · reçus à faire ${y} : ${by("paye").filter(a=>!en(a,y).cerfa||en(a,y).cerfa==="afaire").length}</div></div>`;
   const renewable=all.filter(a=>en(a,py)&&["paye","promis"].includes(en(a,py).statut)&&!en(a,y));
   $("aRenew").textContent=`Reconduire ${renewable.length} annonceur(s) de ${py}`; $("aRenew").disabled=!renewable.length;
   const cnt=k=>k==="all"?all.length:k==="sans"?all.filter(a=>!en(a,y)).length:by(k).length;
   $("aFilt").innerHTML=[["all","Tous"],["relancer","À relancer"],["promis","Promis"],["paye","Payés"],["refuse","Refusés"],["sans","Sans encart "+y]].map(([k,l])=>`<button type="button" class="chip ${aFilter===k?"on":""}" data-af="${k}">${l} · ${cnt(k)}</button>`).join("");
+  const refs=[...new Set(all.map(a=>a.referent).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr")), rf=$("aRef").value;
+  $("aRef").innerHTML=`<option value="">Tous les membres</option>`+refs.map(r=>`<option ${r===rf?"selected":""}>${esc(r)}</option>`).join("");
   const q=strip($("aQ").value), w=canWrite();
-  const rows=all.filter(a=>(aFilter==="all"||(aFilter==="sans"?!en(a,y):en(a,y)&&en(a,y).statut===aFilter))&&(!q||strip(a.nom+" "+(a.contact||"")).includes(q)));
-  $("aTable").innerHTML=`<thead><tr><th>Annonceur</th><th class="r">${py}</th><th class="r">${y}</th><th>Statut ${y}</th><th>Payé le</th>${w?"<th></th>":""}</tr></thead><tbody>${rows.length?rows.map(a=>{
+  const rows=all.filter(a=>(!rf||a.referent===rf)&&(aFilter==="all"||(aFilter==="sans"?!en(a,y):en(a,y)&&en(a,y).statut===aFilter))&&(!q||strip(a.nom+" "+(a.contact||"")).includes(q)));
+  $("aTable").innerHTML=`<thead><tr><th>Annonceur</th><th>Qui</th><th class="r">${py}</th><th class="r">${y}</th><th>Statut ${y}</th><th>Payé le</th><th>Reçu fiscal</th>${w?"<th></th>":""}</tr></thead><tbody>${rows.length?rows.map(a=>{
     const c=en(a,y), p=en(a,py), contact=[a.contact,a.tel,a.email].filter(Boolean).join(" · ");
     const stSel=w?`<select data-astat="${esc(a.id)}" aria-label="Statut ${y}"><option value="">Pas d'encart</option>${Object.entries(ASTAT).map(([k,[l]])=>`<option value="${k}" ${c&&c.statut===k?"selected":""}>${l}</option>`).join("")}</select>`:(c?`<span class="pill ${ast(c.statut)[1]}">${ast(c.statut)[0]}</span>`:"·");
-    return `<tr><td><b>${esc(a.nom)}</b>${contact?`<div class="small muted">${esc(contact)}</div>`:""}${a.note?`<div class="small muted">${esc(a.note)}</div>`:""}</td><td class="r num">${p?fm(+p.montant||0)+(p.statut!=="paye"?` <span class="small muted">${ast(p.statut)[0].toLowerCase()}</span>`:""):"·"}</td><td class="r num">${c?fm(+c.montant||0):"·"}</td><td>${stSel}</td><td class="small num">${c&&c.statut==="paye"&&c.date?fdate(c.date):"·"}</td>${w?`<td>${!c||c.statut!=="paye"?`<button type="button" class="mini primary" data-apay="${esc(a.id)}">Encaisser</button>`:""}<button type="button" class="mini" data-aedit="${esc(a.id)}">Modifier</button></td>`:""}</tr>`;
-  }).join(""):`<tr><td colspan="6" class="muted">${S.annonceurs.length?"Aucun annonceur pour ce filtre.":"Aucun annonceur. « Reprendre les annonceurs du cahier » part des encarts déjà encaissés."}</td></tr>`}</tbody>`;
+    const cf=c&&c.cerfa&&CERFA[c.cerfa];
+    return `<tr><td><b>${esc(a.nom)}</b>${a.logo?` <span class="pill neutral" title="Logo stocké">logo</span>`:""}${contact?`<div class="small muted">${esc(contact)}</div>`:""}${c&&c.com?`<div class="small muted">${esc(c.com)}</div>`:a.note?`<div class="small muted">${esc(a.note)}</div>`:""}</td><td class="small">${esc(a.referent||"")}</td><td class="r num">${p?fm(+p.montant||0)+(p.statut!=="paye"?` <span class="small muted">${ast(p.statut)[0].toLowerCase()}</span>`:""):"·"}</td><td class="r num">${c?fm(+c.montant||0):"·"}</td><td>${stSel}</td><td class="small num">${c&&c.statut==="paye"&&c.date?fdate(c.date):"·"}${c&&c.statut==="paye"&&c.type?`<div class="muted">${esc(c.type)}</div>`:""}</td><td>${cf?`<span class="pill ${cf[1]}">${esc(cf[0])}</span>`:"·"}</td>${w?`<td>${!c||c.statut!=="paye"?`<button type="button" class="mini primary" data-apay="${esc(a.id)}">Encaisser</button>`:""}<button type="button" class="mini" data-aedit="${esc(a.id)}">Modifier</button></td>`:""}</tr>`;
+  }).join(""):`<tr><td colspan="8" class="muted">${S.annonceurs.length?"Aucun annonceur pour ce filtre.":"Aucun annonceur. « Reprendre les annonceurs du cahier » part des encarts déjà encaissés."}</td></tr>`}</tbody>`;
   $("aSeed").disabled=!M.lines.some(isEncartLine);
 }
 
@@ -2741,6 +2767,10 @@ function openAnn(id){
   $("anNom").value=a.nom||""; $("anContact").value=a.contact||""; $("anTel").value=a.tel||""; $("anMail").value=a.email||""; $("anNote").value=a.note||"";
   $("anYearL").textContent=aYear; $("anYearL2").textContent=aYear;
   $("anMont").value=c?dec(c.montant):""; $("anStat").value=c?c.statut:(aEditing?"":"relancer");
+  $("anRef").value=a.referent||""; $("anLogo").checked=!!a.logo; $("anYearL3").textContent=aYear;
+  $("anRefList").innerHTML=[...new Set(S.annonceurs.map(x=>x.referent).filter(Boolean))].sort().map(r=>`<option value="${esc(r)}">`).join("");
+  $("anType").innerHTML=`<option value="">·</option>`+["Cheques","Virement","Espece","CB","Autre"].map(t=>`<option ${c&&c.type===t?"selected":""}>${t}</option>`).join("");
+  $("anDate").value=(c&&c.date)||""; $("anCerfa").value=(c&&c.cerfa)||""; $("anCom").value=(c&&c.com)||"";
   $("anDel").hidden=!aEditing; $("anErr").hidden=true; $("dlgA").showModal(); $("anNom").focus();
 }
 $("aNew").onclick=()=>openAnn(null);
@@ -2748,8 +2778,8 @@ $("fA").addEventListener("submit",async ev=>{
   ev.preventDefault();
   const nom=$("anNom").value.trim(); if(!nom){$("anErr").textContent="Saisissez le nom de l'annonceur.";$("anErr").hidden=false;return;}
   const enc=Object.assign({},(aEditing&&aEditing.encarts)||{}), st=$("anStat").value;
-  if(st)enc[aYear]=Object.assign({},enc[aYear]||{},{montant:round2(parseNum($("anMont").value)),statut:st}); else delete enc[aYear];
-  const data={nom,contact:$("anContact").value.trim(),tel:$("anTel").value.trim(),email:$("anMail").value.trim(),note:$("anNote").value.trim(),encarts:enc};
+  if(st)enc[aYear]=Object.assign({},enc[aYear]||{},{montant:round2(parseNum($("anMont").value)),statut:st,type:$("anType").value,date:$("anDate").value||null,cerfa:$("anCerfa").value,com:$("anCom").value.trim()}); else delete enc[aYear];
+  const data={nom,contact:$("anContact").value.trim(),tel:$("anTel").value.trim(),email:$("anMail").value.trim(),note:$("anNote").value.trim(),referent:$("anRef").value.trim(),logo:$("anLogo").checked,encarts:enc};
   if(await run(store.commit([{t:"set",col:"annonceurs",id:aEditing?aEditing.id:store.newId("annonceurs"),data}],{action:"Encarts",texte:`${nom} : fiche ${aEditing?"modifiée":"créée"}${st?`, encart ${aYear} ${ast(st)[0].toLowerCase()} ${fm(enc[aYear].montant)}`:""}`}),"Annonceur enregistré."))$("dlgA").close();
 });
 $("anDel").onclick=async()=>{
@@ -2770,14 +2800,14 @@ $("fA2").addEventListener("submit",async ev=>{
   const amt=round2(parseNum($("apAmt").value)); if(!(amt>0)){$("apErr").textContent="Le montant doit être positif.";$("apErr").hidden=false;return;}
   const ops=[], date=$("apDate").value, create=$("apCreate").checked; let eid=null;
   if(create){const o=opNewEcr({compte:$("apAcc").value,date,evenement:"ENCART PUB "+aYear,designation:"Encart "+payA.nom,recette:amt,depense:0,type:$("apType").value,commentaire:$("apCom").value.trim(),pointe:false,poste:"Encarts publicitaires"});eid=o.id;ops.push(o);}
-  const enc=Object.assign({},payA.encarts||{}); enc[aYear]={montant:amt,statut:"paye",date,ecriture:eid};
+  const enc=Object.assign({},payA.encarts||{}); enc[aYear]=Object.assign({},enc[aYear]||{},{montant:amt,statut:"paye",date,ecriture:eid,type:$("apType").value,cerfa:(enc[aYear]||{}).cerfa||"afaire"});
   ops.push({t:"update",col:"annonceurs",id:payA.id,data:{encarts:enc}});
   if(await run(store.commit(ops,{action:"Encarts",texte:`${payA.nom} : encart ${aYear} payé ${fm(amt)}${create?", opération créée":""}`}),`Encart de ${payA.nom} encaissé.`))$("dlgA2").close();
 });
 $("aRenew").onclick=async()=>{
   const y=aYear, py=y-1, list=S.annonceurs.filter(a=>{const p=(a.encarts||{})[py];return p&&["paye","promis"].includes(p.statut)&&!(a.encarts||{})[y];});
   if(!list.length)return;
-  if(!await ask(`Reconduire ${list.length} annonceur(s) de ${py} en ${y} ? Ils passent « À relancer » avec le montant de ${py}.`,"Reconduire"))return;
+  if(!await ask(`Reconduire ${list.length} annonceur(s) de ${py} en ${y} ? Ils passent « À relancer » avec le montant de ${py}, et gardent leur responsable au comité.`,"Reconduire"))return;
   const ops=list.map(a=>{const enc=Object.assign({},a.encarts);enc[y]={montant:+enc[py].montant||0,statut:"relancer"};return {t:"update",col:"annonceurs",id:a.id,data:{encarts:enc}};});
   await run(store.commit(ops,{action:"Encarts",texte:`${list.length} annonceurs reconduits de ${py} en ${y}`}),`${list.length} annonceur(s) à relancer pour ${y}.`);
 };
@@ -2803,9 +2833,86 @@ $("aSeed").onclick=async()=>{
 $("aCopy").onclick=async()=>{
   const y=aYear, l=S.annonceurs.filter(a=>((a.encarts||{})[y]||{}).statut==="relancer");
   if(!l.length){flash(`Aucun annonceur à relancer pour ${y}.`);return;}
-  const txt=l.map(a=>[a.nom,a.contact,a.tel,a.email,fm(+a.encarts[y].montant||0)].filter(Boolean).join(" — ")).join("\n");
+  const g=new Map(); for(const a of l.sort((x,z)=>String(x.nom).localeCompare(String(z.nom),"fr"))){const k=a.referent||"Sans responsable";if(!g.has(k))g.set(k,[]);g.get(k).push(a);}
+  const txt=`Encarts ${y} à relancer\n`+[...g.entries()].sort((x,z)=>x[0].localeCompare(z[0],"fr")).map(([k,ls])=>`\n${k} :\n`+ls.map(a=>"- "+[a.nom,a.contact,a.tel,a.email,+a.encarts[y].montant?fm(+a.encarts[y].montant):""].filter(Boolean).join(" — ")).join("\n")).join("\n");
   try{await navigator.clipboard.writeText(txt);flash(`${l.length} annonceur(s) copié(s) : collez la liste dans un courriel ou un message.`);}catch(e){flash("La copie a été refusée par le navigateur.",true);}
 };
+
+/* ---------- encarts : import et export de la liste Excel du bureau ---------- */
+const CERFA={mail:["Reçu envoyé par mail","good"],papier:["Reçu remis papier","good"],refuse:["Ne veut pas de reçu","neutral"],afaire:["Reçu à faire","warn"]};
+const annKey=s=>strip(s).replace(/[^a-z0-9]/g,"");
+const normType=s=>{s=strip(s);return !s?"":/esp/.test(s)?"Espece":/ch[eè]q/.test(s)?"Cheques":/vir/.test(s)?"Virement":/cb|carte/.test(s)?"CB":"Autre";};
+const normCerfa=s=>{s=strip(s);return !s?"":/mail/.test(s)?"mail":/papier/.test(s)?"papier":/ne veu|refus|non/.test(s)?"refuse":"";};
+const GENERIC=new Set(["sarl","sas","eurl","encart","encarts","pub","boulangerie","restaurant","cafe","garage","maison","atelier","pizza","assurance","les","la","le","de","du","des","et","chez","pays"]);
+function cahierMatch(nom,y,montant,used){
+  const toks=strip(nom).split(/[^a-z0-9]+/).filter(t=>t.length>=3&&!GENERIC.has(t));
+  return M.lines.find(l=>isEncartLine(l)&&l.year===y&&!used.has(l.id)&&Math.abs(l.rec-montant)<0.005&&toks.some(t=>strip(l.des).includes(t)));
+}
+let AIMP=null;
+$("aFile").addEventListener("change",async e=>{
+  const f=e.target.files[0]; e.target.value=""; if(!f)return;
+  try{
+    const rows=await readTable(f);
+    let h=-1; for(let i=0;i<Math.min(rows.length,15);i++){if((rows[i]||[]).some(c=>/^(societe|annonceur|entreprise)$/.test(strip(c))) ){h=i;break;}}
+    if(h<0)throw new Error("Colonne « Société » introuvable dans le fichier.");
+    const H=rows[h].map(c=>c==null?"":String(c)), S2=H.map(strip), col=re=>S2.findIndex(c=>re.test(c));
+    const ci={nom:col(/^(societe|annonceur|entreprise)$/),qui:col(/qui/),type:col(/type/),date:col(/recu le|paiement recu|date/),cerfa:col(/cerfa|recu fiscal/),com:col(/commentaire|note/),logo:col(/logo/),mail:col(/^mail|e-mail|courriel/)};
+    const yc=H.map((c,i)=>{const m=/(20\d\d)/.exec(c);return m&&i!==ci.date?[i,+m[1]]:null;}).filter(Boolean);
+    if(!yc.length)throw new Error("Aucune colonne d'année (2025, ENCART 2026…) trouvée.");
+    const Y=Math.max(...yc.map(x=>x[1])), g=(r,i)=>i>=0&&r[i]!=null?String(r[i]).trim():"";
+    // colonne « Qui le fait ? » sans titre : la première colonne vide qui suit les années
+    if(ci.qui<0){const last=Math.max(...yc.map(x=>x[0]));for(let i=last+1;i<H.length;i++){if(!S2[i]){ci.qui=i;break;}if(i===ci.type)break;}}
+    const items=[];
+    for(const r of rows.slice(h+1)){
+      const nom=g(r,ci.nom); if(!nom)continue; if(/^total/i.test(nom))break;
+      const yrs={}; for(const [i,y] of yc){const v=r[i];if(v!=null&&String(v).trim()!=="")yrs[y]=round2(parseNum(v));}
+      const relance=r.some(c=>/relance/i.test(String(c||"")));
+      items.push({nom,qui:g(r,ci.qui),type:normType(g(r,ci.type)),date:parseDate(ci.date>=0?r[ci.date]:null),cerfa:normCerfa(g(r,ci.cerfa)),com:[g(r,ci.com),relance?"Relance mail faite":""].filter(Boolean).join(" · "),logo:/ok|oui/i.test(g(r,ci.logo)),mail:g(r,ci.mail),yrs});
+    }
+    if(!items.length)throw new Error("Aucun annonceur trouvé.");
+    // fusion avec les annonceurs existants
+    const by=new Map(S.annonceurs.map(a=>[annKey(a.nom),JSON.parse(JSON.stringify(a))])), used=new Set(), st={new:0,upd:0,paye:0,promis:0,refuse:0,relancer:0,cah:0}, touched=new Set();
+    S.annonceurs.forEach(a=>Object.values(a.encarts||{}).forEach(c=>{if(c&&c.ecriture)used.add(c.ecriture);}));
+    for(const x of items){
+      const k=annKey(x.nom); let a=by.get(k);
+      if(!a){a={id:store.newId("annonceurs"),nom:x.nom,contact:"",tel:"",email:"",note:"",encarts:{}};by.set(k,a);st.new++;} else st.upd++;
+      a.encarts=a.encarts||{};
+      if(x.qui)a.referent=x.qui; if(x.mail&&!a.email)a.email=x.mail; if(x.logo)a.logo=true;
+      for(const [ys,v] of Object.entries(x.yrs)){const y=+ys;if(y===Y)continue;if(a.encarts[y])continue;a.encarts[y]=v>0?{montant:v,statut:"paye"}:{montant:0,statut:"refuse"};}
+      const v=x.yrs[Y], prev=x.yrs[Y-1]!=null?x.yrs[Y-1]:((a.encarts[Y-1]||{}).montant||0), old=a.encarts[Y]||{};
+      let c=null;
+      if(v>0){
+        c={montant:v,statut:x.date?"paye":"promis",date:x.date||old.date||null,type:x.type||old.type||"",cerfa:x.cerfa||old.cerfa||(x.date?"afaire":""),com:x.com||old.com||"",ecriture:old.ecriture||null};
+        if(!c.ecriture){const l=cahierMatch(x.nom,Y,v,used);if(l){c.ecriture=l.id;used.add(l.id);st.cah++;if(c.statut!=="paye"){c.statut="paye";c.date=l.iso;c.com=[c.com,"paiement retrouvé au cahier"].filter(Boolean).join(" · ");}}}
+      } else if(v===0||/ne le prend plus|pas cette ann|plus d'encart/i.test(x.com)) c={montant:0,statut:"refuse",com:x.com};
+      else if(x.qui||a.referent) c={montant:+prev||0,statut:"relancer",com:x.com};
+      if(c){a.encarts[Y]=c;st[c.statut]++;}
+      touched.add(k);
+    }
+    AIMP={name:f.name,Y,ops:[...touched].map(k=>{const a=by.get(k);return {t:"set",col:"annonceurs",id:a.id,data:{nom:a.nom,contact:a.contact||"",tel:a.tel||"",email:a.email||"",note:a.note||"",referent:a.referent||"",logo:!!a.logo,encarts:a.encarts}};}),items:items.length};
+    const payeT=sumOf([...touched].map(k=>by.get(k)).filter(a=>(a.encarts[Y]||{}).statut==="paye"),a=>+a.encarts[Y].montant||0);
+    const ev=M.events.find(e=>e.name==="ENCART PUB "+Y), cah=sumOf(M.lines.filter(l=>isEncartLine(l)&&l.year===Y),l=>l.rec);
+    $("aiInfo").innerHTML=`<b>${esc(f.name)}</b> : liste ${Y}, ${items.length} annonceur(s) (${st.new} nouveau(x), ${st.upd} déjà connu(s)).<br>
+      Encarts ${Y} : <b>${st.paye}</b> payé(s) pour ${fm(payeT)}, ${st.promis} promis, ${st.relancer} à relancer, ${st.refuse} refusé(s).${st.cah?` ${st.cah} paiement(s) retrouvé(s) au cahier.`:""}<br>
+      Au cahier, « Encarts publicitaires » ${Y} : ${fm(cah)}${Math.abs(cah-payeT)<0.005?` <span class="pill good">identique</span>`:` <span class="pill warn">écart ${sg(cah-payeT)}</span>`}.`;
+    $("dlgAI").showModal();
+  }catch(err){flash(err.message||"Fichier illisible.",true);}
+});
+$("fAI").addEventListener("submit",async ev=>{
+  ev.preventDefault(); const X=AIMP; if(!X)return;
+  if(await run(store.commit(X.ops,{action:"Encarts",texte:`${X.name} : liste des encarts ${X.Y} importée (${X.items} annonceurs)`}),`Liste ${X.Y} importée.`)){$("dlgAI").close();aYear=X.Y;AIMP=null;}
+});
+$("aExport").onclick=()=>{
+  const y=aYear, py=y-1, en=(a,yy)=>(a.encarts||{})[yy];
+  const all=S.annonceurs.slice().sort((a,b)=>{const o=x=>{const c=en(x,y);return c?({paye:0,promis:1,relancer:2,refuse:4}[c.statut]??3):3;};return o(a)-o(b)||String(a.nom).localeCompare(String(b.nom),"fr");});
+  const aoa=[[`ENCARTS PUBLICITAIRES ${y}`],["N°","SOCIETE",String(py),String(y),"Statut "+y,"Qui le fait ?","Type Paiement","Paiement recu le","CERFA","Commentaire","LOGO STOCKE","Mail","Contact","Téléphone"]];
+  all.forEach((a,i)=>{const c=en(a,y),p=en(a,py);aoa.push([i+1,a.nom,p?+p.montant||0:null,c?+c.montant||0:null,c?ast(c.statut)[0]:"",a.referent||"",c&&c.type||"",c&&c.date?fdate(c.date):"",c&&c.cerfa?CERFA[c.cerfa][0]:"",c&&c.com||"",a.logo?"OK":"",a.email||"",a.contact||"",a.tel||""]);});
+  aoa.push([null,"TOTAL",sumOf(all,a=>+((en(a,py)||{}).montant)||0),sumOf(all,a=>+((en(a,y)||{}).montant)||0)]);
+  const wb=XLSX.utils.book_new(), ws=XLSX.utils.aoa_to_sheet(aoa); ws["!cols"]=[5,32,9,9,13,14,13,14,20,40,10,32,18,14].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb,ws,"Encarts "+y);
+  download(new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),`Liste_Encart_PUB_${y}.xlsx`);
+};
+$("aRef").addEventListener("change",renderEncarts);
 
 /* ================= relevé bancaire ================= */
 let REL=null;
