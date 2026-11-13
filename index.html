@@ -601,6 +601,9 @@ td.sv{width:22%}.svb{height:8px;border-radius:4px;background:color-mix(in srgb,v
 .pxin{width:76px;text-align:right;padding:4px 8px}.pxin.own{border-color:var(--accent)}
 details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}details.arh>summary{cursor:pointer;font-weight:600}details.arh[open]>summary{margin-bottom:8px}
 #bvPrix td:first-child{cursor:pointer}
+#aTable .yc{white-space:nowrap}#aTable td:last-child{white-space:nowrap}#aTable select{max-width:128px;padding-right:22px}#aTable .link{text-decoration:none;color:var(--ink)}#aTable .link:hover{text-decoration:underline}#aTable td:first-child{max-width:240px}#aTable td:first-child .small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#aTable .yc.cur{background:var(--accent-soft);font-weight:600}
+#aTable td.st-promis{color:var(--accent)}#aTable td.st-relancer{color:var(--muted)}#aTable td.st-refuse{color:var(--bad);font-size:12px}
+#aTable td.yc .small{font-weight:400}
 @media (display-mode:standalone){.side{padding-top:max(18px,env(safe-area-inset-top))}}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('cahier-theme')||'nuit'}catch(e){document.documentElement.dataset.theme='nuit'}</script>
@@ -2073,12 +2076,17 @@ function renderEncarts(){
   $("aRef").innerHTML=`<option value="">Tous les membres</option>`+refs.map(r=>`<option ${r===rf?"selected":""}>${esc(r)}</option>`).join("");
   const q=strip($("aQ").value), w=canWrite();
   const rows=all.filter(a=>(!rf||a.referent===rf)&&(aFilter==="all"||(aFilter==="sans"?!en(a,y):en(a,y)&&en(a,y).statut===aFilter))&&(!q||strip(a.nom+" "+(a.contact||"")).includes(q)));
-  $("aTable").innerHTML=`<thead><tr><th>Annonceur</th><th>Qui</th><th class="r">${py}</th><th class="r">${y}</th><th>Statut ${y}</th><th>Payé le</th><th>Reçu fiscal</th>${w?"<th></th>":""}</tr></thead><tbody>${rows.length?rows.map(a=>{
+  // une colonne par année qui a des encarts (5 dernières jusqu'à l'année affichée)
+  const YC=[...new Set(S.annonceurs.flatMap(a=>Object.keys(a.encarts||{}).map(Number)))].filter(v=>v<=y).concat([y]).filter((v,i,ar)=>ar.indexOf(v)===i).sort((a,b)=>a-b).slice(-5);
+  const cell=(c,yy)=>{if(!c)return `<td class="r num yc ${yy===y?"cur":""}">·</td>`;const m=+c.montant||0,k=c.statut;
+    return `<td class="r num yc ${yy===y?"cur":""} st-${k}" title="${esc(ast(k)[0])}">${k==="refuse"?"refus":m?fm0(m):"·"}${k!=="paye"&&k!=="refuse"&&yy!==y?`<div class="small">${esc(ast(k)[0].toLowerCase())}</div>`:""}</td>`;};
+  const totY=yy=>sumOf(rows,a=>{const c=en(a,yy);return c&&c.statut==="paye"?+c.montant||0:0;});
+  $("aTable").innerHTML=`<thead><tr><th>Annonceur</th><th>Qui</th>${YC.map(yy=>`<th class="r yc ${yy===y?"cur":""}">${yy}</th>`).join("")}<th>Statut ${y}</th><th>Payé le</th><th>Reçu fiscal</th>${w?"<th></th>":""}</tr></thead><tbody>${rows.length?rows.map(a=>{
     const c=en(a,y), p=en(a,py), contact=[a.contact,a.tel,a.email].filter(Boolean).join(" · ");
     const stSel=w?`<select data-astat="${esc(a.id)}" aria-label="Statut ${y}"><option value="">Pas d'encart</option>${Object.entries(ASTAT).map(([k,[l]])=>`<option value="${k}" ${c&&c.statut===k?"selected":""}>${l}</option>`).join("")}</select>`:(c?`<span class="pill ${ast(c.statut)[1]}">${ast(c.statut)[0]}</span>`:"·");
     const cf=c&&c.cerfa&&CERFA[c.cerfa];
-    return `<tr><td><b>${esc(a.nom)}</b>${a.logo?` <span class="pill neutral" title="Logo stocké">logo</span>`:""}${contact?`<div class="small muted">${esc(contact)}</div>`:""}${c&&c.com?`<div class="small muted">${esc(c.com)}</div>`:a.note?`<div class="small muted">${esc(a.note)}</div>`:""}</td><td class="small">${esc(a.referent||"")}</td><td class="r num">${p?fm(+p.montant||0)+(p.statut!=="paye"?` <span class="small muted">${ast(p.statut)[0].toLowerCase()}</span>`:""):"·"}</td><td class="r num">${c?fm(+c.montant||0):"·"}</td><td>${stSel}</td><td class="small num">${c&&c.statut==="paye"&&c.date?fdate(c.date):"·"}${c&&c.statut==="paye"&&c.type?`<div class="muted">${esc(c.type)}</div>`:""}</td><td>${cf?`<span class="pill ${cf[1]}">${esc(cf[0])}</span>`:"·"}</td>${w?`<td>${!c||c.statut!=="paye"?`<button type="button" class="mini primary" data-apay="${esc(a.id)}">Encaisser</button>`:""}<button type="button" class="mini" data-aedit="${esc(a.id)}">Modifier</button></td>`:""}</tr>`;
-  }).join(""):`<tr><td colspan="8" class="muted">${S.annonceurs.length?"Aucun annonceur pour ce filtre.":"Aucun annonceur. « Reprendre les annonceurs du cahier » part des encarts déjà encaissés."}</td></tr>`}</tbody>`;
+    return `<tr><td>${w?`<button type="button" class="link" data-aedit="${esc(a.id)}" title="Modifier la fiche"><b>${esc(a.nom)}</b></button>`:`<b>${esc(a.nom)}</b>`}${a.logo?` <span class="pill neutral" title="Logo stocké">logo</span>`:""}${contact?`<div class="small muted">${esc(contact)}</div>`:""}${c&&c.com?`<div class="small muted">${esc(c.com)}</div>`:a.note?`<div class="small muted">${esc(a.note)}</div>`:""}</td><td class="small">${esc(a.referent||"")}</td>${YC.map(yy=>cell(en(a,yy),yy)).join("")}<td>${stSel}</td><td class="small num">${c&&c.statut==="paye"&&c.date?fdate(c.date):"·"}${c&&c.statut==="paye"&&c.type?`<div class="muted">${esc(c.type)}</div>`:""}</td><td>${cf?`<span class="pill ${cf[1]}">${esc(cf[0])}</span>`:"·"}</td>${w?`<td>${!c||c.statut!=="paye"?`<button type="button" class="mini primary" data-apay="${esc(a.id)}">Encaisser</button>`:""}</td>`:""}</tr>`;
+  }).join(""):`<tr><td colspan="${7+YC.length}" class="muted">${S.annonceurs.length?"Aucun annonceur pour ce filtre.":"Aucun annonceur. « Reprendre les annonceurs du cahier » part des encarts déjà encaissés."}</td></tr>`}</tbody>${rows.length?`<tfoot><tr class="total"><td colspan="2">Total payé (${rows.length} annonceur(s) affiché(s))</td>${YC.map(yy=>`<td class="r num yc ${yy===y?"cur":""}">${fm0(totY(yy))}</td>`).join("")}<td colspan="${w?4:3}"></td></tr></tfoot>`:""}`;
   $("aSeed").disabled=!M.lines.some(isEncartLine);
 }
 
