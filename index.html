@@ -475,6 +475,122 @@ tr.lr .c-rec::before{content:"+"}tr.lr .c-dep::before{content:"−"}
   tr.lr:hover .c-act,tr.lr:focus-within .c-act{opacity:1}
 }
 @media (max-width:700px){tr.lr .c-ic{display:none}.hero .hchart{order:0}}
+
+/* ================= v10 : présentations plus lisibles ================= */
+.slide{--bg:#f3f5f8;--surface:#ffffff;--ink:#141a2e;--muted:#5d6680;--line:#dde2ea;--accent:#c97a00;--good:#13805a;--bad:#c23b36;--in:#1f9d6e;--out:#5b6b8c;--old:#c9cfdb}
+.sl-in{padding:4cqw 5.5cqw 6cqw;gap:2.2cqw;font-size:2cqw}
+.sl-in .eyebrow{font-size:1.3cqw;color:var(--muted);letter-spacing:.12em}
+.sl-in h2{font-family:var(--display);font-size:3.9cqw;line-height:1.12;letter-spacing:-.01em;max-width:80cqw}
+.sl-in h3{font-size:1.45cqw;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-bottom:1.6cqw}
+.sl-in .pos{color:var(--good)}.sl-in .neg{color:var(--bad)}
+.sl-in .note{font-size:1.25cqw}
+.sl-in .lead.small2{font-size:1.8cqw;max-width:none}
+.slide:has(.sl-title){background:radial-gradient(120% 140% at 85% 10%,#27306a 0%,#141a3c 50%,#0a0e22 100%);color:#fff}
+.sl-title{border-left:0;padding-left:0;gap:2.4cqw}
+.sl-title::before{content:"";width:9cqw;height:.7cqw;border-radius:.4cqw;background:linear-gradient(90deg,#ffc56b,#ff8a3d)}
+.sl-title .eyebrow{color:#ffcf85}.sl-title h1{font-family:var(--display);font-size:7.4cqw;color:#fff}.sl-title p{color:rgba(255,255,255,.75);font-size:2.3cqw}
+.slide:has(.sl-title) .sl-foot{color:rgba(255,255,255,.55)}
+.sl-foot{font-size:1.15cqw}
+.split{display:grid;grid-template-columns:1.7fr 1fr;gap:4.5cqw;align-items:center;flex:1;min-height:0}
+.kcol{display:flex;flex-direction:column;gap:1.4cqw}
+.kpi{border-left:0;border-radius:1.2cqw;padding:1.5cqw 2cqw;background:var(--bg)}
+.kpi span{font-size:1.2cqw}.kpi b{font-size:3.4cqw}.kpi small{font-size:1.2cqw}
+.kpis{gap:2cqw}
+.bal{display:flex;flex-direction:column;gap:2.6cqw}
+.bal-r{display:grid;grid-template-columns:13cqw 1fr 14cqw;align-items:center;gap:2cqw}
+.bal-r>span{font-size:1.9cqw;color:var(--muted);font-weight:600}
+.bal-r>b{font-family:var(--display);font-size:3cqw;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bal-t{height:4.2cqw;background:var(--bg);border-radius:.8cqw;overflow:hidden;display:flex}
+.bal-b{height:100%;border-radius:.8cqw}
+.bal-b.in{background:var(--in)}.bal-b.out{background:var(--out)}
+.bal-b.gain{background:repeating-linear-gradient(135deg,var(--good) 0 .8cqw,#4fc497 .8cqw 1.6cqw)}
+.bal-b.loss{background:repeating-linear-gradient(135deg,var(--bad) 0 .8cqw,#e07772 .8cqw 1.6cqw)}
+.bal-r.res{padding-top:2cqw;border-top:.2cqw solid var(--line)}
+.bal-r.res>span{color:var(--ink)}
+.one{max-width:none}
+.rk{display:flex;flex-direction:column;gap:1.3cqw}
+.rk-r{display:grid;grid-template-columns:30cqw 1fr;gap:2cqw;align-items:center}
+.rk-r .rk-l{display:contents}
+.rk-r .rk-l span{grid-column:1;font-size:1.9cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk-r .rk-t{grid-column:2;grid-row:1;position:relative;overflow:visible;background:none}
+.rk-r .rk-l b{grid-column:2;grid-row:1;justify-self:end;font-size:1.9cqw;position:relative;z-index:1}
+.rk-l{display:flex;justify-content:space-between;align-items:baseline;gap:2cqw;font-size:1.9cqw;margin-bottom:.6cqw}
+.rk-l b{font-variant-numeric:tabular-nums;white-space:nowrap}.rk-l i{font-style:normal;color:var(--muted);font-weight:500;margin-left:1.2cqw;font-size:1.6cqw}
+.rk-t{height:3cqw;border-radius:.6cqw}
+.rk-t>div{height:100%;border-radius:.6cqw;background:var(--old);max-width:calc(100% - 17cqw)}
+.rk.in .rk-r.first .rk-t>div{background:var(--in)}.rk.out .rk-r.first .rk-t>div{background:var(--out)}
+.rk.in .rk-r:not(.first) .rk-t>div{background:color-mix(in srgb,var(--in) 45%,#fff)}.rk.out .rk-r:not(.first) .rk-t>div{background:color-mix(in srgb,var(--out) 45%,#fff)}
+.rk-r.first .rk-l span,.rk-r.first .rk-l b{font-weight:700;font-size:2.1cqw}
+.dv{display:grid;grid-template-columns:24cqw 1fr 13cqw;gap:1.5cqw 2cqw;align-items:center}
+.dv-n{font-size:1.8cqw;font-weight:500;text-align:right}.dv-n i{font-style:normal;color:var(--muted);font-size:1.3cqw}
+.dv-t{position:relative;height:3.2cqw;background:linear-gradient(to right,transparent calc(50% - .1cqw),var(--line) calc(50% - .1cqw),var(--line) calc(50% + .1cqw),transparent calc(50% + .1cqw))}
+.dv-b{position:absolute;top:0;bottom:0;border-radius:.6cqw}.dv-b.p{left:50%;background:var(--good)}.dv-b.n{right:50%;background:var(--bad)}
+.dv-v{font-size:2cqw;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.dv-v.p{color:var(--good)}.dv-v.n{color:var(--bad)}
+.vs{display:flex;flex-direction:column;gap:2.6cqw}
+.vs-leg,.act-leg{display:flex;gap:3cqw;font-size:1.5cqw;color:var(--muted)}
+.vs-leg i,.act-leg i{display:inline-block;width:1.4cqw;height:1.4cqw;border-radius:.3cqw;margin-right:.8cqw;vertical-align:-.2cqw}
+.vs-leg i.old{background:var(--old)}.vs-leg i.new{background:var(--ink)}
+.vs-h{display:flex;justify-content:space-between;font-size:1.9cqw;font-weight:600;margin-bottom:.8cqw}
+.vs-h em{font-style:normal;font-size:1.7cqw;padding:.2cqw 1.1cqw;border-radius:2cqw;background:var(--bg);color:var(--muted)}
+.vs-h em.up{background:#dff3ea;color:var(--good)}.vs-h em.down{background:#f9e3e1;color:var(--bad)}
+.vs-b{display:flex;align-items:center;gap:1.2cqw;height:2.6cqw;margin-bottom:.6cqw}
+.vs-b>div{height:100%;border-radius:.6cqw}.vs-b .old{background:var(--old)}.vs-b .new.in{background:var(--in)}.vs-b .new.out{background:var(--out)}
+.vs-b i{font-style:normal;font-size:1.6cqw;font-variant-numeric:tabular-nums;white-space:nowrap}
+.act{display:flex;flex-direction:column;gap:1.7cqw}
+.act-leg i.in{background:var(--in)}.act-leg i.out{background:var(--out)}
+.act-r{display:grid;grid-template-columns:20cqw 1fr 12cqw;gap:2cqw;align-items:center}
+.act-n{font-size:1.9cqw;font-weight:600}
+.act-bars{display:flex;flex-direction:column;gap:.5cqw}
+.act-b{display:flex;align-items:center;gap:1cqw;height:1.9cqw}
+.act-b>div{height:100%;border-radius:.4cqw}.act-b .in{background:var(--in)}.act-b .out{background:var(--out)}
+.act-b i{font-style:normal;font-size:1.4cqw;color:var(--muted);white-space:nowrap}
+.act-s{font-family:var(--display);font-size:2.4cqw;font-weight:600;text-align:right;white-space:nowrap}
+.pay{margin-top:auto;display:grid;grid-template-columns:auto 1fr;gap:.8cqw 2cqw;align-items:center}
+.pay-t{font-size:1.4cqw;color:var(--muted)}
+.pay-bar{display:flex;height:1.6cqw;border-radius:.8cqw;overflow:hidden;gap:.25cqw}
+.pay-leg{grid-column:2;display:flex;flex-wrap:wrap;gap:.6cqw 2.4cqw;font-size:1.35cqw;color:var(--muted)}
+.pay-leg i{display:inline-block;width:1.1cqw;height:1.1cqw;border-radius:50%;margin-right:.6cqw;vertical-align:-.1cqw}
+.c0{background:#13805a}.c1{background:#5b6b8c}.c2{background:#c97a00}.c3{background:#8a6fc0}.c4{background:#b8c0cf}
+.eq{display:flex;align-items:stretch;gap:1.4cqw;flex-wrap:nowrap;margin:auto 0}
+.eq>em{align-self:center;font-style:normal;font-size:3cqw;color:var(--muted);font-weight:300}
+.eq-i{flex:1;background:var(--bg);border-radius:1.2cqw;padding:2cqw 1.8cqw;display:flex;flex-direction:column;gap:.6cqw;min-width:0}
+.eq-i span{font-size:1.25cqw;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+.eq-i b{font-family:var(--display);font-size:3.1cqw;white-space:nowrap;font-variant-numeric:tabular-nums}
+.eq-i small{font-size:1.2cqw;color:var(--muted)}
+.eq-i.good b{color:var(--good)}.eq-i.bad b{color:var(--bad)}
+.eq-i.tot{background:#141a2e;color:#fff}.eq-i.tot span,.eq-i.tot small{color:rgba(255,255,255,.7)}.eq-i.tot.good b{color:#6fe0b0}.eq-i.tot.bad b{color:#ff9a94}
+table.st{font-size:1.9cqw;width:100%}
+table.st th{font-size:1.2cqw;padding:.9cqw 1.4cqw;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+table.st td{padding:1cqw 1.4cqw}
+table.st tbody tr:nth-child(even) td{background:var(--bg)}
+table.st tr.total td{font-weight:700;border-top:.2cqw solid var(--ink);background:none !important}
+.chg{display:inline-block;padding:.2cqw 1.1cqw;border-radius:2cqw;font-weight:600;font-size:1.6cqw}
+.chg.up{background:#dff3ea;color:var(--good)}.chg.down{background:#f9e3e1;color:var(--bad)}
+ol.pts{margin:0;padding:0;list-style:none;counter-reset:p;display:flex;flex-direction:column;gap:1.8cqw}
+ol.pts li{counter-increment:p;display:grid;grid-template-columns:4cqw 1fr;gap:1.6cqw;align-items:start;font-size:1.85cqw;line-height:1.35}
+ol.pts li::before{content:counter(p);width:3.4cqw;height:3.4cqw;border-radius:50%;background:#141a2e;color:#ffcf85;display:grid;place-items:center;font-weight:700;font-size:1.7cqw}
+.sl-in svg text{font-size:13px}
+/* caisse en trois étapes */
+ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
+.step{display:grid;grid-template-columns:40px 1fr;gap:14px;position:relative;padding-bottom:18px}
+.step:not(:last-child)::before{content:"";position:absolute;left:19px;top:40px;bottom:0;width:2px;background:var(--line)}
+.st-n{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;border:2px solid var(--line);color:var(--muted);background:var(--surface)}
+.step.cur .st-n{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.step.done .st-n{background:var(--good);border-color:var(--good);color:var(--surface);font-size:0}
+.step.done .st-n::after{content:"✓";font-size:18px}
+.st-b{display:flex;flex-direction:column;gap:8px;min-width:0;padding-top:8px}
+.st-h{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.st-h b{font-size:16px}.st-v{font-weight:600;font-variant-numeric:tabular-nums}
+.st-b p{margin:0}
+.st-i{display:flex;gap:12px;align-items:center;padding:7px 12px;border-radius:10px;background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.st-i span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.step:not(.cur):not(.done) .st-b>p{display:none}
+.ceq{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-top:1px solid var(--line);padding-top:14px}
+.ceq>div{display:flex;flex-direction:column;padding:8px 14px;border-radius:12px;background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.ceq span{font-size:12px;color:var(--muted)}.ceq b{font-size:17px;font-variant-numeric:tabular-nums}
+.ceq em{font-style:normal;color:var(--muted);font-size:18px}
+.ceq .ok{background:var(--good-soft)}.ceq .ok b{color:var(--good)}.ceq .due{background:var(--warn-soft)}.ceq .due b{color:var(--warn)}.ceq .over{background:var(--bad-soft)}.ceq .over b{color:var(--bad)}
 @media (display-mode:standalone){.side{padding-top:max(18px,env(safe-area-inset-top))}}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('cahier-theme')||'nuit'}catch(e){document.documentElement.dataset.theme='nuit'}</script>
@@ -554,6 +670,7 @@ tr.lr .c-rec::before{content:"+"}tr.lr .c-dep::before{content:"−"}
           <button type="button" class="w" data-quick="recette">Recette<kbd class="k">R</kbd></button>
           <button type="button" class="w" id="bTransfer">Virement interne<kbd class="k">V</kbd></button>
           <button type="button" class="w" id="bNewEv">Événement<kbd class="k">E</kbd></button>
+          <button type="button" class="w" data-fond="">Fond de caisse<kbd class="k">F</kbd></button>
           <button type="button" class="w" id="bNewAnn">Annonceur</button>
           <div class="grp ws">Stock</div>
           <button type="button" class="ws" id="bNewIn">Réception d'achat<kbd class="k">S</kbd></button>
@@ -624,11 +741,13 @@ tr.lr .c-rec::before{content:"+"}tr.lr .c-dep::before{content:"−"}
       <div class="card"><h2>Moyens d'encaissement</h2><div class="hb" id="evPay"></div><div id="evSubs"></div></div>
     </div>
     <div class="card" id="caisseCard" hidden>
-      <div class="row between"><h2>Caisse de l'événement</h2>
-        <div class="row w"><button type="button" id="cFond">Sortir un fond de caisse</button><button type="button" id="cCompt">Ajouter un comptage</button><button type="button" class="primary" id="cDepot">Déposer en banque</button></div></div>
-      <div class="tiles" id="cTiles"></div>
-      <div class="scroll"><table id="cTable"></table></div>
-      <p class="small muted" style="margin:0">Le déposé comprend tous les dépôts d'espèces de l'événement : ajoutez un comptage pour chaque caisse (buvette, repas…) pour que l'écart soit juste.</p>
+      <div class="row between"><h2>Caisse de l'événement</h2><span class="small muted" id="cState"></span></div>
+      <ol class="steps" id="cSteps">
+        <li class="step" id="cS1"><div class="st-n">1</div><div class="st-b"><div class="st-h"><b>Avant : préparer le fond de caisse</b><span class="st-v" id="cS1v"></span></div><p class="small muted">La monnaie retirée à la banque pour rendre la monnaie. Elle n'est comptée ni en dépense ni en recette.</p><div class="st-l" id="cS1l"></div><div class="row w"><button type="button" id="cFond">+ Ajouter un fond de caisse</button></div></div></li>
+        <li class="step" id="cS2"><div class="st-n">2</div><div class="st-b"><div class="st-h"><b>Après : compter les caisses</b><span class="st-v" id="cS2v"></span></div><p class="small muted">Un comptage par caisse (buvette, repas…), billets et pièces, fond de caisse compris : il est retiré automatiquement.</p><div class="scroll"><table id="cTable"></table></div><div class="row w"><button type="button" id="cCompt">+ Compter une caisse</button></div></div></li>
+        <li class="step" id="cS3"><div class="st-n">3</div><div class="st-b"><div class="st-h"><b>Enfin : déposer en banque</b><span class="st-v" id="cS3v"></span></div><p class="small muted">Le dépôt rembourse d'abord le fond de caisse, le reste devient la recette de l'événement.</p><div class="st-l" id="cS3l"></div><div class="row w"><button type="button" id="cDepot">Déposer en banque</button></div></div></li>
+      </ol>
+      <div class="ceq" id="cTiles"></div>
     </div>
     <div class="card" id="evLinesCard"><h2>Opérations de l'événement</h2><div class="scroll"><table id="evLines"></table></div></div>
   </section>
@@ -870,12 +989,14 @@ tr.lr .c-rec::before{content:"+"}tr.lr .c-dep::before{content:"−"}
   <button type="button" class="ws" data-quick="inventaire"><span class="ic">≡</span>Inventaire</button>
   <button type="button" class="w" data-quick="evenement"><span class="ic">★</span>Événement</button>
   <button type="button" class="w" data-quick="annonceur"><span class="ic">@</span>Annonceur</button>
+  <button type="button" class="w" data-quick="fond"><span class="ic">€</span>Fond de caisse</button>
   <button type="button" class="w" data-quick="releve"><span class="ic">✓</span>Vérifier la banque</button>
 </div></dialog>
 <dialog id="dlgKeys"><h2>Raccourcis clavier</h2><table><tbody>
   <tr><td><kbd class="k">N</kbd></td><td>Nouvelle dépense</td><td><kbd class="k">R</kbd></td><td>Nouvelle recette</td></tr>
   <tr><td><kbd class="k">V</kbd></td><td>Virement interne</td><td><kbd class="k">E</kbd></td><td>Nouvel événement</td></tr>
-  <tr><td><kbd class="k">S</kbd></td><td>Réception de stock</td><td><kbd class="k">/</kbd></td><td>Rechercher (ou Ctrl K)</td></tr>
+  <tr><td><kbd class="k">F</kbd></td><td>Fond de caisse</td><td><kbd class="k">S</kbd></td><td>Réception de stock</td></tr>
+  <tr><td><kbd class="k">/</kbd></td><td>Rechercher (ou Ctrl K)</td></tr>
   <tr><td><kbd class="k">1</kbd>…<kbd class="k">6</kbd></td><td>Rubriques du menu</td><td><kbd class="k">?</kbd></td><td>Cette aide</td></tr>
   <tr><td><kbd class="k">Ctrl Entrée</kbd></td><td>Enregistrer</td><td><kbd class="k">Ctrl Maj Entrée</kbd></td><td>Enregistrer et nouvelle</td></tr>
   <tr><td colspan="4" class="small muted">Double-clic sur une ligne : modifier l'opération. Dans un montant, un calcul est accepté : 12,50+8 ou 3*4,20.</td></tr>
@@ -1031,7 +1152,8 @@ tr.lr .c-rec::before{content:"+"}tr.lr .c-dep::before{content:"−"}
 <!-- caisse : fond -->
 <dialog id="dlgF"><form id="fF">
   <h2>Sortir un fond de caisse</h2>
-  <p class="small muted" style="margin:0">Événement : <b id="fdEvt"></b>. Le retrait n'est pas compté comme une dépense.</p>
+  <div class="field"><label for="fdEvt">Événement</label><select id="fdEvt" required></select></div>
+  <p class="small muted" style="margin:0">La monnaie retirée pour rendre la monnaie. Elle n'est comptée ni en dépense ni en recette : le dépôt après l'événement la rembourse d'abord.</p>
   <div class="grid2">
     <div class="field"><label for="fdAmt">Montant retiré (€)</label><input type="text" inputmode="decimal" id="fdAmt" required></div>
     <div class="field"><label for="fdDate">Date</label><input type="date" id="fdDate" required></div>
@@ -1857,14 +1979,21 @@ const detailTxt=d=>Object.entries(d||{}).filter(([,q])=>+q>0).sort((a,b)=>+b[0]-
 function parseDetail(s){const d={};String(s||"").replace(/(\d+)\s*×\s*([\d\s.,]+)\s*€/g,(_,q,v)=>{d[String(Math.round(parseNum(v)*100))]=+q;return "";});return d;}
 function renderCaisse(e){
   $("caisseCard").hidden=false;
-  const c=caisseOf(e.name), ec=c.sessions.length?c.reste:null, w=canWrite();
-  const lab=ec==null?"Écart de caisse":ec>0.005?"Reste à déposer":ec<-0.005?"Déposé en plus du compté":"Caisse soldée";
-  $("cTiles").innerHTML=`
-    <div class="tile"><h3>Fonds de caisse sortis</h3><div class="v">${fm(c.fonds)}</div><div class="s">${c.retours>0?"dont "+fm(c.retours)+" déjà redéposés":"retraits de monnaie"}</div></div>
-    <div class="tile"><h3>Espèces comptées</h3><div class="v">${fm(c.compte)}</div><div class="s">${c.sessions.length} comptage(s), hors fond de caisse</div></div>
-    <div class="tile"><h3>Déposé en banque</h3><div class="v">${fm(c.depose)}</div><div class="s">dépôts d'espèces de l'événement</div></div>
-    <div class="tile ${ec==null?"":Math.abs(ec)<0.005?"good":ec>0?"acc":"bad"}"><h3>${lab}</h3><div class="v ${ec!=null&&ec<-0.005?"neg":""}">${ec==null?"·":fm(Math.abs(ec))}</div><div class="s">${ec==null?"ajoutez vos comptages pour le suivre":"fonds sortis + comptages − déposé"}</div></div>`;
-  $("cTable").innerHTML=c.sessions.length?`<thead><tr><th>Comptage</th><th>Date</th><th>Activité</th><th class="r">Espèces</th><th class="r">Carte</th><th>Détail</th>${w?"<th></th>":""}</tr></thead><tbody>${c.sessions.map(s=>`<tr><td>${esc(s.libelle)}</td><td class="num small">${fdate(s.date)}</td><td class="small">${esc(s.activite)}</td><td class="r num">${fm(+s.montant||0)}</td><td class="r num">${+s.cb?fm(+s.cb):"·"}</td><td class="small muted">${esc(detailTxt(s.detail))}</td>${w?`<td><button type="button" class="mini" data-qedit="${esc(s.id)}">Modifier</button></td>`:""}</tr>`).join("")}<tr class="total"><td>Total</td><td></td><td></td><td class="r num">${fm(c.compte)}</td><td class="r num">${fm(sumOf(c.sessions,s=>+s.cb||0))}</td><td></td>${w?"<td></td>":""}</tr></tbody>`:"";
+  const c=caisseOf(e.name), ec=c.sessions.length?c.reste:null, w=canWrite(), ev=M.events.find(x=>x.name===e.name), ls=ev?ev.lines:[];
+  const fl=ls.filter(l=>l.fdc&&l.dep>0), dl=ls.filter(l=>(l.fdc&&l.rec>0)||(!l.fdc&&l.rec>0&&/depot|espece/.test(strip(l.type))));
+  const li=l=>`<div class="st-i"><span>${fdate(l.iso)} · ${esc(l.des)}${l.acc==="LA"?" · Livret A":""}</span><b>${fm(l.rec||l.dep)}</b>${w?`<button type="button" class="mini" data-edit="${esc(l.id)}">Modifier</button>`:""}</div>`;
+  const done1=c.fonds>0, done2=c.sessions.length>0, done3=c.depose>0&&ec!=null&&Math.abs(ec)<0.005;
+  $("cS1").className="step"+(done1?" done":" cur"); $("cS2").className="step"+(done2?" done":done1?" cur":""); $("cS3").className="step"+(done3?" done":done2?" cur":"");
+  $("cS1v").textContent=done1?fm(c.fonds):"aucun"; $("cS1l").innerHTML=fl.map(li).join("");
+  $("cFond").className=done1?"":"primary"; $("cFond").textContent=done1?"+ Ajouter un autre fond de caisse":"+ Ajouter un fond de caisse";
+  $("cS2v").textContent=done2?fm(c.compte)+" comptés":"à faire après l'événement";
+  $("cCompt").className=done1&&!done2?"primary":"";
+  $("cTable").innerHTML=c.sessions.length?`<thead><tr><th>Caisse</th><th>Date</th><th>Activité</th><th class="r">Espèces</th><th class="r">Carte</th><th>Détail</th>${w?"<th></th>":""}</tr></thead><tbody>${c.sessions.map(s=>`<tr><td>${esc(s.libelle)}</td><td class="num small">${fdate(s.date)}</td><td class="small">${esc(s.activite)}</td><td class="r num">${fm(+s.montant||0)}</td><td class="r num">${+s.cb?fm(+s.cb):""}</td><td class="small muted">${esc(detailTxt(s.detail))}${+s.fond?` · fond ${fm(+s.fond)} retiré`:""}</td>${w?`<td><button type="button" class="mini" data-cs="${esc(s.id)}">Modifier</button></td>`:""}</tr>`).join("")}</tbody>`:"";
+  $("cS3v").textContent=c.depose>0?fm(c.depose)+" déposés":ec!=null&&ec>0.005?fm(ec)+" à déposer":"";
+  $("cS3l").innerHTML=dl.map(li).join(""); $("cDepot").className=done2&&!done3?"primary":"";
+  const lab=ec==null?"Reste à déposer":ec>0.005?"Reste à déposer":ec<-0.005?"Déposé en plus du compté":"Caisse soldée";
+  $("cState").innerHTML=done3?`<span class="pill good">Caisse soldée</span>`:ec!=null&&ec>0.005?`<span class="pill warn">${fm(ec)} à déposer</span>`:done1&&!done2?`<span class="pill neutral">Fond prêt : ${fm(c.fonds)}</span>`:"";
+  $("cTiles").innerHTML=`<div><span>Fond sorti</span><b>${fm(c.fonds)}</b></div><em>+</em><div><span>Compté</span><b>${fm(c.compte)}</b></div><em>−</em><div><span>Déposé</span><b>${fm(c.depose)}</b></div><em>=</em><div class="${ec==null?"":Math.abs(ec)<0.005?"ok":ec>0?"due":"over"}"><span>${lab}</span><b>${ec==null?"·":fm(Math.abs(ec))}</b></div>`;
 }
 
 /* ---------- encarts publicitaires ---------- */
@@ -1988,26 +2117,42 @@ const pMem={};
 const nk=()=>"cahier-pres-"+pType+"-"+pKey;
 function getNotes(){ if(nk() in pMem)return pMem[nk()]; try{return localStorage.getItem(nk())||"";}catch(e){return "";} }
 function setNotes(v){ pMem[nk()]=v; try{localStorage.setItem(nk(),v);}catch(e){} }
-const sg0=v=>(v>0.5?"+":"")+fm0(v);
+const sg0=v=>(v>0.5?"+":v<-0.5?"−":"")+fm0(Math.abs(v));
 const tone=v=>v>0.005?"good":v<-0.005?"bad":"";
 const kpi=(l,v,s,t)=>`<div class="kpi ${t||""}"><span>${esc(l)}</span><b>${v}</b><small>${s?esc(s):"&nbsp;"}</small></div>`;
+const lc=s=>String(s).replace(/^./,c=>c.toLowerCase());
+// classement lisible : intitulé et montant au-dessus, barre en dessous ; le premier est mis en avant
 function sBars(obj,kind,max){
   let items=Object.entries(obj).filter(([,v])=>v>0.005).sort((a,b)=>b[1]-a[1]);
-  const tot=items.reduce((s,[,v])=>s+v,0); max=max||7;
-  if(items.length>max){const rest=items.slice(max-1).reduce((s,[,v])=>s+v,0);items=items.slice(0,max-1);items.push(["Autres postes",rest]);}
+  const tot=items.reduce((s,[,v])=>s+v,0); max=max||6;
+  if(items.length>max){const rest=items.slice(max-1).reduce((s,[,v])=>s+v,0);items=items.slice(0,max-1);items.push(["Autres",rest]);}
   const top=Math.max(1,...items.map(([,v])=>v));
-  return items.length?`<div class="sb">${items.map(([k,v])=>`<div>${esc(k)}</div><div class="track"><div class="fill ${kind}" style="width:${v/top*100}%"></div></div><div class="num">${fm0(v)} <i>${pct(v/tot)}</i></div>`).join("")}</div>`:`<p class="muted">Aucune opération.</p>`;
+  return items.length?`<div class="rk ${kind}">${items.map(([k,v],i)=>`<div class="rk-r ${i===0?"first":""}"><div class="rk-l"><span>${esc(k)}</span><b>${fm0(v)}<i>${pct(v/tot)}</i></b></div><div class="rk-t"><div style="width:${Math.max(1.5,v/top*100)}%"></div></div></div>`).join("")}</div>`:`<p class="muted">Aucune opération.</p>`;
 }
+// résultat par événement : barres qui partent d'un axe central, montant au bout de la barre
 function sDiv(evs){
   const max=Math.max(1,...evs.map(e=>Math.abs(e.res)));
-  return `<div class="sd">${evs.map(e=>`<div>${esc(e.name)}${e.upcoming?" (acomptes)":""}</div><div class="track"><div class="bar ${e.res>=0?"p":"n"}" style="width:${Math.abs(e.res)/max*50}%"></div></div><div class="num ${cls(e.res)}">${sg0(e.res)}</div>`).join("")}</div>`;
+  return `<div class="dv">${evs.map(e=>{const w=Math.abs(e.res)/max*48;return `<div class="dv-n">${esc(e.name)}${e.upcoming?" <i>à venir</i>":""}</div><div class="dv-t"><div class="dv-b ${e.res>=0?"p":"n"}" style="width:${w}%"></div></div><div class="dv-v ${e.res>=0?"p":"n"}">${sg0(e.res)}</div>`;}).join("")}</div>`;
 }
-const sl=(eyebrow,title,body)=>`<div class="eyebrow">${esc(eyebrow)}</div><h2>${esc(title)}</h2>${body}`;
+// recettes face aux dépenses : deux barres à la même échelle, l'écart est nommé
+function sBalance(rec,dep,res){
+  const m=Math.max(rec,dep,1);
+  return `<div class="bal"><div class="bal-r"><span>Recettes</span><div class="bal-t"><div class="bal-b in" style="width:${rec/m*100}%"></div></div><b>${fm0(rec)}</b></div>
+    <div class="bal-r"><span>Dépenses</span><div class="bal-t"><div class="bal-b out" style="width:${dep/m*100}%"></div></div><b>${fm0(dep)}</b></div>
+    <div class="bal-r res"><span>${res>=0?"Bénéfice":"Déficit"}</span><div class="bal-t"><div class="bal-b ${res>=0?"gain":"loss"}" style="margin-left:${Math.min(rec,dep)/m*100}%;width:${Math.abs(res)/m*100}%"></div></div><b class="${res>=0?"pos":"neg"}">${sg0(res)}</b></div></div>`;
+}
+// deux éditions côte à côte
+function sVs(prev,e){
+  const m=Math.max(prev.rec,prev.dep,e.rec,e.dep,1);
+  const r=(lab,a,b,inv)=>{const d=b-a, good=inv?d<0:d>0;return `<div class="vs-r"><div class="vs-h"><span>${lab}</span><em class="${Math.abs(d)<0.5?"":good?"up":"down"}">${sg0(d)}</em></div><div class="vs-b"><div class="old" style="width:${a/m*100}%"></div><i>${fm0(a)}</i></div><div class="vs-b"><div class="new ${inv?"out":"in"}" style="width:${b/m*100}%"></div><i>${fm0(b)}</i></div></div>`;};
+  return `<div class="vs"><div class="vs-leg"><span><i class="old"></i>${esc(prev.name)}</span><span><i class="new"></i>${esc(e.name)}</span></div>${r("Recettes",prev.rec,e.rec)}${r("Dépenses",prev.dep,e.dep,true)}</div>`;
+}
+const sl=(eyebrow,title,body)=>`<div class="eyebrow">${esc(eyebrow)}</div><h2>${String(title).replace(/ ([:;?!])/g,"&nbsp;$1")}</h2>${body}`;
 const titleSlide=(over,title,sub)=>`<div class="sl-title"><div class="eyebrow">${esc(over)}</div><h1>${esc(title)}</h1><p>${esc(sub)}</p></div>`;
 function notesSlide(eyebrow,auto){
   const mine=getNotes().split("\n").map(s=>s.trim()).filter(Boolean);
-  const a=`<div><h3>Constats</h3><ul>${auto.slice(0,5).map(x=>`<li>${x}</li>`).join("")||"<li>Rien à signaler.</li>"}</ul></div>`;
-  return sl(eyebrow,"À retenir",mine.length?`<div class="cols">${a}<div><h3>Pistes d'amélioration</h3><ul>${mine.slice(0,6).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>`:a);
+  const a=`<div><h3>Les constats</h3><ol class="pts">${auto.slice(0,mine.length?3:4).map(x=>`<li><span>${x}</span></li>`).join("")||"<li><span>Rien à signaler.</span></li>"}</ol></div>`;
+  return sl(eyebrow,"À retenir",mine.length?`<div class="cols">${a}<div><h3>Nos pistes d'amélioration</h3><ol class="pts">${mine.slice(0,5).map(x=>`<li><span>${esc(x)}</span></li>`).join("")}</ol></div></div>`:a);
 }
 function ratiosOf(e){
   const R=k=>e.recCat[k]||0, D=k=>e.depCat[k]||0;
@@ -2015,31 +2160,47 @@ function ratiosOf(e){
     ["Repas",R("Réservations (repas, emplacements)"),D("Traiteur & repas")+D("Boulangerie & desserts")],
     ["Goodies & textile",R("Goodies & textile"),D("Goodies & textile")],
     ["Encarts & impression",R("Encarts publicitaires")+R("Tour du village"),D("Impression & communication")],
-    ["Animation & droits",0,D("Animation & spectacle")+D("Droits d'auteur (SACEM, SPRE)")]].filter(r=>(r[1]>0&&r[2]>0)||(r[1]===0&&r[2]>0));
+    ["Animation & droits",0,D("Animation & spectacle")+D("Droits d'auteur (SACEM, SPRE)")]].filter(r=>r[1]>0||r[2]>0);
+}
+function sActs(rt){
+  const m=Math.max(1,...rt.flatMap(r=>[r[1],r[2]]));
+  return `<div class="act"><div class="act-leg"><span><i class="in"></i>ce qu'elle rapporte</span><span><i class="out"></i>ce qu'elle coûte</span></div>${rt.map(r=>`<div class="act-r"><div class="act-n">${esc(r[0])}</div><div class="act-bars"><div class="act-b">${r[1]?`<div class="in" style="width:${r[1]/m*100}%"></div><i>${fm0(r[1])}</i>`:`<i>aucune recette</i>`}</div><div class="act-b"><div class="out" style="width:${r[2]/m*100}%"></div><i>${fm0(r[2])}</i></div></div><div class="act-s ${r[1]-r[2]>=0?"pos":"neg"}">${sg0(r[1]-r[2])}</div></div>`).join("")}</div>`;
+}
+function sPay(pay){
+  const it=Object.entries(pay).filter(([,v])=>v>0.005).sort((a,b)=>b[1]-a[1]), t=it.reduce((s,[,v])=>s+v,0);
+  if(!t)return "";
+  return `<div class="pay"><span class="pay-t">Encaissé en</span><div class="pay-bar">${it.map(([k,v],i)=>`<div class="c${Math.min(i,4)}" style="flex:${v}"></div>`).join("")}</div><div class="pay-leg">${it.slice(0,5).map(([k,v],i)=>`<span><i class="c${Math.min(i,4)}"></i>${esc(k)} ${pct(v/t)}</span>`).join("")}</div></div>`;
 }
 function deckEvent(e){
   const b=s=>`<b>${esc(s)}</b>`, prev=(families().get(e.family)||[]).filter(x=>x.year<e.year&&!x.upcoming).pop();
   const bg=S.budgets.find(x=>eventKey(x.evenement).parent===e.name);
-  const out=[titleSlide(ASSO||"Bilan financier",e.name,`Bilan financier · opérations du ${fdate(e.first)} au ${fdate(e.last)}`)];
-  const verdict=e.upcoming?`L'événement n'a pas encore eu lieu : ${fm(e.dep)} d'acomptes ont été versés.`:e.res>0.005?`L'événement dégage un bénéfice de ${fm(e.res)}, soit ${pct(e.margin)} des recettes.`:e.res<-0.005?`L'événement est déficitaire de ${fm(-e.res)}.`:"L'événement est à l'équilibre.";
-  out.push(sl(e.name,"Chiffres clés",`<div class="kpis">${kpi("Recettes",fm0(e.rec),bg?"prévu "+fm0(bg.recettes):"hors fond de caisse")}${kpi("Dépenses",fm0(e.dep),bg?"prévu "+fm0(bg.depenses):"hors fond de caisse")}${kpi("Résultat",sg0(e.res),e.rec>0?"marge "+pct(e.margin):"",tone(e.res))}${e.subv>0?kpi("Hors subvention",sg0(e.resHS),"subvention "+fm0(e.subv),tone(e.resHS)):prev?kpi("Édition précédente",sg0(prev.res),prev.name,tone(prev.res)):""}</div><p class="lead">${esc(verdict)}</p><p class="note">Les fonds de caisse (retraits puis retours de monnaie) ne sont comptés ni en recette ni en dépense.</p>`));
-  out.push(sl(e.name,"D'où vient l'argent, où part-il",`<div class="cols"><div><h3>Recettes · ${fm0(e.rec)}</h3>${sBars(e.recCat,"g",6)}</div><div><h3>Dépenses · ${fm0(e.dep)}</h3>${sBars(e.depCat,"b",7)}</div></div>`));
+  const m=evList().find(x=>x.name===e.name), d=m&&m.managed&&m.managed.debut;
+  const out=[titleSlide(ASSO||"Bilan financier",e.name,`Bilan financier${d?" · "+fdate(d):""}`)];
+  const head=e.upcoming?`${esc(e.name)} : ${fm0(e.dep)} déjà engagés`:Math.abs(e.res)<0.5?`${esc(e.name)} est à l'équilibre`:`${esc(e.name)} a ${e.res>0?"rapporté":"coûté"} <span class="${e.res>0?"pos":"neg"}">${fm0(Math.abs(e.res))}</span>`;
+  const side=[];
+  if(e.rec>0&&!e.upcoming)side.push(kpi("Marge",pct(e.margin),"résultat ÷ recettes",tone(e.res)));
+  if(e.subv>0)side.push(kpi("Sans la subvention",sg0(e.resHS),"subvention "+fm0(e.subv),tone(e.resHS)));
+  if(prev)side.push(kpi(prev.name,sg0(prev.res),"édition précédente",tone(prev.res)));
+  if(bg)side.push(kpi("Budget prévu",sg0(bg.recettes-bg.depenses),"résultat attendu"));
+  out.push(sl(e.name,head,`<div class="split"><div>${sBalance(e.rec,e.dep,e.res)}</div><div class="kcol">${side.slice(0,3).join("")}</div></div><p class="note">Les fonds de caisse (monnaie sortie puis redéposée) ne sont comptés ni en recettes ni en dépenses.</p>`));
+  const tr=Object.entries(e.recCat).sort((x,y)=>y[1]-x[1])[0], td=Object.entries(e.depCat).sort((x,y)=>y[1]-x[1])[0];
+  if(tr)out.push(sl(e.name,`${esc(tr[0])} : ${pct(tr[1]/e.rec)} des recettes`,`<div class="one"><h3>D'où vient l'argent · ${fm0(e.rec)}</h3>${sBars(e.recCat,"in",6)}</div>`));
+  if(td)out.push(sl(e.name,`${esc(td[0])} : ${pct(td[1]/e.dep)} des dépenses`,`<div class="one"><h3>Où part l'argent · ${fm0(e.dep)}</h3>${sBars(e.depCat,"out",7)}</div>`));
   let mv=[];
   if(prev){
-    const row=(l,f,inv)=>{const d=f(e)-f(prev);return `<tr><td>${l}</td><td class="r num">${fm(f(prev))}</td><td class="r num">${fm(f(e))}</td><td class="r num ${Math.abs(d)<0.005?"":(d>0)!==!!inv?"pos":"neg"}">${sg(d)}</td></tr>`;};
-    mv=[...new Set([...Object.keys(e.depCat),...Object.keys(prev.depCat)])].map(c=>[c,(e.depCat[c]||0)-(prev.depCat[c]||0)]).filter(x=>Math.abs(x[1])>1).sort((x,y)=>Math.abs(y[1])-Math.abs(x[1])).slice(0,4);
-    out.push(sl(e.name,`Face à ${prev.name}`,`<table class="st"><thead><tr><th></th><th class="r">${esc(prev.year)}</th><th class="r">${esc(e.year)}</th><th class="r">Écart</th></tr></thead><tbody>${row("Recettes",x=>x.rec)}${row("Dépenses",x=>x.dep,true)}${row("<b>Résultat</b>",x=>x.res)}${e.subv>0||prev.subv>0?row("Résultat hors subvention",x=>x.resHS):""}</tbody></table>${mv.length?`<div><h3>Dépenses qui ont le plus bougé</h3><ul>${mv.map(([c,v])=>`<li>${esc(c)} : ${b(sg(v))}</li>`).join("")}</ul></div>`:""}`));
+    mv=[...new Set([...Object.keys(e.depCat),...Object.keys(prev.depCat)])].map(c=>[c,(e.depCat[c]||0)-(prev.depCat[c]||0)]).filter(x=>Math.abs(x[1])>1).sort((x,y)=>Math.abs(y[1])-Math.abs(x[1])).slice(0,3);
+    const dr=e.res-prev.res;
+    out.push(sl(e.name,`Face à ${esc(prev.name)} : résultat <span class="${dr>=0?"pos":"neg"}">${sg0(dr)}</span>`,`<div class="split"><div>${sVs(prev,e)}</div><div class="kcol">${kpi("Résultat "+prev.year,sg0(prev.res),"",tone(prev.res))}${kpi("Résultat "+e.year,sg0(e.res),"",tone(e.res))}</div></div>${mv.length?`<p class="lead small2">Ce qui a le plus bougé : ${mv.map(([c,v])=>`${esc(lc(c))} <b>${sg0(v)}</b>`).join(" · ")}.</p>`:""}`));
   }
   const rt=ratiosOf(e);
-  if(rt.length||Object.keys(e.pay).length) out.push(sl(e.name,"Activité par activité",`<div class="cols"><div><h3>Recettes et coûts directs</h3><table class="st"><thead><tr><th>Activité</th><th class="r">Recettes</th><th class="r">Coûts</th><th class="r">Solde</th></tr></thead><tbody>${rt.map(r=>`<tr><td>${esc(r[0])}</td><td class="r num">${r[1]?fm0(r[1]):"·"}</td><td class="r num">${fm0(r[2])}</td><td class="r num ${cls(r[1]-r[2])}">${sg0(r[1]-r[2])}</td></tr>`).join("")}</tbody></table></div><div><h3>Moyens d'encaissement</h3>${sBars(e.pay,"",5)}</div></div><p class="note">Buvette : caisse face aux boissons. Repas : réservations face au traiteur et à la boulangerie. Ratios indicatifs, une facture de courses peut mélanger repas et buvette.</p>`));
+  if(rt.length){const best=rt.filter(r=>r[1]>0).sort((x,y)=>(y[1]-y[2])-(x[1]-x[2]))[0];
+    out.push(sl(e.name,best?`${esc(best[0])} : l'activité la plus rentable`:"Activité par activité",`${sActs(rt)}${sPay(e.pay)}`));}
   const auto=[];
-  auto.push(e.upcoming?`${fm(e.dep)} d'acomptes déjà versés, sans recette en face pour l'instant.`:`Résultat : ${b(sg(e.res))} pour ${fm(e.rec)} de recettes et ${fm(e.dep)} de dépenses.`);
-  if(prev) auto.push(`Par rapport à ${esc(prev.name)} : recettes ${sg(e.rec-prev.rec)}, dépenses ${sg(e.dep-prev.dep)}, résultat ${b(sg(e.res-prev.res))}.`);
-  const topD=Object.entries(e.depCat).sort((x,y)=>y[1]-x[1])[0];
-  if(topD&&e.dep>0) auto.push(`Premier poste de dépense : ${esc(topD[0])}, ${fm(topD[1])} soit ${pct(topD[1]/e.dep)} des dépenses.`);
-  if(mv.length) auto.push(`Plus forte variation de dépense : ${esc(mv[0][0])} (${sg(mv[0][1])}).`);
-  if(bg) auto.push(`Budget : ${fm(bg.depenses)} de dépenses prévues, ${fm(e.dep)} réalisées (${sg(e.dep-bg.depenses)}).`);
+  auto.push(e.upcoming?`${fm(e.dep)} déjà payés, sans recette en face pour l'instant.`:`Résultat ${b(sg(e.res))} pour ${fm(e.rec)} de recettes et ${fm(e.dep)} de dépenses.`);
+  if(prev) auto.push(`Face à ${esc(prev.name)} : résultat ${b(sg(e.res-prev.res))}.`);
+  if(td&&e.dep>0) auto.push(`Première dépense : ${esc(lc(td[0]))}, ${pct(td[1]/e.dep)} du total.`);
   if(e.subv>0) auto.push(`Sans la subvention de ${fm(e.subv)}, le résultat serait de ${b(sg(e.resHS))}.`);
+  else if(mv.length) auto.push(`Plus forte hausse ou baisse : ${esc(lc(mv[0][0]))} (${sg(mv[0][1])}).`);
   out.push(notesSlide(e.name,auto));
   return out;
 }
@@ -2050,20 +2211,25 @@ function deckYear(y){
   const resEv=done.reduce((s,e)=>s+e.res,0), subv=done.reduce((s,e)=>s+e.subv,0), acomptes=up.reduce((s,e)=>s+e.res,0), tot=resEv+fon+inv+acomptes;
   const end=y+"-12-31", cut=M.maxIso&&M.maxIso<end?M.maxIso:end;
   const bal=acc=>M.lines.filter(l=>l.iso&&l.iso<=cut&&(!acc||l.acc===acc)).reduce((s,l)=>s+l.rec-l.dep,0);
-  const label="Bilan "+y, out=[titleSlide(ASSO||"Bilan financier","Bilan financier "+y,`${done.length} événement(s) · trésorerie au ${fdate(cut)} : ${fm(bal())}`)];
-  out.push(sl(label,"L'année en quatre chiffres",`<div class="kpis">${kpi("Bilan des événements",sg0(resEv),subv>0?sg0(resEv-subv)+" hors subvention":"",tone(resEv))}${kpi("Fonctionnement",sg0(fon),"banque, assurance, AG, intérêts")}${kpi("Investissements",sg0(inv),"matériel durable")}${kpi("Résultat de l'année",sg0(tot),Math.abs(acomptes)>0.005?"dont "+sg0(acomptes)+" d'acomptes":"",tone(tot))}</div><p class="lead">${esc(tot>0.005?`L'année ${y} se termine sur un excédent de ${fm(tot)}.`:tot<-0.005?`L'année ${y} se termine sur un déficit de ${fm(-tot)}.`:`L'année ${y} est à l'équilibre.`)}</p><p class="note">Chaque événement est rattaché à son millésime, y compris les acomptes payés l'année précédente. Les virements entre comptes sont exclus.</p>`));
+  const label="Bilan "+y, out=[titleSlide(ASSO||"Bilan financier","Bilan financier "+y,`${done.length} événement(s) · ${fm0(bal())} disponibles au ${fdate(cut)}`)];
+  const eq=(l,v,s,t)=>`<div class="eq-i ${t||""}"><span>${esc(l)}</span><b>${sg0(v)}</b><small>${esc(s||"")}</small></div>`;
+  out.push(sl(label,Math.abs(tot)<0.5?`${y} : une année à l'équilibre`:`${y} se termine sur un ${tot>0?"excédent":"déficit"} de <span class="${tot>0?"pos":"neg"}">${fm0(Math.abs(tot))}</span>`,
+    `<div class="eq">${eq("Événements",resEv,subv>0?"dont subventions "+fm0(subv):"",tone(resEv))}<em>+</em>${eq("Fonctionnement",fon,"banque, assurance, AG")}<em>+</em>${eq("Investissements",inv,"matériel durable")}${Math.abs(acomptes)>0.5?`<em>+</em>${eq("Acomptes",acomptes,"événements à venir")}`:""}<em>=</em>${eq("Résultat",tot,"de l'année",tone(tot)+" tot")}</div><p class="note">Chaque événement est rattaché à son année, y compris les acomptes payés avant. Les virements entre comptes sont exclus.</p>`));
   if(evs.length){
-    const sorted=[...evs].sort((a,c)=>c.res-a.res);
-    out.push(sl(label,"Résultat par événement",sDiv(sorted.slice(0,12))));
-    out.push(sl(label,"Recettes et dépenses par événement",`<table class="st"><thead><tr><th>Événement</th><th class="r">Recettes</th><th class="r">Dépenses</th><th class="r">Résultat</th><th class="r">Marge</th></tr></thead><tbody>${evs.slice(0,11).map(e=>`<tr><td>${esc(e.name)}</td><td class="r num">${fm(e.rec)}</td><td class="r num">${fm(e.dep)}</td><td class="r num ${cls(e.res)}"><b>${sg(e.res)}</b></td><td class="r num">${pct(e.margin)}</td></tr>`).join("")}<tr class="total"><td>Total</td><td class="r num">${fm(evs.reduce((s,e)=>s+e.rec,0))}</td><td class="r num">${fm(evs.reduce((s,e)=>s+e.dep,0))}</td><td class="r num ${cls(resEv+acomptes)}">${sg(resEv+acomptes)}</td><td></td></tr></tbody></table>`));
+    const sorted=[...evs].sort((a,c)=>c.res-a.res), best=sorted[0], worst=sorted[sorted.length-1];
+    out.push(sl(label,best&&best.res>0?`${esc(best.name)} en tête, ${esc(worst.name)} en dernier`:"Résultat par événement",sDiv(sorted.slice(0,9))));
+    out.push(sl(label,"Recettes et dépenses par événement",`<table class="st"><thead><tr><th>Événement</th><th class="r">Recettes</th><th class="r">Dépenses</th><th class="r">Résultat</th></tr></thead><tbody>${evs.slice(0,9).map(e=>`<tr><td>${esc(e.name)}</td><td class="r num">${fm0(e.rec)}</td><td class="r num">${fm0(e.dep)}</td><td class="r num ${cls(e.res)}"><b>${sg0(e.res)}</b></td></tr>`).join("")}<tr class="total"><td>Total</td><td class="r num">${fm0(evs.reduce((s,e)=>s+e.rec,0))}</td><td class="r num">${fm0(evs.reduce((s,e)=>s+e.dep,0))}</td><td class="r num ${cls(resEv+acomptes)}">${sg0(resEv+acomptes)}</td></tr></tbody></table>`));
     const rc={}, dc={}; for(const e of evs){for(const [k,v] of Object.entries(e.recCat))rc[k]=(rc[k]||0)+v; for(const [k,v] of Object.entries(e.depCat))dc[k]=(dc[k]||0)+v;}
-    out.push(sl(label,"D'où vient l'argent, où part-il",`<div class="cols"><div><h3>Recettes des événements</h3>${sBars(rc,"g",7)}</div><div><h3>Dépenses des événements</h3>${sBars(dc,"b",8)}</div></div>`));
+    const trc=Object.entries(rc).sort((a,c)=>c[1]-a[1])[0], tdc=Object.entries(dc).sort((a,c)=>c[1]-a[1])[0], sr=Object.values(rc).reduce((a,c)=>a+c,0), sd=Object.values(dc).reduce((a,c)=>a+c,0);
+    if(trc)out.push(sl(label,`${esc(trc[0])} : ${pct(trc[1]/sr)} des recettes de l'année`,`<div class="one"><h3>D'où vient l'argent · ${fm0(sr)}</h3>${sBars(rc,"in",6)}</div>`));
+    if(tdc)out.push(sl(label,`${esc(tdc[0])} : ${pct(tdc[1]/sd)} des dépenses de l'année`,`<div class="one"><h3>Où part l'argent · ${fm0(sd)}</h3>${sBars(dc,"out",7)}</div>`));
     const pairs=done.map(e=>[e,M.events.find(x=>x.family===e.family&&x.year===y-1&&!x.upcoming)]).filter(p=>p[1]);
-    if(pairs.length) out.push(sl(label,`Face à ${y-1}`,`<table class="st"><thead><tr><th>Événement</th><th class="r">Résultat ${y-1}</th><th class="r">Résultat ${y}</th><th class="r">Écart</th></tr></thead><tbody>${pairs.map(([e,p])=>`<tr><td>${esc(e.family)}</td><td class="r num ${cls(p.res)}">${sg(p.res)}</td><td class="r num ${cls(e.res)}">${sg(e.res)}</td><td class="r num ${cls(e.res-p.res)}"><b>${sg(e.res-p.res)}</b></td></tr>`).join("")}<tr class="total"><td>Total des événements comparables</td><td class="r num">${sg(pairs.reduce((s,p)=>s+p[1].res,0))}</td><td class="r num">${sg(pairs.reduce((s,p)=>s+p[0].res,0))}</td><td class="r num ${cls(pairs.reduce((s,p)=>s+p[0].res-p[1].res,0))}">${sg(pairs.reduce((s,p)=>s+p[0].res-p[1].res,0))}</td></tr></tbody></table>`));
+    if(pairs.length){const dt=pairs.reduce((s,p)=>s+p[0].res-p[1].res,0);
+      out.push(sl(label,`Face à ${y-1} : <span class="${dt>=0?"pos":"neg"}">${sg0(dt)}</span> sur les mêmes événements`,`<table class="st"><thead><tr><th>Événement</th><th class="r">${y-1}</th><th class="r">${y}</th><th class="r">Évolution</th></tr></thead><tbody>${pairs.map(([e,p])=>`<tr><td>${esc(e.family)}</td><td class="r num ${cls(p.res)}">${sg0(p.res)}</td><td class="r num ${cls(e.res)}">${sg0(e.res)}</td><td class="r num"><span class="chg ${e.res-p.res>=0?"up":"down"}">${e.res-p.res>=0?"▲":"▼"} ${fm0(Math.abs(e.res-p.res))}</span></td></tr>`).join("")}</tbody></table>`));}
   }
-  out.push(sl(label,"Trésorerie",`<div class="kpis">${kpi("Trésorerie totale",fm0(bal()),"au "+fdate(cut),"acc")}${kpi("Compte courant",fm0(bal("CC")))}${kpi("Livret A",fm0(bal("LA")))}</div>${tresoSvg(cut)}`));
+  out.push(sl(label,`${fm0(bal())} disponibles au ${fdate(cut)}`,`<div class="kpis">${kpi("Compte courant",fm0(bal("CC")))}${kpi("Livret A",fm0(bal("LA")))}</div>${tresoSvg(cut)}`));
   const bgs=evs.map(e=>[e,S.budgets.find(x=>eventKey(x.evenement).parent===e.name)]).filter(p=>p[1]);
-  if(bgs.length) out.push(sl(label,"Budget prévu et réalisé",`<table class="st"><thead><tr><th>Événement</th><th class="r">Dépenses prévues</th><th class="r">réalisées</th><th class="r">Résultat prévu</th><th class="r">réalisé</th><th class="r">Écart</th></tr></thead><tbody>${bgs.slice(0,10).map(([e,g])=>{const pr=g.recettes-g.depenses;return `<tr><td>${esc(e.name)}</td><td class="r num">${fm(g.depenses)}</td><td class="r num ${e.dep>g.depenses+0.005?"neg":""}">${fm(e.dep)}</td><td class="r num">${sg(pr)}</td><td class="r num ${cls(e.res)}">${sg(e.res)}</td><td class="r num ${cls(e.res-pr)}"><b>${sg(e.res-pr)}</b></td></tr>`;}).join("")}</tbody></table>`));
+  if(bgs.length) out.push(sl(label,"Le budget prévu face au réalisé",`<table class="st"><thead><tr><th>Événement</th><th class="r">Résultat prévu</th><th class="r">Réalisé</th><th class="r">Écart</th></tr></thead><tbody>${bgs.slice(0,9).map(([e,g])=>{const pr=g.recettes-g.depenses;return `<tr><td>${esc(e.name)}</td><td class="r num">${sg0(pr)}</td><td class="r num ${cls(e.res)}">${sg0(e.res)}</td><td class="r num"><span class="chg ${e.res-pr>=0?"up":"down"}">${e.res-pr>=0?"▲":"▼"} ${fm0(Math.abs(e.res-pr))}</span></td></tr>`;}).join("")}</tbody></table>`));
   const old=season; season=String(y); let auto=[]; try{auto=insights(evs).filter(x=>!/^<b>[^<]+<\/b> : résultat/.test(x));}finally{season=old;}
   out.push(notesSlide(label,auto));
   return out;
@@ -2175,7 +2341,7 @@ function renderFiche(name,tab){
   $("subnav").innerHTML=FICHE_TABS.map(([k,l])=>`<a href="${ficheHash(name,k)}" class="${k===tab?"on":""}">${esc(l)}</a>`).join("");
   $("empty").hidden=true;
   if(tab==="apercu"||tab==="ops"){
-    if(!e){showView("none");$("ficheEmpty").hidden=false;$("ficheEmpty").innerHTML=`<h3>Aucune opération pour l'instant</h3><p class="muted" style="margin:0">Commencez par le budget de l'événement, puis saisissez les opérations avec « + Nouveau ».</p><div class="row"><a class="btn primary" href="${ficheHash(name,"budget")}">Préparer le budget</a></div>`;return;}
+    if(!e){showView("none");$("ficheEmpty").hidden=false;$("ficheEmpty").innerHTML=`<h3>Aucune opération pour l'instant</h3><p class="muted" style="margin:0">Commencez par le budget de l'événement, puis saisissez les opérations avec « + Nouveau ».</p><div class="row"><a class="btn primary" href="${ficheHash(name,"budget")}">Préparer le budget</a>${canWrite()?`<button type="button" data-fond="${esc(name)}">Préparer le fond de caisse</button>`:""}</div>`;return;}
     showView("evenement"); renderEvent();
   } else if(tab==="caisse"){showView("evenement"); renderCaisse({name});}
   else if(tab==="budget"){showView("previsionnel"); renderPrev();}
@@ -2477,12 +2643,20 @@ $("fG").addEventListener("submit",async ev=>{
 
 /* ================= caisse d'un événement ================= */
 let qEditing=null;
-$("cFond").onclick=()=>{if(!curEv)return;$("fdEvt").textContent=curEv;$("fdAmt").value="";$("fdDate").value=today();$("fdAcc").value="CC";$("fdDes").value="Retrait fond de caisse";$("dlgF").showModal();};
+function openFond(name){
+  const t=today(), opts=evList().filter(x=>!HORS_RE.test(x.name)&&(isOpen(x)||(x.ev&&x.ev.upcoming)||(x.managed&&x.managed.debut&&(x.managed.fin||x.managed.debut)>=t))).map(x=>x.name);
+  if(name&&!opts.includes(name))opts.unshift(name);
+  if(!opts.length){flash("Créez d'abord l'événement : le fond de caisse s'y rattache.",true);return;}
+  const nx=name||evList().filter(x=>opts.includes(x.name)&&x.managed&&x.managed.debut&&x.managed.debut>=t).sort((a,b)=>a.managed.debut.localeCompare(b.managed.debut)).map(x=>x.name)[0]||opts[0];
+  $("fdEvt").innerHTML=opts.map(n=>`<option ${n===nx?"selected":""}>${esc(n)}</option>`).join("");
+  $("fdAmt").value="";$("fdDate").value=t;$("fdAcc").value="CC";$("fdDes").value="Retrait fond de caisse";$("dlgF").showModal();
+}
+$("cFond").onclick=()=>openFond(FICHE||curEv);
 $("fF").addEventListener("submit",async ev=>{
   ev.preventDefault();
   const amt=round2(parseNum($("fdAmt").value)); if(!(amt>0)){flash("Le montant doit être positif.",true);return;}
-  const d={compte:$("fdAcc").value,date:$("fdDate").value,evenement:curEv,designation:$("fdDes").value.trim(),recette:0,depense:amt,type:"Retrait",commentaire:"",pointe:false,poste:"Fond de caisse"};
-  if(await run(store.commit([opNewEcr(d)],{action:"Création",texte:resume(d)}),"Retrait de fond de caisse enregistré."))$("dlgF").close();
+  const d={compte:$("fdAcc").value,date:$("fdDate").value,evenement:$("fdEvt").value,designation:$("fdDes").value.trim(),recette:0,depense:amt,type:"Retrait",commentaire:"",pointe:false,poste:"Fond de caisse"};
+  if(await run(store.commit([opNewEcr(d)],{action:"Création",texte:resume(d)}),`Fond de caisse de ${fm(amt)} enregistré pour ${d.evenement}.`))$("dlgF").close();
 });
 function qTotal(set){
   let t=0; document.querySelectorAll("#qGrid [data-den]").forEach(i=>{t+=(+i.dataset.den)*(parseInt(i.value)||0);}); t=round2(t);
@@ -3519,6 +3693,9 @@ function renderAccueil(){
   if(S.articles.length){const st=stockState(), al=S.articles.filter(a=>a.actif!==false&&(+a.seuil>0&&st.get(a.id).qty<+a.seuil));if(al.length)add(al.length,"article(s) sous le seuil d'alerte, à racheter","#stock");}
   if(S.previsions.length){const pj=projection(), bl=pj.rows.find(x=>x.solde<pj.seuil);if(bl)add("!",`trésorerie prévue sous ${fm0(pj.seuil)} en ${esc(monthLabel(bl.ym))} (${fm0(bl.solde)})`,"#tresorerie","bad");}
   for(const x of evList().filter(isOpen)){if(!pvLines(x.name).length&&!S.budgets.some(b=>eventKey(b.evenement).parent===x.name))add("—",`${esc(x.name)} n'a pas encore de budget`,ficheHash(x.name,"budget"),"neutral");}
+  if(w){const t=today(), lim14=new Date(Date.now()+14*864e5).toISOString().slice(0,10);
+    for(const x of evList().filter(x=>x.managed&&x.managed.debut&&x.managed.debut>=t&&x.managed.debut<=lim14&&!dateSuspecte(x)))
+      if(!caisseOf(x.name).fonds)add("€",`fond de caisse à préparer pour ${esc(x.name)} (le ${fdate(x.managed.debut)})`,"",null,`<button type="button" class="mini primary" data-fond="${esc(x.name)}">Préparer</button>`);}
   const nd=evList().filter(x=>x.managed&&(!x.managed.debut||dateSuspecte(x)));
   if(nd.length)add(nd.length,`événement(s) sans date ou avec une date à vérifier (${esc(nd.slice(0,3).map(x=>x.name).join(", "))}${nd.length>3?"…":""})`,"#evenements","warn");
   const dv=M.lines.filter(l=>!l.iso||l.cat==="Divers").length;
@@ -3555,6 +3732,8 @@ document.addEventListener("click",e=>{
   document.querySelectorAll("details.menu[open]").forEach(d=>{if(!d.contains(e.target)||e.target.closest(".pop button,.pop a,.pop label"))d.open=false;});
   if(!e.target.closest(".gsearch"))$("gqRes").hidden=true;
   if((t=e.target.closest("[data-newev]"))){newEvent();return;}
+  if((t=e.target.closest("[data-cs]"))){openComptage(t.dataset.cs);return;}
+  if((t=e.target.closest("[data-fond]"))){openFond(t.dataset.fond||null);return;}
   if((t=e.target.closest("[data-fhedit]"))){openEventDialog(FICHE,n=>openFiche(n,document.body.dataset.tab));return;}
   if((t=e.target.closest("[data-fhnext]"))){newEvent(t.dataset.fhnext);return;}
   if((t=e.target.closest("[data-fhpres]"))){pType="event";pKey=FICHE;const r=document.querySelector('input[name=pType][value=event]');if(r)r.checked=true;go("presentation");return;}
@@ -3629,6 +3808,7 @@ function quick(a){
   if((a==="depense"||a==="recette")&&w){openEcriture(null,lastEntry());if(a==="recette"){$("eRec").checked=true;eTouched.add("sens");eAuto();}}
   else if(a==="virement"&&w)$("bTransfer").click();
   else if(a==="evenement"&&w)newEvent();
+  else if(a==="fond"&&w)openFond(FICHE||null);
   else if(a==="annonceur"&&w)openAnn(null);
   else if(a==="reception"&&s)$("stIn").click();
   else if(a==="sortie"&&s)$("stOut").click();
@@ -3656,7 +3836,7 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("dblclick",e=>{const t=e.target.closest("tr[data-row]");if(t&&canWrite()&&!e.target.closest("input,a,button,label"))openEcriture(t.dataset.row);});
 // raccourcis clavier
-const QKEYS={n:"depense",r:"recette",v:"virement",e:"evenement",s:"reception","/":"recherche"};
+const QKEYS={f:"fond",n:"depense",r:"recette",v:"virement",e:"evenement",s:"reception","/":"recherche"};
 const NAVK=["accueil","operations","evenements","stock","encarts","synthese"];
 document.addEventListener("keydown",e=>{
   const dlg=document.querySelector("dialog[open]");
@@ -3698,7 +3878,7 @@ function renderHero(cc,la){
   const nx=evList().filter(x=>x.managed&&x.managed.debut&&(x.managed.fin||x.managed.debut)>=t&&!dateSuspecte(x)).sort((a,b)=>a.managed.debut.localeCompare(b.managed.debut))[0];
   if(nx){const j=Math.round((Date.parse(nx.managed.debut)-Date.parse(t))/864e5), L=pvLines(nx.name);
     $("hNext").hidden=false;
-    $("hNext").innerHTML=`<button type="button" data-ev="${esc(nx.name)}"><span class="jj">${j>0?"J−"+j:"Jour J"}</span><span class="nx"><b>${esc(nx.name)}</b><span class="small">${fdate(nx.managed.debut)}${L.length?" · budget prêt":" · budget à préparer"}</span></span><span aria-hidden="true">›</span></button>`;
+    $("hNext").innerHTML=`<button type="button" data-ev="${esc(nx.name)}"><span class="jj">${j>0?"J−"+j:"Jour J"}</span><span class="nx"><b>${esc(nx.name)}</b><span class="small">${fdate(nx.managed.debut)}${L.length?" · budget prêt":" · budget à préparer"}${caisseOf(nx.name).fonds?" · fond de caisse "+fm(caisseOf(nx.name).fonds):j<=14?" · fond de caisse à préparer":""}</span></span><span aria-hidden="true">›</span></button>`;
   } else $("hNext").hidden=true;
 }
 
