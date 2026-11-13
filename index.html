@@ -598,6 +598,7 @@ details.pvs[open]>summary{margin-bottom:10px}
 #pvTable tr.total.big td{font-size:16px}
 td.sv{width:22%}.svb{height:8px;border-radius:4px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden}
 .svb>div{height:100%;border-radius:4px;background:var(--accent)}.svb>div.over{background:var(--bad)}
+.pxin{width:76px;text-align:right;padding:4px 8px}.pxin.own{border-color:var(--accent)}
 @media (display-mode:standalone){.side{padding-top:max(18px,env(safe-area-inset-top))}}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('cahier-theme')||'nuit'}catch(e){document.documentElement.dataset.theme='nuit'}</script>
@@ -954,7 +955,7 @@ td.sv{width:22%}.svb{height:8px;border-radius:4px;background:color-mix(in srgb,v
       <h2>Coût et marge par produit vendu</h2>
       <div class="scroll"><table id="bvTable"></table></div>
       <p class="small muted" style="margin:0" id="bvNote"></p>
-      <p class="small muted" style="margin:0">Unités = quantité consommée × unités vendues par article (fiche de l'article, ex. fût de 30 L = 120 verres de 25 cl). Coût au prix d'achat TTC net des retours et avoirs. Les coûts annexes (gaz de la tireuse) sont rattachés au produit avec 0 unité.</p>
+      <p class="small muted" style="margin:0">Prix : celui pratiqué pour cet événement, modifiable ici (s'il diffère de la grille, la grille est rappelée en dessous ; videz la case pour revenir à la grille). Unités = quantité consommée × unités vendues par article (fiche de l'article, ex. fût de 30 L = 120 verres de 25 cl). Coût au prix d'achat TTC net des retours et avoirs. Les coûts annexes (gaz de la tireuse) sont rattachés au produit avec 0 unité.</p>
     </div>
     <div class="card"><h2>Achats non rattachés à la grille</h2><div class="scroll"><table id="bvOther"></table></div></div>
     <div class="card"><h2>Prix d'achat par édition et fournisseur</h2><div class="scroll"><table id="bvPrix"></table></div></div>
@@ -3561,6 +3562,14 @@ const DEFAULT_TARIFS=[
 const FAMILLES=["Bière pression","Bière bouteille","GET 27","Sangria","Vins & blanquette","Softs","Eau","Autre"];
 const tarifs=()=>(P().tarifs&&P().tarifs.length?P().tarifs:DEFAULT_TARIFS);
 const tarifOf=id=>tarifs().find(t=>t.id===id)||null;
+// prix pratiqué pour un événement donné (sinon celui de la grille)
+const prixEvOf=ev=>(P().prixEv&&P().prixEv[ev])||{};
+const prixPour=(ev,t)=>{const v=prixEvOf(ev)[t.id];return v!=null&&v!==""?+v:(+t.prix||0);};
+async function savePrixEv(ev,patch,msg){
+  const all=JSON.parse(JSON.stringify(P().prixEv||{})), cur=Object.assign({},all[ev]||{},patch);
+  for(const k of Object.keys(cur))if(cur[k]==null)delete cur[k];
+  all[ev]=cur; return run(store.commit([{t:"merge",col:"parametres",id:"general",data:{prixEv:all}}],{action:"Réglages",texte:msg}),"Prix enregistré.");
+}
 function tarifOptions(cur){return `<option value="">Non vendu à la buvette (repas, usage interne…)</option>`+FAMILLES.map(f=>{const ts=tarifs().filter(t=>(t.famille||"Autre")===f);return ts.length?`<optgroup label="${esc(f)}">${ts.map(t=>`<option value="${esc(t.id)}" ${t.id===cur?"selected":""}>${esc(t.nom)} · ${fm(+t.prix||0)}</option>`).join("")}</optgroup>`:"";}).join("");}
 let bvEv=null, TG=null;
 function bvEvents(){
@@ -3594,7 +3603,7 @@ function renderBuvette(){
   const d=bvData(bvEv), cible=(+P().margeCible||65)/100, ws=canStock();
   const groups=new Map();
   for(const r of d.rows){if(!r.t)continue;const g=groups.get(r.t.id)||{t:r.t,cost:0,units:0,arts:[]};g.cost+=r.cost;g.units+=r.units;g.arts.push(r);groups.set(r.t.id,g);}
-  const G=[...groups.values()].map(g=>Object.assign(g,{cu:g.units>0?g.cost/g.units:null,pot:g.units*(+g.t.prix||0)})).sort((a,b)=>b.pot-a.pot||b.cost-a.cost);
+  const G=[...groups.values()].map(g=>Object.assign(g,{cu:g.units>0?g.cost/g.units:null,pot:g.units*prixPour(bvEv,g.t)})).sort((a,b)=>b.pot-a.pot||b.cost-a.cost);
   const cost=sumOf(G,g=>g.cost), pot=sumOf(G,g=>g.pot), ev=M.events.find(e=>e.name===bvEv), caisse=ev?(ev.recCat["Buvette & caisse"]||0):0;
   const taux=pot>0?caisse/pot:NaN;
   $("bvTiles").innerHTML=`
@@ -3607,8 +3616,8 @@ function renderBuvette(){
   $("bvTable").innerHTML=`<thead><tr><th>Produit vendu</th><th>Articles achetés</th><th class="r">Unités</th><th class="r">Coût</th><th class="r">Coût unitaire</th><th class="r">Prix</th><th class="r">Marge unitaire</th><th class="r">Taux de marge</th><th class="r">Prix pour ${pct(cible)}</th><th class="r">Recette potentielle</th>${ws?"<th></th>":""}</tr></thead><tbody>${G.length?FAMILLES.map(f=>{
     const gs=G.filter(g=>(g.t.famille||"Autre")===f); if(!gs.length)return "";
     return `<tr class="grp"><td colspan="${nc}">${esc(f)}</td></tr>`+gs.map(g=>{
-      const pv=+g.t.prix||0, m=g.cu!=null?pv-g.cu:null, tx=m!=null&&pv>0?m/pv:null, conseil=g.cu!=null?g.cu/(1-cible):null;
-      return `<tr><td><b>${esc(g.t.nom)}</b></td><td class="small">${g.arts.map(r=>`${esc(r.a.nom)} <span class="muted">(${qfmt(r.conso)} ${esc(r.a.unite||"")} × ${qfmt(+r.a.rendement||0)})</span>`).join("<br>")}</td><td class="r num">${qfmt(Math.round(g.units))}</td><td class="r num">${fm(g.cost)}</td><td class="r num"><b>${g.cu!=null?fm(g.cu):"·"}</b></td><td class="r num">${fm(pv)}</td><td class="r num ${m!=null?cls(m):""}">${m!=null?fm(m):"·"}</td><td class="r">${tx!=null?`<span class="pill ${tx>=cible?"good":tx>=cible-0.15?"warn":"bad"}">${pct(tx)}</span>`:"·"}</td><td class="r num ${conseil!=null&&conseil>pv+0.005?"neg":""}">${conseil!=null?fm(Math.ceil(conseil*10)/10):"·"}</td><td class="r num">${fm(g.pot)}</td>${ws?`<td>${g.arts.map(r=>`<button type="button" class="mini" data-arted="${esc(r.a.id)}" title="${esc(r.a.nom)}">Modifier</button>`).slice(0,1).join("")}</td>`:""}</tr>`;
+      const pv=prixPour(bvEv,g.t), own=prixEvOf(bvEv)[g.t.id]!=null, w2=canWrite(), m=g.cu!=null?pv-g.cu:null, tx=m!=null&&pv>0?m/pv:null, conseil=g.cu!=null?g.cu/(1-cible):null;
+      return `<tr><td><b>${esc(g.t.nom)}</b></td><td class="small">${g.arts.map(r=>`${esc(r.a.nom)} <span class="muted">(${qfmt(r.conso)} ${esc(r.a.unite||"")} × ${qfmt(+r.a.rendement||0)})</span>`).join("<br>")}</td><td class="r num">${qfmt(Math.round(g.units))}</td><td class="r num">${fm(g.cost)}</td><td class="r num"><b>${g.cu!=null?fm(g.cu):"·"}</b></td><td class="r num">${w2?`<input type="text" inputmode="decimal" class="pxin ${own?"own":""}" data-pxev="${esc(g.t.id)}" value="${esc(dec(pv))}" aria-label="Prix pratiqué pour ${esc(g.t.nom)}">`:fm(pv)}${own&&Math.abs(pv-(+g.t.prix||0))>0.005?`<div class="small muted">grille ${fm(+g.t.prix||0)}</div>`:""}</td><td class="r num ${m!=null?cls(m):""}">${m!=null?fm(m):"·"}</td><td class="r">${tx!=null?`<span class="pill ${tx>=cible?"good":tx>=cible-0.15?"warn":"bad"}">${pct(tx)}</span>`:"·"}</td><td class="r num ${conseil!=null&&conseil>pv+0.005?"neg":""}">${conseil!=null?fm(Math.ceil(conseil*10)/10):"·"}</td><td class="r num">${fm(g.pot)}</td>${ws?`<td>${g.arts.map(r=>`<button type="button" class="mini" data-arted="${esc(r.a.id)}" title="${esc(r.a.nom)}">Modifier</button>`).slice(0,1).join("")}</td>`:""}</tr>`;
     }).join("");
   }).join("")+`<tr class="total"><td colspan="3">Total</td><td class="r num">${fm(cost)}</td><td colspan="5"></td><td class="r num">${fm(pot)}</td>${ws?"<td></td>":""}</tr>`:`<tr><td colspan="${nc}" class="muted">Aucun article consommé n'est rattaché à la grille de prix : indiquez « Vendu comme » dans la fiche des articles.</td></tr>`}</tbody>`;
   const other=d.rows.filter(r=>!r.t).sort((a,b)=>b.cost-a.cost);
@@ -3636,6 +3645,13 @@ function renderGrille(){
   $("tgTable").innerHTML=`<thead><tr><th>Produit vendu</th><th>Famille</th><th class="r">Prix (€)</th>${w?"<th></th>":""}</tr></thead><tbody>${TG.map((t,i)=>w?`<tr><td><input type="text" data-tg="${i}" data-tk="nom" value="${esc(t.nom)}" aria-label="Produit" style="width:100%;min-width:220px"></td><td><select data-tg="${i}" data-tk="famille" aria-label="Famille">${FAMILLES.map(f=>`<option ${f===(t.famille||"Autre")?"selected":""}>${esc(f)}</option>`).join("")}</select></td><td class="r"><input type="text" inputmode="decimal" data-tg="${i}" data-tk="prix" value="${esc(dec(t.prix))}" aria-label="Prix" style="width:90px;text-align:right"></td><td><button type="button" class="mini danger" data-tgdel="${i}">Retirer</button></td></tr>`:`<tr><td>${esc(t.nom)}</td><td class="small">${esc(t.famille||"")}</td><td class="r num">${fm(+t.prix||0)}</td></tr>`).join("")}</tbody>`;
 }
 $("bvSel").addEventListener("change",e=>{bvEv=e.target.value;renderBuvette();});
+$("bvTable").addEventListener("change",async e=>{
+  const t=e.target; if(!t.dataset.pxev||!bvEv)return;
+  const tf=tarifOf(t.dataset.pxev); if(!tf)return;
+  const raw=t.value.trim(), v=raw===""?null:round2(parseNum(raw));
+  const same=v==null||Math.abs(v-(+tf.prix||0))<0.005;
+  await savePrixEv(bvEv,{[tf.id]:same?null:v},`${bvEv} : prix pratiqué « ${tf.nom} » ${same?"ramené à la grille ("+fm(+tf.prix||0)+")":fm(v)}`);
+});
 $("tgTable").addEventListener("input",e=>{const t=e.target,i=t.dataset.tg;if(i==null)return;TG[+i][t.dataset.tk]=t.dataset.tk==="prix"?parseNum(t.value):t.value;});
 $("tgTable").addEventListener("change",e=>{const t=e.target,i=t.dataset.tg;if(i==null)return;TG[+i][t.dataset.tk]=t.dataset.tk==="prix"?parseNum(t.value):t.value;});
 $("tgAdd").onclick=()=>{TG.push({id:"t"+Date.now().toString(36),nom:"",famille:"Softs",prix:2});renderGrille();};
@@ -3648,12 +3664,12 @@ $("tgSave").onclick=async()=>{
 
 /* ---------- import des factures ---------- */
 let BVI=null;
-const BV_HEAD=["Date","Fournisseur","Facture","Événement","Article","Catégorie","Unité","Quantité","Prix unitaire TTC","Vendu comme","Unités vendues par article","Note"];
+const BV_HEAD=["Date","Fournisseur","Facture","Événement","Article","Catégorie","Unité","Quantité","Prix unitaire TTC","Vendu comme","Unités vendues par article","Note","Prix de vente pratiqué"];
 $("bvTpl").onclick=()=>{
   if(typeof XLSX==="undefined"){flash("La bibliothèque Excel n'a pas pu se charger.",true);return;}
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet([BV_HEAD,["24/07/2026","ABD","26008431","FETE 2027","Bière blonde fût 30 L","Boissons","fût",40,110.51,"Bière pression – verre",120,"une ligne négative = fût rendu"],["24/07/2026","Super U","68194","FETE 2027","Sangria 1,5 L","Boissons","bouteille",50,2.95,"Sangria – verre",6,""]]);
-  ws["!cols"]=BV_HEAD.map((h,i)=>({wch:[11,14,12,12,34,12,10,9,14,32,12,30][i]}));
+  ws["!cols"]=BV_HEAD.map((h,i)=>({wch:[11,14,12,12,34,12,10,9,14,32,12,30,14][i]}));
   XLSX.utils.book_append_sheet(wb,ws,"Achats");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Vendu comme (copier exactement)","Famille","Prix"],...tarifs().map(t=>[t.nom,t.famille,+t.prix])]),"Grille buvette");
   download(new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),"Modele_import_factures_buvette.xlsx");
@@ -3665,9 +3681,9 @@ $("bvFile").addEventListener("change",async e=>{
     let h=-1; for(let i=0;i<Math.min(rows.length,15);i++){const r=(rows[i]||[]).map(strip);if(r.includes("article")&&r.some(c=>/^quantit/.test(c))){h=i;break;}}
     if(h<0)throw new Error("Colonnes « Article » et « Quantité » introuvables : partez du modèle d'import.");
     const H=rows[h].map(strip), col=re=>H.findIndex(c=>re.test(c));
-    const c={d:col(/^date/),f:col(/fournisseur/),fa:col(/facture/),e:col(/evenement/),a:col(/^article/),cat:col(/categ/),u:col(/^unite$/),q:col(/^quantit/),pu:col(/prix/),t:col(/vendu comme/),r:col(/unites vendues/),n:col(/^note/)};
+    const c={d:col(/^date/),f:col(/fournisseur/),fa:col(/facture/),e:col(/evenement/),a:col(/^article/),cat:col(/categ/),u:col(/^unite$/),q:col(/^quantit/),pu:col(/prix/),t:col(/vendu comme/),r:col(/unites vendues/),n:col(/^note/),pv:col(/prix de vente/)};
     const g=(r,i)=>i>=0&&r[i]!=null?String(r[i]).trim():"";
-    const items=rows.slice(h+1).filter(r=>r&&g(r,c.a)&&g(r,c.q)!=="").map(r=>({date:parseDate(r[c.d])||today(),four:g(r,c.f),fac:g(r,c.fa),evt:normEv(g(r,c.e)),art:g(r,c.a),cat:g(r,c.cat),un:g(r,c.u),q:parseNum(r[c.q]),pu:round2(parseNum(r[c.pu])*10000)/10000,tar:g(r,c.t),rend:g(r,c.r),note:g(r,c.n)})).filter(x=>x.q);
+    const items=rows.slice(h+1).filter(r=>r&&g(r,c.a)&&g(r,c.q)!=="").map(r=>({date:parseDate(r[c.d])||today(),four:g(r,c.f),fac:g(r,c.fa),evt:normEv(g(r,c.e)),art:g(r,c.a),cat:g(r,c.cat),un:g(r,c.u),q:parseNum(r[c.q]),pu:round2(parseNum(r[c.pu])*10000)/10000,tar:g(r,c.t),rend:g(r,c.r),note:g(r,c.n),pv:c.pv>=0&&g(r,c.pv)!==""?round2(parseNum(r[c.pv])):null})).filter(x=>x.q);
     if(!items.length)throw new Error("Aucune ligne d'achat trouvée.");
     BVI={name:f.name,items};
     const evs=[...new Set(items.map(x=>x.evt).filter(Boolean))], noEv=items.filter(x=>!x.evt).length;
@@ -3699,6 +3715,9 @@ $("fBV").addEventListener("submit",async ev=>{
     else{if(conso&&evt)mv("retour",evt);mv("retfour",evt);}
   }
   for(const k of touched){const a=arts.get(k);const {id,...data}=a;ops.unshift({t:"set",col:"articles",id,data:{nom:data.nom,categorie:data.categorie,unite:data.unite||"",seuil:+data.seuil||0,prixAchat:+data.prixAchat||0,prixVente:+data.prixVente||0,lieu:data.lieu||"",note:data.note||"",actif:data.actif!==false,tarif:data.tarif||"",rendement:+data.rendement||0}});}
+  const px={};
+  for(const x of X.items){if(x.pv==null||!x.evt||!x.tar)continue;const t=tarifs().find(t=>t.id===x.tar||strip(t.nom)===strip(x.tar));if(!t||Math.abs(x.pv-(+t.prix||0))<0.005)continue;(px[x.evt]=px[x.evt]||{})[t.id]=x.pv;}
+  if(Object.keys(px).length){const all=JSON.parse(JSON.stringify(P().prixEv||{}));for(const [e,o] of Object.entries(px))all[e]=Object.assign({},all[e]||{},o);ops.push({t:"merge",col:"parametres",id:"general",data:{prixEv:all}});}
   if(await run(store.commit(ops,{action:"Stock",texte:`${X.name} : ${X.items.length} lignes de factures importées${conso?" (consommées pendant l'événement)":" (entrées en stock)"}`}),`${X.items.length} ligne(s) importée(s).`)){
     $("dlgBV").close(); const e1=X.items.find(x=>x.evt); if(e1){bvEv=e1.evt;} BVI=null;
   }
