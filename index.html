@@ -180,6 +180,8 @@ dialog form{display:flex;flex-direction:column;gap:12px}
 .seg label:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:-2px}
 body:not(.can-write) .w{display:none !important}
 /* v12 documents */
+.entbox{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px}
+button.entr{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;width:100%;padding:8px 10px;font-weight:400}
 .dchip{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:3px 6px 3px 4px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:13.5px;margin:2px 4px 2px 0;vertical-align:middle}
 .dchip a,.dchip>span:not(.dk):not(.small){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
 .dchip .dk{font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 5px;border-radius:5px;background:var(--accent);color:var(--surface)}
@@ -866,6 +868,7 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
           <button type="button" id="aExport">Exporter la liste de l'année (Excel)</button>
           <button type="button" id="aSeed">Reprendre les annonceurs du cahier</button></div></details>
           <details class="menu w"><summary class="btn">Reçus fiscaux</summary><div class="pop">
+          <button type="button" id="aFill">Compléter les fiches sans SIREN (annuaire)</button>
           <button type="button" id="aRecus">Générer les reçus manquants de l'année</button>
           <button type="button" id="aLinkRecus">Rattacher des reçus déjà faits (Drive)</button></div></details><input type="file" id="aFile" accept=".xlsx,.xls,.csv" hidden>
           <button type="button" class="w" id="aRenew">Reconduire</button><button type="button" class="primary w" id="aNew">+ Annonceur</button></div>
@@ -1281,7 +1284,9 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
 <!-- annonceur -->
 <dialog id="dlgA"><form id="fA">
   <h2 id="anTitle">Annonceur</h2>
-  <div class="field"><label for="anNom">Nom de l'annonceur</label><input type="text" id="anNom" required></div>
+  <div class="field"><label for="anNom">Nom de l'annonceur</label><div class="row" style="flex-wrap:nowrap"><input type="text" id="anNom" required style="flex:1"><button type="button" id="anFind" title="Retrouver SIREN, forme juridique et adresse dans l'annuaire officiel des entreprises">Rechercher l'entreprise</button></div></div>
+  <div class="entbox" id="anEnt" hidden></div>
+  <input type="hidden" id="anNomLegal">
   <div class="grid2">
     <div class="field"><label for="anContact">Contact</label><input type="text" id="anContact"></div>
     <div class="field"><label for="anTel">Téléphone</label><input type="text" id="anTel" inputmode="tel"></div>
@@ -1292,6 +1297,7 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
   </div>
   <label class="small"><input type="checkbox" id="anLogo"> Logo reçu</label>
   <details id="anSoc"><summary class="small">Société (pour le reçu fiscal) : forme, SIREN, adresse</summary>
+    <p class="small muted" style="margin:0">« Rechercher l'entreprise » remplit ces champs depuis l'annuaire officiel (SIREN, forme, adresse du siège).</p>
     <div class="grid2"><div class="field"><label for="anForme">Forme juridique</label><input type="text" id="anForme" placeholder="SAS, SARL, EI…"></div><div class="field"><label for="anSiren">SIREN</label><input type="text" id="anSiren" inputmode="numeric"></div></div>
     <div class="grid2"><div class="field"><label for="anNum">N°</label><input type="text" id="anNum"></div><div class="field"><label for="anRue">Rue</label><input type="text" id="anRue"></div></div>
     <div class="grid2"><div class="field"><label for="anCp">Code postal</label><input type="text" id="anCp"></div><div class="field"><label for="anVille">Commune</label><input type="text" id="anVille"></div></div>
@@ -1339,6 +1345,14 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
   <p class="small" style="margin:0" id="trSum"></p>
   <label class="small"><input type="checkbox" id="trFiles" checked> Référencer aussi les fichiers déjà présents (factures, devis, reçus, logos)</label>
   <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary" id="trGo">Relier</button></div>
+</form></dialog>
+<dialog id="dlgEF" class="wide"><form id="fEF">
+  <h2>Compléter les fiches des annonceurs</h2>
+  <p class="small muted" style="margin:0">Recherche par nom dans l'annuaire officiel des entreprises (SIREN, forme juridique, adresse du siège). Les entreprises de l'Ariège passent en premier.</p>
+  <p class="msg" id="efProg" hidden></p>
+  <div class="scroll" style="max-height:55vh"><table id="efTable"></table></div>
+  <p class="small" style="margin:0" id="efSum"></p>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Compléter</button></div>
 </form></dialog>
 <dialog id="dlgRL"><form id="fRL">
   <h2>Rattacher des reçus fiscaux</h2>
@@ -2879,7 +2893,7 @@ $("fA").addEventListener("submit",async ev=>{
   if(st)enc[aYear]=Object.assign({},enc[aYear]||{},{montant:round2(parseNum($("anMont").value)),statut:st,type:$("anType").value,date:$("anDate").value||null,cerfa:$("anCerfa").value,com:$("anCom").value.trim()}); else delete enc[aYear];
   const old=aEditing&&aEditing.logo, logo=old&&typeof old==="object"?old:$("anLogo").checked;
   const data=Object.assign(aEditing?annData(aEditing):{},{nom,contact:$("anContact").value.trim(),tel:$("anTel").value.trim(),email:$("anMail").value.trim(),note:$("anNote").value.trim(),referent:$("anRef").value.trim(),logo,encarts:enc,
-    forme:$("anForme").value.trim(),siren:$("anSiren").value.replace(/\s+/g,""),adrNum:$("anNum").value.trim(),adrRue:$("anRue").value.trim(),adrCp:$("anCp").value.trim(),adrVille:$("anVille").value.trim()});
+    forme:$("anForme").value.trim(),siren:$("anSiren").value.replace(/\s+/g,""),adrNum:$("anNum").value.trim(),adrRue:$("anRue").value.trim(),adrCp:$("anCp").value.trim(),adrVille:$("anVille").value.trim(),nomLegal:$("anNomLegal").value.trim()});
   if(await run(store.commit([{t:"set",col:"annonceurs",id:aEditing?aEditing.id:store.newId("annonceurs"),data}],{action:"Encarts",texte:`${nom} : fiche ${aEditing?"modifiée":"créée"}${st?`, encart ${aYear} ${ast(st)[0].toLowerCase()} ${fm(enc[aYear].montant)}`:""}`}),"Annonceur enregistré."))$("dlgA").close();
 });
 $("anDel").onclick=async()=>{
@@ -4849,6 +4863,85 @@ $("gdRootSet").onclick=async()=>{
     DRV.folders={}; $("gdRootUrl").value=""; renderDriveSettings();
   }catch(e){flash(e.message||String(e),true);}
 };
+/* ---------- v12d : fiche entreprise automatique (annuaire officiel des entreprises) ---------- */
+const NJ={"1000":"Entrepreneur individuel","5202":"SNC","5306":"SCS","5308":"SCA","5385":"SELAFA","5410":"SARL nationale","5485":"SELARL","5498":"EURL","5499":"SARL","5505":"SA à participation ouvrière","5599":"SA","5699":"SA à directoire","5710":"SAS","5720":"SASU","5785":"SELAS","6220":"GIE","6316":"CUMA","6317":"Société coopérative agricole","6533":"GAEC","6534":"Groupement foncier agricole","6540":"SCI","6585":"Société civile de moyens","6588":"Société civile laitière","6589":"Société civile de moyens","6597":"Société civile d'exploitation agricole","6598":"EARL","6599":"Société civile","7210":"Commune","7229":"Collectivité territoriale","7348":"Communauté de communes","9220":"Association déclarée","9221":"Association déclarée d'insertion","9300":"Fondation"};
+const VOIE={RUE:"Rue",AV:"Avenue",BD:"Boulevard",CHE:"Chemin",RTE:"Route",PL:"Place",IMP:"Impasse",ALL:"Allée",LD:"Lieu-dit",QUA:"Quartier",CRS:"Cours",FG:"Faubourg",LOT:"Lotissement",SQ:"Square",PRO:"Promenade",HAM:"Hameau",VOIE:"Voie",ZA:"ZA",ZI:"ZI",ZAC:"ZAC",RPT:"Rond-point",CHS:"Chaussée",PASS:"Passage",SEN:"Sentier",TRA:"Traverse",QU:"Quai",CAR:"Carrefour",RES:"Résidence",DOM:"Domaine",MTE:"Montée",VC:"Voie communale"};
+const ENT_API="https://recherche-entreprises.api.gouv.fr/search";
+async function entSearch(q,n){
+  const clean=String(q||"").trim(); if(clean.length<2)return [];
+  const r=await fetch(`${ENT_API}?q=${encodeURIComponent(clean)}&per_page=${n||10}&page=1`);
+  if(r.status===429){await new Promise(z=>setTimeout(z,1200));return entSearch(q,n);}
+  if(!r.ok)throw new Error("Annuaire des entreprises indisponible ("+r.status+").");
+  const j=await r.json();
+  return (j.results||[]).map(x=>{
+    const s=x.siege||{}, voie=[s.indice_repetition,VOIE[s.type_voie]||s.type_voie||"",s.libelle_voie||""].filter(Boolean).join(" ").replace(/\s+/g," ").trim();
+    return {siren:x.siren,nom:x.nom_complet||x.nom_raison_sociale||"",legal:x.nom_raison_sociale||x.nom_complet||"",forme:NJ[x.nature_juridique]||(x.nature_juridique?"Forme "+x.nature_juridique:""),
+      adrNum:s.numero_voie||"",adrRue:[voie,s.complement_adresse&&!voie?s.complement_adresse:""].filter(Boolean).join(" ")||s.complement_adresse||"",adrCp:s.code_postal||"",adrVille:s.libelle_commune||"",
+      ferme:x.etat_administratif==="C",naf:x.activite_principale||"",adresse:s.adresse||""};
+  });
+}
+function entRank(list,nom){
+  // la Haute-Ariège et alentours d'abord, entreprises actives d'abord, nom le plus proche
+  const k=annKey(nom);
+  const sc=e=>(e.ferme?-100:0)+(/^09/.test(e.adrCp)?30:/^(11|31)/.test(e.adrCp)?12:0)+(annKey(e.nom)===k||annKey(e.legal)===k?40:annKey(e.nom).includes(k)||k.includes(annKey(e.nom))?15:0);
+  return list.map(e=>Object.assign(e,{score:sc(e)})).sort((a,b)=>b.score-a.score);
+}
+function entFill(e){
+  $("anSoc").open=true;
+  $("anForme").value=e.forme; $("anSiren").value=e.siren; $("anNum").value=e.adrNum; $("anRue").value=e.adrRue; $("anCp").value=e.adrCp; $("anVille").value=e.adrVille;
+  $("anNomLegal").value=annKey(e.legal)!==annKey($("anNom").value)?e.legal:"";
+  if(!$("anNom").value.trim())$("anNom").value=e.nom;
+  $("anEnt").hidden=true;
+  flash(`Fiche complétée : ${e.nom}, SIREN ${e.siren}.`);
+}
+let ENTR=[];
+async function entLookup(){
+  const q=$("anSiren").value.replace(/\s+/g,"")||$("anNom").value.trim();
+  const box=$("anEnt"); box.hidden=false;
+  if(!q){box.innerHTML=`<span class="small muted">Saisissez d'abord le nom ou le SIREN.</span>`;return;}
+  box.innerHTML=`<span class="small muted">Recherche dans l'annuaire des entreprises…</span>`;
+  try{
+    ENTR=entRank(await entSearch(q,10),$("anNom").value);
+    box.innerHTML=ENTR.length?`<div class="small muted">Choisissez l'entreprise (annuaire officiel des entreprises) :</div>`+ENTR.slice(0,8).map((e,i)=>`<button type="button" class="entr" data-entr="${i}"><b>${esc(e.nom)}</b>${e.ferme?` <span class="pill bad">fermée</span>`:""}<span class="small muted">${esc(e.forme)} · SIREN ${esc(e.siren)}</span><span class="small">${esc([e.adrNum,e.adrRue].filter(Boolean).join(" "))}, ${esc(e.adrCp)} ${esc(e.adrVille)}</span></button>`).join(""):`<span class="small muted">Aucune entreprise trouvée pour « ${esc(q)} ». Essayez un autre nom ou le SIREN.</span>`;
+  }catch(e){box.innerHTML=`<span class="small neg">${esc(e.message||String(e))}</span>`;}
+}
+$("anFind").onclick=entLookup;
+document.addEventListener("click",e=>{const t=e.target.closest("[data-entr]");if(t)entFill(ENTR[+t.dataset.entr]);});
+{const _o=openAnn;openAnn=function(id){_o(id);$("anEnt").hidden=true;$("anEnt").innerHTML="";$("anNomLegal").value=(aEditing&&aEditing.nomLegal)||"";$("anSoc").open=!!(aEditing&&aEditing.siren);};}
+
+/* complétion de toutes les fiches sans SIREN */
+let EFILL=null;
+$("aFill").onclick=async()=>{
+  const l=S.annonceurs.filter(a=>!a.siren).sort((x,z)=>String(x.nom).localeCompare(String(z.nom),"fr"));
+  if(!l.length){flash("Toutes les fiches ont déjà un SIREN.");return;}
+  EFILL=[]; $("efTable").innerHTML=""; $("efProg").hidden=false; $("dlgEF").showModal();
+  for(let i=0;i<l.length;i++){
+    if(!$("dlgEF").open)return;
+    $("efProg").textContent=`Recherche ${i+1} / ${l.length} : ${l[i].nom}…`;
+    const q=l[i].nom.replace(/\s[-–]\s.*$/,"").replace(/\(.*?\)/g,"").trim()||l[i].nom;
+    let res=[]; try{res=entRank(await entSearch(q,8),q);}catch(e){}
+    const best=res[0], gap=best?best.score-(res[1]?res[1].score:0):0, sure=best&&!best.ferme&&best.score>=40&&(best.score>=70||gap>=25);
+    EFILL.push({a:l[i],res,pick:sure?0:-1});
+    await new Promise(z=>setTimeout(z,160));   // l'annuaire limite le nombre de demandes par seconde
+  }
+  $("efProg").hidden=true; renderEF();
+};
+function renderEF(){
+  $("efTable").innerHTML=`<thead><tr><th>Annonceur</th><th>Entreprise trouvée</th><th>Adresse</th></tr></thead><tbody>${EFILL.map((r,i)=>{const e=r.res[r.pick];return `<tr><td><b>${esc(r.a.nom)}</b></td><td><select data-efp="${i}" aria-label="Entreprise pour ${esc(r.a.nom)}"><option value="-1">· ne pas compléter</option>${r.res.slice(0,6).map((e,j)=>`<option value="${j}" ${j===r.pick?"selected":""}>${esc(e.nom)} · ${esc(e.adrCp)} ${esc(e.adrVille)}${e.ferme?" (fermée)":""}</option>`).join("")}</select></td><td class="small">${e?`${esc(e.forme)} · ${esc(e.siren)}<br>${esc([e.adrNum,e.adrRue].filter(Boolean).join(" "))}, ${esc(e.adrCp)} ${esc(e.adrVille)}`:r.res.length?`<span class="muted">${r.res.length} proposition(s), à choisir</span>`:`<span class="muted">rien trouvé</span>`}</td></tr>`;}).join("")}</tbody>`;
+  const n=EFILL.filter(r=>r.pick>=0).length;
+  $("efSum").textContent=`${n} fiche(s) seront complétées sur ${EFILL.length}. Les propositions sûres sont présélectionnées ; vérifiez les autres.`;
+}
+document.addEventListener("change",e=>{const t=e.target;if(t.dataset.efp!=null&&EFILL){EFILL[+t.dataset.efp].pick=+t.value;renderEF();}});
+$("fEF").addEventListener("submit",async ev=>{
+  ev.preventDefault(); if(!EFILL)return;
+  const ops=[];
+  for(const r of EFILL){const e=r.res[r.pick];if(!e)continue;
+    const data={forme:e.forme,siren:e.siren,adrNum:e.adrNum,adrRue:e.adrRue,adrCp:e.adrCp,adrVille:e.adrVille};
+    if(annKey(e.legal)!==annKey(r.a.nom))data.nomLegal=e.legal;
+    ops.push({t:"update",col:"annonceurs",id:r.a.id,data});}
+  if(!ops.length){$("dlgEF").close();return;}
+  if(await run(store.commit(ops,{action:"Encarts",texte:`${ops.length} fiche(s) annonceur complétée(s) depuis l'annuaire des entreprises`}),`${ops.length} fiche(s) complétée(s).`)){$("dlgEF").close();EFILL=null;}
+});
 </script>
 </body>
 </html>
