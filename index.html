@@ -948,7 +948,7 @@ td.sv{width:22%}.svb{height:8px;border-radius:4px;background:color-mix(in srgb,v
   <section class="view" id="v-buvette">
     <div class="row between">
       <div class="row evpick"><label for="bvSel" class="muted">Événement</label><select id="bvSel"></select></div>
-      <div class="row ws"><button type="button" id="bvTpl">Modèle d'import</button><label class="btn primary" for="bvFile">Importer des factures (Excel)</label><input type="file" id="bvFile" accept=".xlsx,.xls,.csv" hidden></div>
+      <div class="row ws"><button type="button" id="bvPurge">Retirer les achats importés</button><button type="button" id="bvTpl">Modèle d'import</button><label class="btn primary" for="bvFile">Importer des factures (Excel)</label><input type="file" id="bvFile" accept=".xlsx,.xls,.csv" hidden></div>
     </div>
     <div class="tiles" id="bvTiles"></div>
     <div class="card">
@@ -1339,6 +1339,7 @@ td.sv{width:22%}.svb{height:8px;border-radius:4px;background:color-mix(in srgb,v
   <div class="field"><label>Ces achats</label>
     <label class="small"><input type="radio" name="bviMode" value="conso" checked> ont été consommés pendant l'événement (le stock ne change pas ; choix pour une fête passée)</label>
     <label class="small"><input type="radio" name="bviMode" value="stock"> entrent dans le stock (vous ferez ensuite les sorties vers l'événement)</label></div>
+  <div class="msg warn" id="bviDup" hidden></div>
   <p class="small muted" style="margin:0">Les articles inconnus sont créés. Une quantité négative correspond à un retour au fournisseur ou un avoir. Aucune opération n'est créée dans le cahier : les factures y sont déjà.</p>
   <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Importer</button></div>
 </form></dialog>
@@ -3645,6 +3646,14 @@ function renderGrille(){
   $("tgTable").innerHTML=`<thead><tr><th>Produit vendu</th><th>Famille</th><th class="r">Prix (€)</th>${w?"<th></th>":""}</tr></thead><tbody>${TG.map((t,i)=>w?`<tr><td><input type="text" data-tg="${i}" data-tk="nom" value="${esc(t.nom)}" aria-label="Produit" style="width:100%;min-width:220px"></td><td><select data-tg="${i}" data-tk="famille" aria-label="Famille">${FAMILLES.map(f=>`<option ${f===(t.famille||"Autre")?"selected":""}>${esc(f)}</option>`).join("")}</select></td><td class="r"><input type="text" inputmode="decimal" data-tg="${i}" data-tk="prix" value="${esc(dec(t.prix))}" aria-label="Prix" style="width:90px;text-align:right"></td><td><button type="button" class="mini danger" data-tgdel="${i}">Retirer</button></td></tr>`:`<tr><td>${esc(t.nom)}</td><td class="small">${esc(t.famille||"")}</td><td class="r num">${fm(+t.prix||0)}</td></tr>`).join("")}</tbody>`;
 }
 $("bvSel").addEventListener("change",e=>{bvEv=e.target.value;renderBuvette();});
+$("bvPurge").onclick=async()=>{
+  if(!bvEv)return;
+  const ms=S.mouvements.filter(m=>m.facture&&m.evenement&&eventKey(m.evenement).parent===bvEv);
+  if(!ms.length){flash(`Aucun achat importé pour ${bvEv}.`,true);return;}
+  const fs=[...new Set(ms.map(m=>(m.fournisseur?m.fournisseur+" ":"")+m.facture))];
+  if(!await ask(`Retirer les achats importés de ${bvEv} ?\n\n${ms.length} mouvement(s) de stock, factures : ${fs.join(", ")}.\n\nLes opérations du cahier ne sont pas touchées. Vous pourrez réimporter le fichier ensuite.`,"Retirer"))return;
+  await run(store.commit(ms.map(m=>({t:"delete",col:"mouvements",id:m.id})),{action:"Stock",texte:`${bvEv} : ${ms.length} mouvement(s) d'achats importés retirés (${fs.join(", ")})`}),"Achats retirés.");
+};
 $("bvTable").addEventListener("change",async e=>{
   const t=e.target; if(!t.dataset.pxev||!bvEv)return;
   const tf=tarifOf(t.dataset.pxev); if(!tf)return;
@@ -3685,7 +3694,14 @@ $("bvFile").addEventListener("change",async e=>{
     const g=(r,i)=>i>=0&&r[i]!=null?String(r[i]).trim():"";
     const items=rows.slice(h+1).filter(r=>r&&g(r,c.a)&&g(r,c.q)!=="").map(r=>({date:parseDate(r[c.d])||today(),four:g(r,c.f),fac:g(r,c.fa),evt:normEv(g(r,c.e)),art:g(r,c.a),cat:g(r,c.cat),un:g(r,c.u),q:parseNum(r[c.q]),pu:round2(parseNum(r[c.pu])*10000)/10000,tar:g(r,c.t),rend:g(r,c.r),note:g(r,c.n),pv:c.pv>=0&&g(r,c.pv)!==""?round2(parseNum(r[c.pv])):null})).filter(x=>x.q);
     if(!items.length)throw new Error("Aucune ligne d'achat trouvée.");
-    BVI={name:f.name,items};
+    // factures déjà importées pour le même événement : on propose de les remplacer
+    const fk=(e,fa)=>strip(eventKey(e||"").parent)+"|"+strip(fa);
+    const keys=new Set(items.filter(x=>x.fac&&x.evt).map(x=>fk(x.evt,x.fac)));
+    const dup=S.mouvements.filter(m=>m.facture&&m.evenement&&keys.has(fk(m.evenement,m.facture)));
+    BVI={name:f.name,items,dup};
+    const nf=new Set(dup.map(m=>m.facture)).size;
+    $("bviDup").hidden=!dup.length;
+    $("bviDup").innerHTML=dup.length?`<label><input type="checkbox" id="bviRepl" checked> <b>Remplacer l'import précédent</b> : ${nf} facture(s) de ce fichier sont déjà importées (${dup.length} mouvement(s) de stock). Décochez seulement pour les ajouter une seconde fois.</label>`:"";
     const evs=[...new Set(items.map(x=>x.evt).filter(Boolean))], noEv=items.filter(x=>!x.evt).length;
     const unknownT=[...new Set(items.filter(x=>x.tar&&!tarifs().some(t=>t.id===x.tar||strip(t.nom)===strip(x.tar))).map(x=>x.tar))];
     const tot=sumOf(items,x=>x.q*x.pu);
@@ -3701,6 +3717,8 @@ $("fBV").addEventListener("submit",async ev=>{
   const X=BVI; if(!X)return;
   const conso=document.querySelector("input[name=bviMode]:checked").value==="conso";
   const ops=[], arts=new Map(S.articles.map(a=>[strip(a.nom),Object.assign({},a)])), touched=new Set(); let o=Date.now();
+  const repl=X.dup&&X.dup.length&&$("bviRepl")&&$("bviRepl").checked;
+  if(repl)for(const m of X.dup)ops.push({t:"delete",col:"mouvements",id:m.id});
   for(const x of X.items){
     const k=strip(x.art); let a=arts.get(k);
     if(!a){a={id:store.newId("articles"),nom:x.art,categorie:"Autre",unite:"",seuil:0,prixAchat:0,prixVente:0,lieu:"",note:"",actif:true,tarif:"",rendement:0};arts.set(k,a);}
@@ -3718,7 +3736,7 @@ $("fBV").addEventListener("submit",async ev=>{
   const px={};
   for(const x of X.items){if(x.pv==null||!x.evt||!x.tar)continue;const t=tarifs().find(t=>t.id===x.tar||strip(t.nom)===strip(x.tar));if(!t||Math.abs(x.pv-(+t.prix||0))<0.005)continue;(px[x.evt]=px[x.evt]||{})[t.id]=x.pv;}
   if(Object.keys(px).length){const all=JSON.parse(JSON.stringify(P().prixEv||{}));for(const [e,o] of Object.entries(px))all[e]=Object.assign({},all[e]||{},o);ops.push({t:"merge",col:"parametres",id:"general",data:{prixEv:all}});}
-  if(await run(store.commit(ops,{action:"Stock",texte:`${X.name} : ${X.items.length} lignes de factures importées${conso?" (consommées pendant l'événement)":" (entrées en stock)"}`}),`${X.items.length} ligne(s) importée(s).`)){
+  if(await run(store.commit(ops,{action:"Stock",texte:`${X.name} : ${X.items.length} lignes de factures importées${conso?" (consommées pendant l'événement)":" (entrées en stock)"}${repl?`, remplaçant ${X.dup.length} mouvement(s) de l'import précédent`:""}`}),`${X.items.length} ligne(s) importée(s)${repl?", l'import précédent est remplacé":""}.`)){
     $("dlgBV").close(); const e1=X.items.find(x=>x.evt); if(e1){bvEv=e1.evt;} BVI=null;
   }
 });
