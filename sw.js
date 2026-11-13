@@ -2,8 +2,8 @@
 // Fichiers de l'application : réseau d'abord, cache si hors connexion (les mises à jour arrivent donc tout de suite).
 // Bibliothèques (Firebase, lecture Excel, polices) : cache d'abord, ce sont des versions figées.
 // Les échanges avec la base Firebase ne passent pas par ce cache : Firebase gère lui-même le hors connexion.
-const CACHE="cahier-comptes-v11b";
-const SHELL=["./","./index.html","./config.js","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png"];
+const CACHE="cahier-comptes-v12";
+const SHELL=["./","./index.html","./config.js","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./cerfa-2041-mec-sd.pdf"];
 const LIBS=[
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js",

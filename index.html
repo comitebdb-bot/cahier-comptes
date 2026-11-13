@@ -179,6 +179,19 @@ dialog form{display:flex;flex-direction:column;gap:12px}
 .seg label:has(input:checked){background:var(--accent);color:var(--surface)}
 .seg label:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:-2px}
 body:not(.can-write) .w{display:none !important}
+/* v12 documents */
+.dchip{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:3px 6px 3px 4px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:13.5px;margin:2px 4px 2px 0;vertical-align:middle}
+.dchip a,.dchip>span:not(.dk):not(.small){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
+.dchip .dk{font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 5px;border-radius:5px;background:var(--accent);color:var(--surface)}
+.dchip .dx{border:0;background:none;padding:0 4px;font-size:16px;line-height:1;color:var(--muted);cursor:pointer}
+.dlist{display:flex;flex-direction:column;gap:6px}.drow{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.pieces{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+svg.clip{width:14px;height:14px;vertical-align:-2px;margin-left:4px;color:var(--muted)}
+a.pc{text-decoration:none}
+.docbox{border:1px dashed var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.dsrc{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dsrc button{padding:14px 10px}
+@media (max-width:560px){#docTable th:nth-child(2),#docTable td:nth-child(2),#docTable th:nth-child(5),#docTable td:nth-child(5){display:none}.dsrc{grid-template-columns:1fr}.dchip a{max-width:170px}}
+
 @media (max-width:520px){
   h1{font-size:21px}
   .dv{grid-template-columns:1fr 84px} .dv .lbl{grid-column:1 / -1;margin-top:6px}
@@ -659,6 +672,7 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
       <a href="#evenements" data-sec="evenements"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Événements</a>
       <a href="#stock" data-sec="stock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Stock</a>
       <a href="#encarts" data-sec="encarts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Encarts</a>
+      <a href="#documents" data-sec="documents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Documents</a>
       <a href="#synthese" data-sec="rapports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Bilans</a>
     </nav>
     <div class="sep"></div>
@@ -850,7 +864,10 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
         <div class="row"><details class="menu w"><summary class="btn">Importer / exporter</summary><div class="pop">
           <label class="mi" for="aFile">Importer une liste d'encarts (Excel)</label>
           <button type="button" id="aExport">Exporter la liste de l'année (Excel)</button>
-          <button type="button" id="aSeed">Reprendre les annonceurs du cahier</button></div></details><input type="file" id="aFile" accept=".xlsx,.xls,.csv" hidden>
+          <button type="button" id="aSeed">Reprendre les annonceurs du cahier</button></div></details>
+          <details class="menu w"><summary class="btn">Reçus fiscaux</summary><div class="pop">
+          <button type="button" id="aRecus">Générer les reçus manquants de l'année</button>
+          <button type="button" id="aLinkRecus">Rattacher des reçus déjà faits (Drive)</button></div></details><input type="file" id="aFile" accept=".xlsx,.xls,.csv" hidden>
           <button type="button" class="w" id="aRenew">Reconduire</button><button type="button" class="primary w" id="aNew">+ Annonceur</button></div>
       </div>
       <div class="tiles" id="aTiles"></div>
@@ -975,6 +992,22 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
     </div>
   </section>
 
+  <section class="view" id="v-documents">
+    <div class="card">
+      <div class="row between"><h2>Documents</h2><button type="button" class="primary w" id="docAdd">+ Ajouter</button></div>
+      <p class="small muted" style="margin:0" id="docState"></p>
+      <div class="row"><input type="search" id="docQ" placeholder="Rechercher un document, un fournisseur, un annonceur…" aria-label="Rechercher" style="flex:1;min-width:200px"><select id="docYear" aria-label="Année"></select></div>
+      <div class="chips" id="docChips"></div>
+      <div class="scroll"><table id="docTable"></table></div>
+    </div>
+  </section>
+  <section class="view" id="v-evdocs">
+    <div class="card">
+      <div class="row between"><h2>Documents de l'événement</h2><button type="button" class="primary w" id="evDocAdd">+ Ajouter</button></div>
+      <p class="small muted" style="margin:0">Factures, devis, contrats, assurances, comptes rendus. Les pièces jointes aux opérations de l'événement apparaissent aussi.</p>
+      <div id="evDocs"></div>
+    </div>
+  </section>
   <section class="view" id="v-reglages">
     <div class="card w"><h2>Demandes d'accès</h2><div class="scroll"><table id="dTable"></table></div></div>
     <div class="card w"><h2>Membres</h2>
@@ -986,6 +1019,19 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
     <div class="card w"><div class="row between"><h2>Opérations régulières</h2><button type="button" class="primary" id="uNew">+ Opération régulière</button></div>
       <p class="small muted" style="margin:0">Chaque mois, l'application propose de créer ces opérations (frais de tenue de compte, cotisation carte…).</p>
       <div class="scroll"><table id="uTable"></table></div></div>
+    <div class="card w"><div class="row between"><h2>Google Drive</h2><span id="gdState"></span></div>
+      <p class="small muted" style="margin:0">Les factures, devis, logos et reçus fiscaux ajoutés depuis l'application sont rangés dans le Drive du comité, par année et par événement. Réglage à faire une seule fois (voir le guide d'installation, partie « Google Drive »). Adresse du site à autoriser : <b id="gdOrigin"></b></p>
+      <div class="grid2"><div class="field"><label for="gdClient">ID client OAuth</label><input type="text" id="gdClient" placeholder="123456-abc.apps.googleusercontent.com" autocomplete="off"></div><div class="field"><label for="gdKey">Clé d'API (Picker)</label><input type="text" id="gdKey" placeholder="AIza…" autocomplete="off"></div></div>
+      <div class="field" style="max-width:260px"><label for="gdApp">Numéro du projet Google Cloud</label><input type="text" id="gdApp" inputmode="numeric" autocomplete="off"></div>
+      <p class="small" style="margin:0" id="gdRoot"></p>
+      <div class="row"><button type="button" class="primary" id="gdSave">Enregistrer</button><button type="button" id="gdConnect">Se connecter au Drive</button><button type="button" id="gdPickRoot">Choisir un dossier existant</button></div></div>
+    <div class="card w"><h2>Reçus fiscaux (CERFA 2041-MEC-SD)</h2>
+      <p class="small muted" style="margin:0">Coordonnées du comité reprises sur chaque reçu. Dans l'objet, {annee} est remplacé par l'année de l'encart.</p>
+      <div class="grid2"><div class="field"><label for="orgNom">Dénomination</label><input type="text" id="orgNom"></div><div class="field"><label for="orgRna">N° RNA</label><input type="text" id="orgRna"></div></div>
+      <div class="grid2"><div class="field"><label for="orgNum">N°</label><input type="text" id="orgNum"></div><div class="field"><label for="orgRue">Rue</label><input type="text" id="orgRue"></div></div>
+      <div class="grid2"><div class="field"><label for="orgCp">Code postal</label><input type="text" id="orgCp"></div><div class="field"><label for="orgVille">Commune</label><input type="text" id="orgVille"></div></div>
+      <div class="grid2"><div class="field"><label for="orgObjet">Objet</label><input type="text" id="orgObjet"></div><div class="field"><label for="orgNext">Prochain numéro d'ordre</label><input type="text" inputmode="numeric" id="orgNext"></div></div>
+      <div class="row"><button type="button" class="primary" id="orgSave">Enregistrer</button></div></div>
     <div class="card"><h2>Application sur téléphone</h2>
       <p style="margin:0" id="instTxt"></p>
       <p class="small muted" style="margin:0" id="offTxt"></p>
@@ -998,7 +1044,7 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
     <div class="fabw ws"><button type="button" id="fab" aria-label="Nouveau">+</button></div>
     <a href="#evenements" data-sec="evenements"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Événements</a>
     <details class="menu"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg>Plus</summary>
-      <div class="pop"><a href="#stock">Stock</a><a href="#encarts">Encarts</a><a href="#synthese">Bilans</a><a href="#reglages">Réglages</a><button type="button" data-theme-toggle><span></span>Thème clair</button><button type="button" data-signout="1">Se déconnecter</button></div></details>
+      <div class="pop"><a href="#stock">Stock</a><a href="#encarts">Encarts</a><a href="#documents">Documents</a><a href="#synthese">Bilans</a><a href="#reglages">Réglages</a><button type="button" data-theme-toggle><span></span>Thème clair</button><button type="button" data-signout="1">Se déconnecter</button></div></details>
   </nav>
 </div>
 <dialog id="dlgNew" class="sheet"><h2>Nouveau</h2><div class="grid">
@@ -1043,6 +1089,7 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
     <div class="field"><label for="eType">Moyen de paiement</label><select id="eType"></select></div>
   </div>
   <div class="field"><label for="eCom">Commentaire, n° de chèque, lien de la pièce</label><input type="text" id="eCom"></div>
+  <div class="field"><label>Pièces jointes (facture, devis, ticket)</label><div class="docbox"><div class="pieces" id="ePieces"></div><div class="row"><button type="button" class="mini" id="eAddPiece">+ Joindre une pièce</button></div></div></div>
   <label class="small"><input type="checkbox" id="ePt"> Opération vérifiée (vue sur le relevé bancaire)</label>
   <label class="small" id="eFraisL"><input type="checkbox" id="eFrais" checked> Ajouter aussi les frais de virement (<span id="eFraisM"></span>)</label>
   <div id="eErr" class="msg err" hidden></div>
@@ -1242,7 +1289,12 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
     <div class="field"><label for="anMail">E-mail</label><input type="email" id="anMail"></div>
     <div class="field"><label for="anRef">Qui s'en occupe au comité</label><input type="text" id="anRef" list="anRefList"><datalist id="anRefList"></datalist></div>
   </div>
-  <label class="small"><input type="checkbox" id="anLogo"> Logo reçu et stocké</label>
+  <label class="small"><input type="checkbox" id="anLogo"> Logo reçu</label>
+  <details id="anSoc"><summary class="small">Société (pour le reçu fiscal) : forme, SIREN, adresse</summary>
+    <div class="grid2"><div class="field"><label for="anForme">Forme juridique</label><input type="text" id="anForme" placeholder="SAS, SARL, EI…"></div><div class="field"><label for="anSiren">SIREN</label><input type="text" id="anSiren" inputmode="numeric"></div></div>
+    <div class="grid2"><div class="field"><label for="anNum">N°</label><input type="text" id="anNum"></div><div class="field"><label for="anRue">Rue</label><input type="text" id="anRue"></div></div>
+    <div class="grid2"><div class="field"><label for="anCp">Code postal</label><input type="text" id="anCp"></div><div class="field"><label for="anVille">Commune</label><input type="text" id="anVille"></div></div>
+  </details>
   <div class="grid2">
     <div class="field"><label for="anMont">Montant de l'encart <span id="anYearL"></span> (€)</label><input type="text" inputmode="decimal" id="anMont"></div>
     <div class="field"><label for="anStat">Statut <span id="anYearL2"></span></label><select id="anStat"><option value="">Pas d'encart</option><option value="relancer">À relancer</option><option value="promis">Promis</option><option value="paye">Payé</option><option value="refuse">Refusé</option></select></div>
@@ -1255,12 +1307,36 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
     <div class="field"><label for="anCerfa">Reçu fiscal (CERFA)</label><select id="anCerfa"><option value="">·</option><option value="afaire">Reçu à faire</option><option value="mail">Envoyé par mail</option><option value="papier">Remis papier</option><option value="refuse">Ne veut pas de reçu</option></select></div>
     <div class="field"><label for="anCom">Commentaire de l'année</label><input type="text" id="anCom"></div>
   </div>
+  <div class="docbox" id="anDocs" hidden>
+    <div class="drow"><b class="small" style="min-width:90px">Logo</b><span id="anLogoD"></span><button type="button" class="mini" id="anLogoAdd">Ajouter</button></div>
+    <div class="drow"><b class="small" style="min-width:90px">Reçu <span id="anRecuY"></span></b><span id="anRecuD"></span><button type="button" class="mini" id="anRecuAdd">Rattacher</button><button type="button" class="mini primary" id="anGen">Générer</button><button type="button" class="mini" id="anSend">Envoyer par mail</button></div>
+  </div>
   <div class="field"><label for="anNote">Note sur l'annonceur</label><textarea id="anNote" rows="2"></textarea></div>
   <p class="small muted" style="margin:0">Pour enregistrer un paiement dans le cahier, utilisez plutôt « Encaisser ».</p>
   <div id="anErr" class="msg err" hidden></div>
   <div class="row between"><button type="button" class="danger" id="anDel">Supprimer</button><div class="row"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div></div>
 </form></dialog>
 
+<dialog id="dlgDoc"><form method="dialog" id="fDoc">
+  <h2 id="dTitle">Ajouter un document</h2>
+  <p class="small muted" style="margin:0" id="dCtx"></p>
+  <div class="grid2"><div class="field" id="dTypeF"><label for="dType">Type</label><select id="dType"></select></div><div class="field" id="dYearF"><label for="dYear">Année</label><input type="text" inputmode="numeric" id="dYear"></div></div>
+  <div class="field" id="dEvF"><label for="dEv">Événement</label><select id="dEv"></select></div>
+  <div class="dsrc"><button type="button" id="dDev">Depuis cet appareil<br><span class="small muted">photo, PDF… envoyé dans le Drive</span></button><button type="button" id="dDriveB">Choisir dans le Drive<br><span class="small muted">fichier déjà dans le Drive</span></button></div>
+  <input type="file" id="dFile" hidden>
+  <p class="small muted" style="margin:0" id="dNoDrive">Google Drive n'est pas relié : seul un lien collé est possible. <a href="#reglages">Relier le Drive</a></p>
+  <details><summary class="small">Ou coller un lien</summary><div class="grid2"><div class="field"><label for="dUrl">Lien</label><input type="url" id="dUrl" placeholder="https://"></div><div class="field"><label for="dName">Nom</label><input type="text" id="dName"></div></div><div class="row"><button type="button" id="dLinkB">Ajouter le lien</button></div></details>
+  <p class="msg" id="dProg" hidden></p>
+  <div id="dErr" class="msg err" hidden></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Fermer</button></div>
+</form></dialog>
+<dialog id="dlgRL"><form id="fRL">
+  <h2>Rattacher des reçus fiscaux</h2>
+  <p class="small muted" style="margin:0">Chaque fichier est rapproché d'un annonceur par son nom. Le SIREN, l'adresse et le numéro d'ordre lus dans le reçu complètent la fiche.</p>
+  <div class="scroll"><table id="rlTable"></table></div>
+  <label class="small"><input type="checkbox" id="rlSent" checked> Ces reçus ont déjà été envoyés par mail</label>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Rattacher</button></div>
+</form></dialog>
 <dialog id="dlgAI"><form id="fAI">
   <h2>Importer une liste d'encarts</h2>
   <p style="margin:0" id="aiInfo"></p>
@@ -1519,7 +1595,7 @@ function classify(l){
 }
 function build(ecr){
   const sorted=[...ecr].sort((a,b)=>(a.date||"")<(b.date||"")?-1:(a.date||"")>(b.date||"")?1:(a.ordre||0)-(b.ordre||0));
-  const lines=sorted.map((e,i)=>classify({n:i,id:e.id,acc:e.compte==="LA"?"LA":"CC",iso:e.date||null,evt:String(e.evenement||""),des:String(e.designation||""),rec:+e.recette||0,dep:+e.depense||0,type:String(e.type||""),com:String(e.commentaire||""),pointe:!!e.pointe,poste:String(e.poste||""),ref:e.releveRef||""}));
+  const lines=sorted.map((e,i)=>classify({n:i,id:e.id,acc:e.compte==="LA"?"LA":"CC",iso:e.date||null,evt:String(e.evenement||""),des:String(e.designation||""),rec:+e.recette||0,dep:+e.depense||0,type:String(e.type||""),com:String(e.commentaire||""),pointe:!!e.pointe,poste:String(e.poste||""),ref:e.releveRef||"",pieces:e.pieces&&e.pieces.length?e.pieces:null}));
   const evs=new Map();
   for(const l of lines){
     if(l.kind!=="event")continue;
@@ -1549,12 +1625,12 @@ function build(ecr){
 /* ================= stockage : Firebase ou démonstration ================= */
 // Toutes les opérations en base passent par commit(ops, journal) : une liste d'opérations
 // {t:"set"|"update"|"merge"|"delete", col, id, data} appliquées par lots, plus les lignes du journal.
-const S={ready:false,user:null,role:null,ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},pending:0,previsions:[],articles:[],mouvements:[]};
+const S={ready:false,user:null,role:null,ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},pending:0,previsions:[],articles:[],mouvements:[],documents:[]};
 let onData=()=>{};
 const slug=s=>strip(s).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"sans-nom";
 const resume=e=>`${fdate(e.date)} · ${e.compte==="LA"?"Livret A":"Compte courant"} · ${e.evenement} · ${e.designation} · ${(+e.recette||0)>0?"+"+fm(+e.recette):"−"+fm(+e.depense||0)}`;
 const P=()=>Object.assign({fraisVirement:0.3,seuilTreso:2000,margeCible:65,recurrentes:[]},S.params);
-const KEYS={ecritures:"ecr",budgets:"budgets",evenements:"evenements",caisses:"caisses",annonceurs:"annonceurs",parametres:"paramsList",journal:"journal",membres:"membres",demandes:"demandes",previsions:"previsions",articles:"articles",mouvements:"mouvements"};
+const KEYS={ecritures:"ecr",budgets:"budgets",evenements:"evenements",caisses:"caisses",annonceurs:"annonceurs",parametres:"paramsList",journal:"journal",membres:"membres",demandes:"demandes",previsions:"previsions",articles:"articles",mouvements:"mouvements",documents:"documents"};
 const afterData=()=>{S.params=S.paramsList.find(x=>x.id==="general")||{};};
 const asList=j=>Array.isArray(j)?j:j?[j]:[];
 
@@ -1587,12 +1663,12 @@ function firebaseStore(){
       if(count){pend[key]=s.docs.filter(d=>d.metadata.hasPendingWrites).length;S.pending=Object.values(pend).reduce((a,b)=>a+b,0);}
       afterData();onData();
     },err));
-    for(const c of ["ecritures","budgets","evenements","caisses","annonceurs","parametres","previsions","articles","mouvements"]) col(db.collection(c),KEYS[c],true);
+    for(const c of ["ecritures","budgets","evenements","caisses","annonceurs","parametres","previsions","articles","mouvements","documents"]) col(db.collection(c),KEYS[c],true);
     col(db.collection("journal").orderBy("at","desc").limit(300),"journal",false);
     if(S.role==="tresorier"){col(db.collection("membres"),"membres",true);col(db.collection("demandes"),"demandes",false);}
   }
   auth.onAuthStateChanged(async u=>{
-    stop(); Object.assign(S,{ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},role:null,pending:0,previsions:[],articles:[],mouvements:[]});
+    stop(); Object.assign(S,{ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},role:null,pending:0,previsions:[],articles:[],mouvements:[],documents:[]});
     if(!u){S.user=null;S.ready=true;onData();return;}
     S.user={uid:u.uid,email:u.email,nom:pendingName||u.displayName||u.email};
     S.role=await role(u); S.ready=true; onData();
@@ -1627,7 +1703,7 @@ function firebaseStore(){
 }
 
 function demoStore(){
-  const KEY="cahier-comptes-demo-v2", LIST=["ecr","budgets","journal","evenements","caisses","annonceurs","paramsList","previsions","articles","mouvements"];
+  const KEY="cahier-comptes-demo-v2", LIST=["ecr","budgets","journal","evenements","caisses","annonceurs","paramsList","previsions","articles","mouvements","documents"];
   let D={};
   try{D=JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){D={};}
   for(const k of LIST) if(!Array.isArray(D[k]))D[k]=[];
@@ -1741,7 +1817,7 @@ function linesTable(ls,opt){
     const com=u?(esc(l.com.replace(u[0],"").replace(/[:\s]+$/,""))+` <a href="${esc(u[0])}" target="_blank" rel="noopener">pièce</a>`):esc(l.com);
     const chk=opt.check?`<td class="c-ptc"><input type="checkbox" data-pt="${esc(l.id)}" ${l.pointe?"checked":""} ${w?"":"disabled"} aria-label="Vu en banque"></td>`:"";
     const s=sel?`<td class="sel"><input type="checkbox" data-sel="${esc(l.id)}" ${SEL.has(l.id)?"checked":""} aria-label="Sélectionner"></td>`:"";
-    return `<tr class="lr ${sel&&SEL.has(l.id)?"picked":""}" data-row="${esc(l.id)}">${s}${chk}<td class="c-ic"><span class="io ${l.rec?"in":"out"}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${l.rec?"M17 7L7 17M7 9v8h8":"M7 17L17 7M9 7h8v8"}"/></svg></span></td><td class="num c-date">${fdate(l.iso)}</td><td class="small c-evt">${l.acc==="LA"?"Livret A · ":""}${esc(l.evt.trim())}</td><td class="c-des">${esc(l.des)}</td><td class="small c-cat ${l.poste?"":"muted"}">${esc(l.cat)}</td><td class="r num pos c-rec">${l.rec?fm(l.rec):""}</td><td class="r num neg c-dep">${l.dep?fm(l.dep):""}</td><td class="small c-type">${esc(l.type)}</td><td class="small muted c-com">${com}</td>${opt.check?"":`<td class="small c-pt">${l.pointe?"✓ vérifié":""}</td>`}${w?`<td class="c-act"><button type="button" class="mini" data-edit="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
+    return `<tr class="lr ${sel&&SEL.has(l.id)?"picked":""}" data-row="${esc(l.id)}">${s}${chk}<td class="c-ic"><span class="io ${l.rec?"in":"out"}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${l.rec?"M17 7L7 17M7 9v8h8":"M7 17L17 7M9 7h8v8"}"/></svg></span></td><td class="num c-date">${fdate(l.iso)}</td><td class="small c-evt">${l.acc==="LA"?"Livret A · ":""}${esc(l.evt.trim())}</td><td class="c-des">${esc(l.des)}${l.pieces?(l.pieces[0].u?`<a class="pc" href="${esc(l.pieces[0].u)}" target="_blank" rel="noopener" title="${esc(l.pieces.map(d=>d.n).join(", "))}">${ICON_CLIP}${l.pieces.length>1?`<span class="small muted">${l.pieces.length}</span>`:""}</a>`:ICON_CLIP):""}</td><td class="small c-cat ${l.poste?"":"muted"}">${esc(l.cat)}</td><td class="r num pos c-rec">${l.rec?fm(l.rec):""}</td><td class="r num neg c-dep">${l.dep?fm(l.dep):""}</td><td class="small c-type">${esc(l.type)}</td><td class="small muted c-com">${com}</td>${opt.check?"":`<td class="small c-pt">${l.pointe?"✓ vérifié":""}</td>`}${w?`<td class="c-act"><button type="button" class="mini" data-edit="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
   }).join("");
   return head+`<tbody>${rows||`<tr><td colspan="13" class="muted">Aucune opération.</td></tr>`}</tbody>`;
 }
@@ -1997,6 +2073,7 @@ function renderReglages(){
   $("instBtn").hidden=!installEvt||standalone;
   $("offTxt").textContent=DEMO?"En mode démonstration, les données restent sur cet appareil.":"Hors connexion, l'application reste utilisable : les opérations saisies sont gardées sur l'appareil puis envoyées au retour du réseau. Il faut s'être connecté au moins une fois sur l'appareil avec Internet.";
   if(!canWrite())return;
+  renderDriveSettings();
   if(document.activeElement!==$("sFrais"))$("sFrais").value=String(P().fraisVirement).replace(".",",");
   if(document.activeElement!==$("sSeuil"))$("sSeuil").value=String(P().seuilTreso).replace(".",",");
   const rs=P().recurrentes||[];
@@ -2085,7 +2162,7 @@ function renderEncarts(){
     const c=en(a,y), p=en(a,py), contact=[a.contact,a.tel,a.email].filter(Boolean).join(" · ");
     const stSel=w?`<select data-astat="${esc(a.id)}" aria-label="Statut ${y}"><option value="">Pas d'encart</option>${Object.entries(ASTAT).map(([k,[l]])=>`<option value="${k}" ${c&&c.statut===k?"selected":""}>${l}</option>`).join("")}</select>`:(c?`<span class="pill ${ast(c.statut)[1]}">${ast(c.statut)[0]}</span>`:"·");
     const cf=c&&c.cerfa&&CERFA[c.cerfa];
-    return `<tr><td>${w?`<button type="button" class="link" data-aedit="${esc(a.id)}" title="Modifier la fiche"><b>${esc(a.nom)}</b></button>`:`<b>${esc(a.nom)}</b>`}${a.logo?` <span class="pill neutral" title="Logo stocké">logo</span>`:""}${contact?`<div class="small muted">${esc(contact)}</div>`:""}${c&&c.com?`<div class="small muted">${esc(c.com)}</div>`:a.note?`<div class="small muted">${esc(a.note)}</div>`:""}</td><td class="small">${esc(a.referent||"")}</td>${YC.map(yy=>cell(en(a,yy),yy)).join("")}<td>${stSel}</td><td class="small num">${c&&c.statut==="paye"&&c.date?fdate(c.date):"·"}${c&&c.statut==="paye"&&c.type?`<div class="muted">${esc(c.type)}</div>`:""}</td><td>${cf?`<span class="pill ${cf[1]}">${esc(cf[0])}</span>`:"·"}</td>${w?`<td>${!c||c.statut!=="paye"?`<button type="button" class="mini primary" data-apay="${esc(a.id)}">Encaisser</button>`:""}</td>`:""}</tr>`;
+    return `<tr><td>${w?`<button type="button" class="link" data-aedit="${esc(a.id)}" title="Modifier la fiche"><b>${esc(a.nom)}</b></button>`:`<b>${esc(a.nom)}</b>`}${a.logo&&a.logo.u?` <a class="pill neutral" href="${esc(a.logo.u)}" target="_blank" rel="noopener" title="Ouvrir le logo">logo</a>`:a.logo?` <span class="pill neutral" title="Logo reçu">logo</span>`:""}${contact?`<div class="small muted">${esc(contact)}</div>`:""}${c&&c.com?`<div class="small muted">${esc(c.com)}</div>`:a.note?`<div class="small muted">${esc(a.note)}</div>`:""}</td><td class="small">${esc(a.referent||"")}</td>${YC.map(yy=>cell(en(a,yy),yy)).join("")}<td>${stSel}</td><td class="small num">${c&&c.statut==="paye"&&c.date?fdate(c.date):"·"}${c&&c.statut==="paye"&&c.type?`<div class="muted">${esc(c.type)}</div>`:""}</td><td>${cf?`<span class="pill ${cf[1]}">${esc(cf[0])}</span>`:"·"}${c&&c.recu&&c.recu.u?` <a class="pill neutral" href="${esc(c.recu.u)}" target="_blank" rel="noopener" title="${esc(c.recu.n||"")}">PDF${c.num?" n° "+esc(c.num):""}</a>`:""}</td>${w?`<td>${!c||c.statut!=="paye"?`<button type="button" class="mini primary" data-apay="${esc(a.id)}">Encaisser</button>`:""}</td>`:""}</tr>`;
   }).join(""):`<tr><td colspan="${7+YC.length}" class="muted">${S.annonceurs.length?"Aucun annonceur pour ce filtre.":"Aucun annonceur. « Reprendre les annonceurs du cahier » part des encarts déjà encaissés."}</td></tr>`}</tbody>${rows.length?`<tfoot><tr class="total"><td colspan="2">Total payé (${rows.length} annonceur(s) affiché(s))</td>${YC.map(yy=>`<td class="r num yc ${yy===y?"cur":""}">${fm0(totY(yy))}</td>`).join("")}<td colspan="${w?4:3}"></td></tr></tfoot>`:""}`;
   $("aSeed").disabled=!M.lines.some(isEncartLine);
 }
@@ -2328,6 +2405,7 @@ const ROUTES={
   mouvements:{sec:"stock",view:"mouvements",title:"Mouvements de stock",sub:"stock"},
   buvette:{sec:"stock",view:"buvette",title:"Analyse buvette",sub:"stock"},
   encarts:{sec:"encarts",view:"encarts",title:"Encarts publicitaires"},
+  documents:{sec:"documents",view:"documents",title:"Documents"},
   synthese:{sec:"rapports",view:"synthese",title:"Bilan de l'année",sub:"rap"},
   editions:{sec:"rapports",view:"editions",title:"Comparer les éditions",sub:"rap"},
   tresorerie:{sec:"rapports",view:"previsionnel",title:"Trésorerie prévisionnelle",sub:"rap"},
@@ -2341,9 +2419,9 @@ const SUBS={
   stock:[["stock","Articles"],["mouvements","Mouvements"],["buvette","Analyse buvette"]],
   rap:[["synthese","Bilan de l'année"],["editions","Comparer les éditions"],["tresorerie","Trésorerie prévisionnelle"],["presentation","Présentation"],["controles","Vérifications"],["journal","Historique"]]
 };
-const FICHE_TABS=[["apercu","Vue d'ensemble"],["budget","Budget"],["caisse","Caisse"],["buvette","Buvette"],["stock","Stock"],["comparer","Comparer"],["ops","Opérations"]];
+const FICHE_TABS=[["apercu","Vue d'ensemble"],["budget","Budget"],["caisse","Caisse"],["buvette","Buvette"],["stock","Stock"],["comparer","Comparer"],["docs","Documents"],["ops","Opérations"]];
 const ALIAS={ecritures:"operations",budget:"evenements",previsionnel:"evenements",acces:"reglages",stockev:"stock",evenement:"evenements"};
-const VIEWS={accueil:renderAccueil,synthese:renderSynthese,ecritures:renderLines,evenements:renderEvenements,previsionnel:renderPrev,evenement:renderEvent,editions:renderEditions,encarts:renderEncarts,rapprochement:renderRap,presentation:renderPres,controles:renderControles,journal:renderJournal,reglages:renderReglages,stock:renderStock,stockev:renderStockEv,mouvements:renderMvts,buvette:renderBuvette};
+const VIEWS={documents:()=>renderDocuments(),evdocs:()=>renderEvDocs(FICHE),accueil:renderAccueil,synthese:renderSynthese,ecritures:renderLines,evenements:renderEvenements,previsionnel:renderPrev,evenement:renderEvent,editions:renderEditions,encarts:renderEncarts,rapprochement:renderRap,presentation:renderPres,controles:renderControles,journal:renderJournal,reglages:renderReglages,stock:renderStock,stockev:renderStockEv,mouvements:renderMvts,buvette:renderBuvette};
 let FICHE=null;
 const ficheHash=(name,tab)=>"#fiche/"+(tab||"apercu")+"/"+slug(name);
 let FICHE_NEW=null;
@@ -2398,6 +2476,7 @@ function renderFiche(name,tab){
   else if(tab==="buvette"){showView("buvette"); renderBuvette();}
   else if(tab==="stock"){showView("stockev"); renderStockEv();}
   else if(tab==="comparer"){showView("editions"); renderEditions();}
+  else if(tab==="docs"){showView("evdocs"); renderEvDocs(name);}
 }
 const pill2=(t,k)=>`<span class="pill ${k}">${esc(t)}</span>`;
 function go(v){ if(location.hash==="#"+v)show(); else location.hash=v; }
@@ -2447,6 +2526,7 @@ function openEcriture(id,preset){
   $("eType").innerHTML=typeOptions(e.type||"Virement");
   $("ePoste").innerHTML=posteOptions("",e.poste||"");
   $("eCom").value=e.commentaire||""; $("ePt").checked=!!e.pointe; $("eFrais").checked=true;
+  ePieces=JSON.parse(JSON.stringify(e.pieces||[]));if($("ePieces"))renderEPieces();
   $("eDel").hidden=$("eDup").hidden=!editing; $("eNext").hidden=!!editing; $("eErr").hidden=true;
   const seen=new Set(), des=[];
   for(const x of S.ecr.slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")))){const k=strip(x.designation);if(k&&!seen.has(k)){seen.add(k);des.push(x.designation);}if(des.length>=400)break;}
@@ -2473,7 +2553,7 @@ async function saveE(next){
   if(!$("eDes").value.trim())return fail("Saisissez un intitulé.");
   if(!(amt>0))return fail("Le montant doit être un nombre positif, par exemple 125,50.");
   const rec=$("eRec").checked;
-  const data={compte:$("eAcc").value,date:$("eDate").value||null,evenement:evt,designation:$("eDes").value.trim(),recette:rec?amt:0,depense:rec?0:amt,type:$("eType").value,commentaire:$("eCom").value.trim(),pointe:$("ePt").checked,poste:$("ePoste").value};
+  const data={compte:$("eAcc").value,date:$("eDate").value||null,evenement:evt,designation:$("eDes").value.trim(),recette:rec?amt:0,depense:rec?0:amt,type:$("eType").value,commentaire:$("eCom").value.trim(),pointe:$("ePt").checked,poste:$("ePoste").value,pieces:ePieces.slice()};
   const ops=[], jr=[];
   if(editing){ops.push({t:"update",col:"ecritures",id:editing.id,data});jr.push({action:"Modification",texte:resume(editing)+"  →  "+resume(data)});}
   else{
@@ -2787,7 +2867,9 @@ $("fA").addEventListener("submit",async ev=>{
   const nom=$("anNom").value.trim(); if(!nom){$("anErr").textContent="Saisissez le nom de l'annonceur.";$("anErr").hidden=false;return;}
   const enc=Object.assign({},(aEditing&&aEditing.encarts)||{}), st=$("anStat").value;
   if(st)enc[aYear]=Object.assign({},enc[aYear]||{},{montant:round2(parseNum($("anMont").value)),statut:st,type:$("anType").value,date:$("anDate").value||null,cerfa:$("anCerfa").value,com:$("anCom").value.trim()}); else delete enc[aYear];
-  const data={nom,contact:$("anContact").value.trim(),tel:$("anTel").value.trim(),email:$("anMail").value.trim(),note:$("anNote").value.trim(),referent:$("anRef").value.trim(),logo:$("anLogo").checked,encarts:enc};
+  const old=aEditing&&aEditing.logo, logo=old&&typeof old==="object"?old:$("anLogo").checked;
+  const data=Object.assign(aEditing?annData(aEditing):{},{nom,contact:$("anContact").value.trim(),tel:$("anTel").value.trim(),email:$("anMail").value.trim(),note:$("anNote").value.trim(),referent:$("anRef").value.trim(),logo,encarts:enc,
+    forme:$("anForme").value.trim(),siren:$("anSiren").value.replace(/\s+/g,""),adrNum:$("anNum").value.trim(),adrRue:$("anRue").value.trim(),adrCp:$("anCp").value.trim(),adrVille:$("anVille").value.trim()});
   if(await run(store.commit([{t:"set",col:"annonceurs",id:aEditing?aEditing.id:store.newId("annonceurs"),data}],{action:"Encarts",texte:`${nom} : fiche ${aEditing?"modifiée":"créée"}${st?`, encart ${aYear} ${ast(st)[0].toLowerCase()} ${fm(enc[aYear].montant)}`:""}`}),"Annonceur enregistré."))$("dlgA").close();
 });
 $("anDel").onclick=async()=>{
@@ -2835,7 +2917,7 @@ $("aSeed").onclick=async()=>{
   const keys=new Set([...touched].map(x=>x.split("|")[0]));
   if(!keys.size){flash("Tous les encarts du cahier sont déjà repris.");return;}
   if(!await ask(`Reprendre ${keys.size} annonceur(s) depuis les opérations « ENCART PUB » (dont ${created.size} nouveaux) ? Vérifiez ensuite les lignes qui regroupent plusieurs annonceurs.`,"Reprendre"))return;
-  const ops=[...keys].map(k=>{const a=by.get(k);return {t:"set",col:"annonceurs",id:a.id,data:{nom:a.nom,contact:a.contact||"",tel:a.tel||"",email:a.email||"",note:a.note||"",encarts:a.encarts}};});
+  const ops=[...keys].map(k=>{const a=by.get(k);return {t:"set",col:"annonceurs",id:a.id,data:annData(a)};});
   await run(store.commit(ops,{action:"Encarts",texte:`${keys.size} annonceurs repris du cahier`}),`${keys.size} annonceur(s) repris du cahier.`);
 };
 $("aCopy").onclick=async()=>{
@@ -2897,7 +2979,7 @@ $("aFile").addEventListener("change",async e=>{
       if(c){a.encarts[Y]=c;st[c.statut]++;}
       touched.add(k);
     }
-    AIMP={name:f.name,Y,ops:[...touched].map(k=>{const a=by.get(k);return {t:"set",col:"annonceurs",id:a.id,data:{nom:a.nom,contact:a.contact||"",tel:a.tel||"",email:a.email||"",note:a.note||"",referent:a.referent||"",logo:!!a.logo,encarts:a.encarts}};}),items:items.length};
+    AIMP={name:f.name,Y,ops:[...touched].map(k=>{const a=by.get(k);return {t:"set",col:"annonceurs",id:a.id,data:Object.assign(annData(a),{contact:a.contact||"",tel:a.tel||"",email:a.email||"",note:a.note||"",referent:a.referent||"",logo:a.logo||false})};}),items:items.length};
     const payeT=sumOf([...touched].map(k=>by.get(k)).filter(a=>(a.encarts[Y]||{}).statut==="paye"),a=>+a.encarts[Y].montant||0);
     const ev=M.events.find(e=>e.name==="ENCART PUB "+Y), cah=sumOf(M.lines.filter(l=>isEncartLine(l)&&l.year===Y),l=>l.rec);
     $("aiInfo").innerHTML=`<b>${esc(f.name)}</b> : liste ${Y}, ${items.length} annonceur(s) (${st.new} nouveau(x), ${st.upd} déjà connu(s)).<br>
@@ -3036,13 +3118,13 @@ async function readFile(file){
       if(!(R>0)&&!(D>0))continue;
       const date=parseDate(r[0]); if(!date)noDate++;
       const pv=String(r[7]==null?"":r[7]).trim(), pt=/^(oui|x|✓|true|1)$/i.test(pv)?true:/^(non|no|false|0)$/i.test(pv)?false:null;
-      const poste=String(r[12]==null?"":r[12]).trim();
-      rows.push({compte:acc,date,evenement:normEv(r[1]),designation:String(r[2]==null?"":r[2]).trim(),recette:R>0?R:0,depense:R>0?0:D,type:String(r[5]==null?"":r[5]).trim(),commentaire:r[6]==null?"":String(r[6]).trim(),pointe:pt,poste:POSTES_ALL.includes(poste)?poste:""});
+      const poste=String(r[12]==null?"":r[12]).trim(); let pieces=null; try{pieces=r[13]?JSON.parse(r[13]):null;}catch(e){}
+      rows.push({compte:acc,date,evenement:normEv(r[1]),designation:String(r[2]==null?"":r[2]).trim(),recette:R>0?R:0,depense:R>0?0:D,type:String(r[5]==null?"":r[5]).trim(),commentaire:r[6]==null?"":String(r[6]).trim(),pointe:pt,poste:POSTES_ALL.includes(poste)?poste:"",...(pieces&&pieces.length?{pieces}:{})});
     }
   }
   if(!rows.length)throw new Error("Aucune opération trouvée. Le fichier doit garder les colonnes Date, EVENEMENT, Designation, Recettes, Dépenses, Type de Payement, Commentaires.");
   const sh=n=>wb.Sheets[n]?XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}).slice(1).filter(r=>r&&r.some(v=>v!=null&&v!=="")):null;
-  const extra={ev:sh("Événements"),ann:sh("Annonceurs"),cpt:sh("Comptages de caisse"),rec:sh("Récurrentes"),reg:sh("Réglages"),pv:sh("Prévisionnel"),art:sh("Articles"),mvt:sh("Mouvements de stock"),tg:sh("Grille buvette")};
+  const extra={ev:sh("Événements"),ann:sh("Annonceurs"),cpt:sh("Comptages de caisse"),rec:sh("Récurrentes"),reg:sh("Réglages"),pv:sh("Prévisionnel"),art:sh("Articles"),mvt:sh("Mouvements de stock"),tg:sh("Grille buvette"),doc:sh("Documents")};
   return {rows,sheets:names.length,noDate,name:file.name,extra};
 }
 function restoreOps(x){
@@ -3063,9 +3145,15 @@ function restoreOps(x){
       const nom=String(r[0]||"").trim(); if(!nom)continue;
       const k=strip(nom); let a=by.get(k);
       if(!a){a={nom,contact:String(r[1]||""),tel:String(r[2]||""),email:String(r[3]||""),note:String(r[4]||""),encarts:{}};by.set(k,a);}
+      if(r[9]){try{const full=JSON.parse(r[9]);if(full&&full.nom){Object.assign(a,full);a._full=1;}}catch(e){}}
+      if(a._full)continue;
       const y=parseInt(r[5]); if(y){const st=Object.keys(ASTAT).find(s=>strip(ASTAT[s][0])===strip(r[7]))||"promis";a.encarts[y]={montant:round2(parseNum(r[6])),statut:st,date:parseDate(r[8])||null,ecriture:null};}
     }
-    by.forEach(a=>ops.push({t:"set",col:"annonceurs",id:store.newId("annonceurs"),data:a}));
+    by.forEach(a=>{delete a._full;ops.push({t:"set",col:"annonceurs",id:store.newId("annonceurs"),data:a});});
+  }
+  if(x.doc){
+    S.documents.forEach(d=>ops.push({t:"delete",col:"documents",id:d.id}));
+    for(const r of x.doc){let d=null;try{d=JSON.parse(r[6]);}catch(e){}if(!d&&r[1])d={n:String(r[0]||"Document"),u:String(r[1]),t:Object.keys(DOC_TYPES).find(k=>DOC_TYPES[k]===r[2])||"autre",annee:String(r[3]||""),evenement:String(r[4]||""),d:String(r[5]||"")};if(d)ops.push({t:"set",col:"documents",id:store.newId("documents"),data:d});}
   }
   if(x.cpt){
     S.caisses.forEach(c=>ops.push({t:"delete",col:"caisses",id:c.id}));
@@ -3128,15 +3216,15 @@ function exportXlsx(){
   const wb=XLSX.utils.book_new(), all=round2(sumOf(M.lines,l=>l.rec-l.dep));
   for(const [acc,title,first,other] of [["CC","Compte Courant",4,"Livret A"],["LA","Livret A",3,"Compte Courant"]]){
     const ls=M.lines.filter(l=>l.acc===acc);
-    const aoa=[["Date","EVENEMENT","Designation","Recettes (€)","Dépenses (€)","Type de Payement","Commentaires","Pointé","TOTAL Recette :","TOTAL Dépense :","SOLDE du compte :","TOTAL DES COMPTES","Poste (application)"],[null]];
+    const aoa=[["Date","EVENEMENT","Designation","Recettes (€)","Dépenses (€)","Type de Payement","Commentaires","Pointé","TOTAL Recette :","TOTAL Dépense :","SOLDE du compte :","TOTAL DES COMPTES","Poste (application)","Pièces jointes (application)"],[null]];
     if(acc==="CC")aoa.push(["DATE","EVENEMENT","Designation","Recette","Depense","Type de Payement","Commentaire"]);
-    for(const l of ls)aoa.push([null,l.evt,l.des,l.rec||null,l.dep||null,l.type,l.com,l.pointe?"oui":"non",null,null,null,null,l.poste||null]);
+    for(const l of ls)aoa.push([null,l.evt,l.des,l.rec||null,l.dep||null,l.type,l.com,l.pointe?"oui":"non",null,null,null,null,l.poste||null,l.pieces?JSON.stringify(l.pieces):null]);
     const ws=XLSX.utils.aoa_to_sheet(aoa);
     ls.forEach((l,i)=>{if(l.iso)ws["A"+(first+i)]={t:"n",v:Date.parse(l.iso+"T00:00:00Z")/864e5+25569,z:"dd/mm/yyyy"};});
     const last=Math.max(2012,first+ls.length+500), r=round2(sumOf(ls,l=>l.rec)), d=round2(sumOf(ls,l=>l.dep));
     ws.I2={t:"n",v:r,f:`SUM(D${first}:D${last})`}; ws.J2={t:"n",v:d,f:`SUM(E${first}:E${last})`};
     ws.K2={t:"n",v:round2(r-d),f:"I2-J2"}; ws.L2={t:"n",v:all,f:`K2+'${other}'!K2`};
-    ws["!cols"]=[{wch:12},{wch:24},{wch:48},{wch:13},{wch:13},{wch:16},{wch:40},{wch:8},{wch:16},{wch:16},{wch:18},{wch:20},{wch:24}];
+    ws["!cols"]=[{wch:12},{wch:24},{wch:48},{wch:13},{wch:13},{wch:16},{wch:40},{wch:8},{wch:16},{wch:16},{wch:18},{wch:20},{wch:24},{wch:30}];
     XLSX.utils.book_append_sheet(wb,ws,title);
   }
   const add=(name,aoa)=>{if(aoa.length>1)XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),name);};
@@ -3146,9 +3234,10 @@ function exportXlsx(){
     evR.push([n,(m&&m.debut)||"",(m&&m.fin)||"",m?(m.statut==="clos"?"clos":"en cours"):"",m&&m.sous?m.sous.join(", "):"",b?b.recettes:"",b?b.depenses:"",(m&&m.note)||(b&&b.note)||""]);
   }
   add("Événements",evR);
-  const anR=[["Annonceur","Contact","Téléphone","E-mail","Note","Année","Montant","Statut","Payé le"]];
-  for(const a of S.annonceurs){const ys=Object.keys(a.encarts||{}).sort();if(!ys.length)anR.push([a.nom,a.contact||"",a.tel||"",a.email||"",a.note||"","","","",""]);for(const y of ys){const c=a.encarts[y];anR.push([a.nom,a.contact||"",a.tel||"",a.email||"",a.note||"",+y,+c.montant||0,ast(c.statut)[0],c.date||""]);}}
+  const anR=[["Annonceur","Contact","Téléphone","E-mail","Note","Année","Montant","Statut","Payé le","Fiche complète (application)"]];
+  for(const a of S.annonceurs){const ys=Object.keys(a.encarts||{}).sort(),js=JSON.stringify(annData(a));if(!ys.length)anR.push([a.nom,a.contact||"",a.tel||"",a.email||"",a.note||"","","","","",js]);ys.forEach((y,i)=>{const c=a.encarts[y];anR.push([a.nom,a.contact||"",a.tel||"",a.email||"",a.note||"",+y,+c.montant||0,ast(c.statut)[0],c.date||"",i?"":js]);});}
   add("Annonceurs",anR);
+  add("Documents",[["Nom","Lien","Type","Année","Événement","Ajouté le","Fiche (application)"],...S.documents.map(d=>[d.n||"",d.u||"",DOC_TYPES[d.t]||"",d.annee||"",d.evenement||"",d.d||"",JSON.stringify((({id,...r})=>r)(d))])]);
   const cR=[["Événement","Comptage","Date","Activité","Espèces","Dont fond","Carte","Détail"]];
   for(const c of S.caisses)for(const s of c.sessions||[])cR.push([c.evenement,s.libelle||"",s.date||"",s.activite||"",+s.montant||0,+s.fond||0,+s.cb||0,detailTxt(s.detail)]);
   add("Comptages de caisse",cR);
@@ -4175,6 +4264,420 @@ try{
   else store=firebaseStore();
 }catch(e){$("scrLoad").innerHTML=`<div class="msg err">${esc(e.message||e)}</div>`;}
 render();
+/* ================= v12 : documents et Google Drive ================= */
+// Pièce : {n: nom, u: lien, id: identifiant Drive, t: type, m: type de fichier, d: date}
+const DOC_TYPES={facture:"Facture",devis:"Devis",recu:"Reçu fiscal",logo:"Logo",contrat:"Contrat",assurance:"Assurance",cr:"Compte rendu",autre:"Autre"};
+const dcfg=()=>P().drive||{};
+const driveOn=()=>!!(dcfg().clientId&&dcfg().apiKey);
+const DRV={tok:null,exp:0,folders:{}};
+const ICON_CLIP=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="clip"><path d="M21 11.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l7.9-7.9"/></svg>`;
+function loadScript(src){
+  return new Promise((ok,ko)=>{
+    const old=document.querySelector(`script[src="${src}"]`);
+    if(old){if(old.dataset.ok)return ok();old.addEventListener("load",()=>ok());old.addEventListener("error",()=>ko(new Error("Chargement impossible.")));return;}
+    const s=document.createElement("script"); s.src=src; s.async=true;
+    s.onload=()=>{s.dataset.ok="1";ok();}; s.onerror=()=>ko(new Error("Chargement impossible : vérifiez la connexion internet."));
+    document.head.appendChild(s);
+  });
+}
+// à charger tôt : la fenêtre de connexion Google doit s'ouvrir directement au clic, sinon le navigateur la bloque
+const driveWarm=()=>{if(driveOn()&&!(DRV.tok&&Date.now()<DRV.exp-60000)&&window.google&&google.accounts)driveToken().catch(()=>{});};
+function drivePreload(){if(driveOn()&&canWrite()){loadScript("https://accounts.google.com/gsi/client").catch(()=>{});loadScript("https://apis.google.com/js/api.js").catch(()=>{});}}
+function driveToken(){
+  if(DRV.tok&&Date.now()<DRV.exp-60000)return Promise.resolve(DRV.tok);
+  const c=dcfg(); if(!driveOn())return Promise.reject(new Error("Google Drive n'est pas encore relié : Réglages → Google Drive."));
+  const go=()=>new Promise((ok,ko)=>{
+    const tc=google.accounts.oauth2.initTokenClient({client_id:c.clientId,scope:"https://www.googleapis.com/auth/drive.file",
+      callback:r=>{if(!r||r.error)return ko(new Error("Accès au Drive refusé."));DRV.tok=r.access_token;DRV.exp=Date.now()+(+r.expires_in||3600)*1000;renderDriveState();ok(DRV.tok);},
+      error_callback:e=>ko(new Error(e&&e.type==="popup_closed"?"Fenêtre Google fermée avant la fin.":e&&e.type==="popup_failed_to_open"?"Le navigateur a bloqué la fenêtre Google : autorisez les fenêtres pour ce site.":"Connexion à Google impossible."))});
+    tc.requestAccessToken({prompt:""});
+  });
+  if(DRV.pend)return DRV.pend;
+  DRV.pend=(window.google&&google.accounts&&google.accounts.oauth2?go():loadScript("https://accounts.google.com/gsi/client").then(go));
+  DRV.pend.then(()=>{DRV.pend=null;},()=>{DRV.pend=null;});
+  return DRV.pend;
+}
+async function gfetch(url,opt,retry){
+  const tok=await driveToken();
+  const r=await fetch(url,Object.assign({},opt,{headers:Object.assign({Authorization:"Bearer "+tok},(opt&&opt.headers)||{})}));
+  if(r.status===401&&!retry){DRV.tok=null;return gfetch(url,opt,true);}
+  if(!r.ok){let m="";try{m=(await r.json()).error.message;}catch(e){}throw new Error("Google Drive : "+(m||("erreur "+r.status)));}
+  return r;
+}
+const GD="https://www.googleapis.com/drive/v3/files", GU="https://www.googleapis.com/upload/drive/v3/files";
+const FIELDS="id,name,mimeType,webViewLink,size";
+async function driveFolder(path){
+  // path : ["2026","FETE 2026"] sous le dossier du comité, créé au besoin et mémorisé
+  const c=dcfg(); let parent=c.rootId;
+  if(!parent){
+    const r=await (await gfetch(GD+"?fields=id",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:"Comité des fêtes – Documents",mimeType:"application/vnd.google-apps.folder"})})).json();
+    parent=r.id; await store.commit([{t:"merge",col:"parametres",id:"general",data:{drive:Object.assign({},dcfg(),{rootId:parent,rootName:"Comité des fêtes – Documents"})}}],{action:"Réglages",texte:"Dossier « Comité des fêtes – Documents » créé dans le Drive"});
+  }
+  let key=parent;
+  for(const part of path){
+    key+=(key?"/":"")+part;
+    const known=DRV.folders[key]||(dcfg().folders||{})[key];
+    if(known){parent=known;continue;}
+    const q=`'${parent}' in parents and name='${String(part).replace(/'/g,"\\'")}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+    const l=await (await gfetch(GD+"?fields=files(id)&q="+encodeURIComponent(q))).json();
+    let id=l.files&&l.files[0]&&l.files[0].id;
+    if(!id)id=(await (await gfetch(GD+"?fields=id",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:part,mimeType:"application/vnd.google-apps.folder",parents:[parent]})})).json()).id;
+    DRV.folders[key]=id; parent=id;
+  }
+  const f=Object.assign({},dcfg().folders||{},DRV.folders);
+  if(JSON.stringify(f)!==JSON.stringify(dcfg().folders||{}))store.commit([{t:"merge",col:"parametres",id:"general",data:{drive:Object.assign({},dcfg(),{folders:f})}}],[]).catch(()=>{});
+  return parent;
+}
+async function shrinkImage(file){
+  // photos de factures prises au téléphone : réduites à 2000 px pour un envoi rapide
+  if(!/^image\/(jpeg|png|webp|heic)/.test(file.type)||file.size<700000)return file;
+  try{
+    const bmp=await createImageBitmap(file), k=Math.min(1,2000/Math.max(bmp.width,bmp.height));
+    const cv=document.createElement("canvas"); cv.width=Math.round(bmp.width*k); cv.height=Math.round(bmp.height*k);
+    cv.getContext("2d").drawImage(bmp,0,0,cv.width,cv.height);
+    const b=await new Promise(r=>cv.toBlob(r,"image/jpeg",0.82));
+    return b&&b.size<file.size?new File([b],file.name.replace(/\.\w+$/,"")+".jpg",{type:"image/jpeg"}):file;
+  }catch(e){return file;}
+}
+async function driveUpload(file,path,name){
+  const parent=await driveFolder(path), fd=new FormData();
+  fd.append("metadata",new Blob([JSON.stringify({name:name||file.name,parents:[parent]})],{type:"application/json"}));
+  fd.append("file",file);
+  return (await gfetch(GU+"?uploadType=multipart&fields="+FIELDS,{method:"POST",body:fd})).json();
+}
+async function driveDownload(id){return (await gfetch(GD+"/"+id+"?alt=media")).arrayBuffer();}
+async function drivePick(opt){
+  opt=opt||{};
+  const tok=await driveToken();
+  if(!(window.google&&google.picker)){await loadScript("https://apis.google.com/js/api.js");await new Promise(r=>gapi.load("picker",r));}
+  return new Promise(ok=>{
+    const view=new google.picker.DocsView(google.picker.ViewId.DOCS).setIncludeFolders(true).setOwnedByMe(false);
+    if(opt.mime)view.setMimeTypes(opt.mime);
+    const b=new google.picker.PickerBuilder().addView(view).addView(new google.picker.DocsUploadView())
+      .setOAuthToken(tok).setDeveloperKey(dcfg().apiKey).setLocale("fr").setTitle(opt.title||"Choisir dans le Drive")
+      .setCallback(d=>{if(d.action===google.picker.Action.PICKED)ok((d.docs||[]).map(x=>({n:x.name,u:x.url,id:x.id,m:x.mimeType})));else if(d.action===google.picker.Action.CANCEL)ok([]);});
+    if(dcfg().appId)b.setAppId(String(dcfg().appId));
+    if(opt.multi!==false)b.enableFeature(google.picker.Feature.MULTISELECT_ENABLED);
+    b.build().setVisible(true);
+  });
+}
+const docIcon=m=>/pdf/.test(m||"")?"PDF":/image/.test(m||"")?"IMG":/sheet|excel/.test(m||"")?"XLS":/word|document/.test(m||"")?"DOC":"LIEN";
+function docChip(d,rm,noT){
+  return `<span class="dchip"><span class="dk">${docIcon(d.m)}</span>${d.u?`<a href="${esc(d.u)}" target="_blank" rel="noopener">${esc(d.n||"Document")}</a>`:`<span>${esc(d.n||"Document")}</span>`}${!noT&&d.t&&DOC_TYPES[d.t]?`<span class="small muted">${esc(DOC_TYPES[d.t])}</span>`:""}${rm&&canWrite()?`<button type="button" class="dx" data-docrm="${esc(rm)}" aria-label="Retirer ${esc(d.n||"")}">×</button>`:""}</span>`;
+}
+
+/* ---------- ajout de documents (appareil, Drive, lien) ---------- */
+let DOCX=null;   // contexte : {kind:"ecr"|"ev"|"gen"|"ann-logo"|"ann-recu", ...}
+function docPath(c){
+  const y=String(c.annee||yearOf(c.evenement||"")||today().slice(0,4));
+  if(c.kind==="ann-logo")return ["Logos"];
+  if(c.kind==="ann-recu")return [y,"Reçus fiscaux"];
+  if(c.evenement)return [String(yearOf(c.evenement)||y),eventKey(c.evenement).parent];
+  return [y,"Comité"];
+}
+function openDocAdd(c){
+  DOCX=c; driveWarm();
+  const ttl={ecr:"Joindre une pièce à l'opération","ann-logo":"Logo de l'annonceur","ann-recu":"Reçu fiscal",ev:"Document de l'événement",gen:"Ajouter un document"}[c.kind]||"Ajouter un document";
+  $("dTitle").textContent=ttl; $("dCtx").textContent=c.label||"";
+  const fixed=c.kind==="ann-logo"||c.kind==="ann-recu";
+  $("dTypeF").hidden=fixed;
+  $("dType").innerHTML=Object.entries(DOC_TYPES).filter(([k])=>k!=="logo"&&k!=="recu").map(([k,l])=>`<option value="${k}" ${k===(c.type||"facture")?"selected":""}>${l}</option>`).join("");
+  $("dEvF").hidden=c.kind!=="gen";
+  if(c.kind==="gen"){$("dEv").innerHTML=`<option value="">Aucun (document du comité)</option>`+allEventNames().sort((a,b)=>(yearOf(b)||0)-(yearOf(a)||0)||a.localeCompare(b,"fr")).map(n=>`<option>${esc(n)}</option>`).join("");$("dEv").value=c.evenement||"";$("dYear").value=c.annee||today().slice(0,4);}
+  $("dYearF").hidden=c.kind!=="gen";
+  $("dFile").accept=c.kind==="ann-logo"?"image/*,application/pdf,.svg,.ai,.eps":"image/*,application/pdf,.doc,.docx,.xls,.xlsx,.odt,.ods";
+  $("dFile").multiple=c.kind!=="ann-logo"&&c.kind!=="ann-recu";
+  $("dDriveB").disabled=$("dDev").disabled=!driveOn();
+  $("dNoDrive").hidden=driveOn();
+  $("dUrl").value=""; $("dName").value=""; $("dErr").hidden=true; $("dProg").hidden=true;
+  $("dlgDoc").showModal();
+}
+function docCtxNow(){
+  const c=Object.assign({},DOCX);
+  if(c.kind==="gen"){c.evenement=$("dEv").value||"";c.annee=$("dYear").value||today().slice(0,4);}
+  return c;
+}
+async function docsAttach(c,docs){
+  if(!docs.length)return;
+  const t=c.kind==="ann-logo"?"logo":c.kind==="ann-recu"?"recu":($("dType").value||"autre"), d0=today();
+  docs=docs.map(d=>Object.assign({t,d:d0},d));
+  if(c.kind==="ecr"){ePieces=ePieces.concat(docs);renderEPieces();flash(`${docs.length} pièce(s) jointe(s) : enregistrez l'opération pour les garder.`);return;}
+  if(c.kind==="ann-logo"||c.kind==="ann-recu"){
+    const a=S.annonceurs.find(x=>x.id===c.id); if(!a)return;
+    const data={};
+    if(c.kind==="ann-logo")data.logo=Object.assign({},docs[0]);
+    else{const enc=JSON.parse(JSON.stringify(a.encarts||{}));enc[c.annee]=Object.assign({montant:0,statut:"paye"},enc[c.annee]||{},{recu:docs[0]});if(!enc[c.annee].cerfa||enc[c.annee].cerfa==="afaire")enc[c.annee].cerfa=c.sent?"mail":"afaire";data.encarts=enc;}
+    await run(store.commit([{t:"update",col:"annonceurs",id:a.id,data}],{action:"Documents",texte:`${a.nom} : ${c.kind==="ann-logo"?"logo":"reçu fiscal "+c.annee} ${docs[0].n}`}),"Document rattaché.");
+    if($("dlgA").open&&aEditing&&aEditing.id===a.id){aEditing=S.annonceurs.find(x=>x.id===a.id)||aEditing;renderAnnDocs();}
+    return;
+  }
+  const ops=docs.map(({id,...d})=>({t:"set",col:"documents",id:store.newId("documents"),data:Object.assign({},d,id?{fid:id}:{},{annee:String(c.annee||yearOf(c.evenement||"")||d0.slice(0,4)),evenement:c.evenement||"",par:S.user.nom})}));
+  await run(store.commit(ops,{action:"Documents",texte:`${docs.length} document(s) ajouté(s)${c.evenement?" à "+c.evenement:""} : ${docs.map(d=>d.n).join(", ")}`}),`${docs.length} document(s) ajouté(s).`);
+}
+async function docsFromDevice(files){
+  const c=docCtxNow(), out=[], path=docPath(c), prog=$("dProg");
+  prog.hidden=false;
+  try{
+    for(let i=0;i<files.length;i++){
+      prog.textContent=`Envoi vers le Drive : ${i+1} / ${files.length} (${files[i].name})…`;
+      let f=c.kind==="ann-logo"?files[i]:await shrinkImage(files[i]);
+      const name=c.kind==="ann-logo"&&c.nom?`${c.nom} – logo${(f.name.match(/\.\w+$/)||[""])[0]}`:c.kind==="ann-recu"&&c.nom?`COMITE_BDB_CERFA_encart_${c.annee}_${c.nom.replace(/[^\w-]+/g,"_")}${(f.name.match(/\.\w+$/)||[".pdf"])[0]}`:c.kind==="ecr"&&c.prefix?`${c.prefix} – ${f.name}`:f.name;
+      const r=await driveUpload(f,path,name);
+      out.push({n:r.name,u:r.webViewLink,id:r.id,m:r.mimeType});
+    }
+    $("dlgDoc").close(); await docsAttach(c,out);
+  }catch(e){$("dErr").textContent=e.message||String(e);$("dErr").hidden=false;}
+  finally{prog.hidden=true;}
+}
+$("dFile").addEventListener("change",e=>{const fs=[...e.target.files];e.target.value="";if(fs.length)docsFromDevice(fs);});
+$("dDev").onclick=()=>$("dFile").click();
+$("dDriveB").onclick=async()=>{
+  try{const c=docCtxNow(), l=await drivePick({multi:$("dFile").multiple,title:$("dTitle").textContent});if(!l.length)return;$("dlgDoc").close();await docsAttach(c,l.map(d=>Object.assign(d,{u:d.u||`https://drive.google.com/file/d/${d.id}/view`})));}
+  catch(e){$("dErr").textContent=e.message||String(e);$("dErr").hidden=false;}
+};
+$("dLinkB").onclick=async()=>{
+  const u=$("dUrl").value.trim(); if(!/^https?:\/\//.test(u)){$("dErr").textContent="Collez un lien qui commence par https://";$("dErr").hidden=false;return;}
+  const c=docCtxNow(), n=$("dName").value.trim()||decodeURIComponent((u.split("?")[0].split("/").filter(Boolean).pop())||"Document");
+  $("dlgDoc").close(); await docsAttach(c,[{n,u,m:/\.pdf/i.test(u)?"application/pdf":""}]);
+};
+
+/* ---------- pièces d'une opération ---------- */
+let ePieces=[];
+function renderEPieces(){
+  $("ePieces").innerHTML=ePieces.map((d,i)=>docChip(d,"e:"+i)).join("")||`<span class="small muted">Aucune pièce.</span>`;
+}
+$("eAddPiece").onclick=()=>{
+  const evt=$("eEvt").value;
+  if(!evt||evt==="__new"){$("eErr").textContent="Choisissez d'abord l'événement : la pièce sera rangée dans son dossier.";$("eErr").hidden=false;return;}
+  openDocAdd({kind:"ecr",evenement:evt,annee:($("eDate").value||today()).slice(0,4),label:`${evt} · ${$("eDes").value.trim()||"nouvelle opération"}`,prefix:[$("eDate").value,$("eDes").value.trim()].filter(Boolean).join(" ").replace(/[\\/:*?"<>|]+/g," ").slice(0,60),type:$("eRec").checked?"autre":"facture"});
+};
+const ecrById=()=>new Map(S.ecr.map(e=>[e.id,e]));
+
+/* ---------- vue Documents ---------- */
+function allDocs(){
+  const out=[], E=ecrById();
+  for(const d of S.documents)out.push(Object.assign({},d,{src:"doc",ref:d.evenement||"Comité",key:"d:"+d.id}));
+  for(const e of S.ecr)(e.pieces||[]).forEach((d,i)=>out.push(Object.assign({},d,{src:"ecr",annee:String((e.date||"").slice(0,4)||""),evenement:eventKey(e.evenement||"").parent,ref:`${e.designation} · ${fm((+e.recette||0)||(+e.depense||0))}`,ecr:e.id,key:`p:${e.id}:${i}`})));
+  for(const a of S.annonceurs){
+    if(a.logo&&a.logo.u)out.push(Object.assign({},a.logo,{t:"logo",src:"ann",annee:"",evenement:"",ref:a.nom,ann:a.id,key:"l:"+a.id}));
+    for(const [y,c] of Object.entries(a.encarts||{}))if(c&&c.recu)out.push(Object.assign({},c.recu,{t:"recu",src:"ann",annee:String(y),evenement:"ENCART PUB "+y,ref:`${a.nom}${c.num?" · n° "+c.num:""}`,ann:a.id,key:`r:${a.id}:${y}`}));
+  }
+  return out;
+}
+let docF={t:"",y:""};
+function renderDocuments(){
+  const all=allDocs(), ys=[...new Set(all.map(d=>d.annee).filter(Boolean))].sort().reverse(), q=strip($("docQ").value);
+  if(docF.y&&!ys.includes(docF.y))docF.y="";
+  $("docYear").innerHTML=`<option value="">Toutes les années</option>`+ys.map(y=>`<option ${y===docF.y?"selected":""}>${y}</option>`).join("");
+  const cnt=t=>all.filter(d=>(!docF.y||d.annee===docF.y)&&(!t||d.t===t)).length;
+  $("docChips").innerHTML=[["","Tous"],...Object.entries(DOC_TYPES)].map(([k,l])=>{const n=cnt(k);return n||!k?`<button type="button" class="chip ${docF.t===k?"on":""}" data-docf="${k}">${l} · ${n}</button>`:"";}).join("");
+  const ls=all.filter(d=>(!docF.y||d.annee===docF.y)&&(!docF.t||d.t===docF.t)&&(!q||strip(`${d.n} ${d.ref} ${d.evenement}`).includes(q))).sort((a,b)=>String(b.d||"").localeCompare(String(a.d||""))||String(a.n).localeCompare(String(b.n)));
+  $("docTable").innerHTML=`<thead><tr><th>Document</th><th>Type</th><th>Événement</th><th>Rattaché à</th><th>Ajouté le</th>${canWrite()?"<th></th>":""}</tr></thead><tbody>${ls.map(d=>`<tr><td>${docChip(d,null,1)}</td><td class="small">${esc(DOC_TYPES[d.t]||"")}</td><td class="small">${d.evenement?`<button type="button" class="link" data-ev="${esc(eventKey(d.evenement).parent)}">${esc(eventKey(d.evenement).parent)}</button>`:"·"}</td><td class="small">${d.ecr&&canWrite()?`<button type="button" class="link" data-edit="${esc(d.ecr)}">${esc(d.ref)}</button>`:d.ann&&canWrite()?`<button type="button" class="link" data-aedit="${esc(d.ann)}">${esc(d.ref)}</button>`:esc(d.ref||"")}</td><td class="small num">${d.d?fdate(d.d):"·"}</td>${canWrite()?`<td>${d.src==="doc"?`<button type="button" class="mini" data-docrm="${esc(d.key)}">Retirer</button>`:""}</td>`:""}</tr>`).join("")||`<tr><td colspan="6" class="muted">${all.length?"Aucun document pour ce filtre.":"Aucun document pour l'instant. Ajoutez des factures depuis une opération, des reçus et logos depuis la fiche d'un annonceur, ou un document du comité avec « + Ajouter »."}</td></tr>`}</tbody>`;
+  $("docState").innerHTML=driveOn()?(dcfg().rootId?`Rangés dans le Drive, dossier <a href="https://drive.google.com/drive/folders/${esc(dcfg().rootId)}" target="_blank" rel="noopener">${esc(dcfg().rootName||"du comité")}</a>.`:"Le dossier du comité sera créé dans le Drive au premier envoi."):`Google Drive n'est pas relié : seuls les liens collés sont possibles. <a href="#reglages">Relier le Drive</a>`;
+}
+$("docQ").addEventListener("input",renderDocuments);
+$("docYear").addEventListener("change",e=>{docF.y=e.target.value;renderDocuments();});
+$("docAdd").onclick=()=>openDocAdd({kind:"gen",annee:docF.y||today().slice(0,4),type:"autre"});
+function renderEvDocs(name){
+  const ds=allDocs().filter(d=>d.evenement&&eventKey(d.evenement).parent===name);
+  $("evDocs").innerHTML=ds.length?`<div class="dlist">${ds.map(d=>`<div class="drow">${docChip(d,d.src==="doc"?d.key:null)}<span class="small muted">${esc(d.ref||"")}</span></div>`).join("")}</div>`:`<p class="muted" style="margin:0">Aucun document pour ${esc(name)}. Les factures jointes aux opérations apparaîtront ici.</p>`;
+}
+$("evDocAdd").onclick=()=>openDocAdd({kind:"ev",evenement:FICHE,annee:String(yearOf(FICHE)||today().slice(0,4)),label:FICHE,type:"facture"});
+
+/* ---------- retrait d'un document ---------- */
+document.addEventListener("click",async e=>{
+  let t;
+  if((t=e.target.closest("[data-docf]"))){docF.t=t.dataset.docf;renderDocuments();return;}
+  if((t=e.target.closest("[data-docrm]"))){
+    const k=t.dataset.docrm;
+    if(k.startsWith("e:")){ePieces.splice(+k.slice(2),1);renderEPieces();return;}
+    if(!await ask("Retirer ce document de l'application ? Le fichier reste dans le Drive.","Retirer"))return;
+    if(k.startsWith("d:"))await run(store.commit([{t:"delete",col:"documents",id:k.slice(2)}],{action:"Documents",texte:"Document retiré"}),"Document retiré.");
+    else if(k.startsWith("l:")){const a=S.annonceurs.find(x=>x.id===k.slice(2));if(a)await run(store.commit([{t:"update",col:"annonceurs",id:a.id,data:{logo:null}}],{action:"Documents",texte:`${a.nom} : logo retiré`}),"Logo retiré.");}
+    else if(k.startsWith("r:")){const [,id,y]=k.split(":"),a=S.annonceurs.find(x=>x.id===id);if(a){const enc=JSON.parse(JSON.stringify(a.encarts||{}));if(enc[y]){delete enc[y].recu;delete enc[y].num;}await run(store.commit([{t:"update",col:"annonceurs",id:a.id,data:{encarts:enc}}],{action:"Documents",texte:`${a.nom} : reçu ${y} retiré`}),"Reçu retiré.");}}
+    if($("dlgA").open&&aEditing){aEditing=S.annonceurs.find(x=>x.id===aEditing.id)||aEditing;renderAnnDocs();}
+  }
+});
+
+/* ---------- annonceur : logo, reçu fiscal, coordonnées pour le CERFA ---------- */
+function renderAnnDocs(){
+  const a=aEditing, y=aYear;
+  $("anDocs").hidden=!a;
+  if(!a)return;
+  const c=(a.encarts||{})[y];
+  $("anLogoD").innerHTML=a.logo&&a.logo.u?docChip(a.logo,"l:"+a.id):`<span class="small muted">Aucun logo.</span>`;
+  $("anRecuD").innerHTML=c&&c.recu?docChip(c.recu,`r:${a.id}:${y}`)+(c.num?` <span class="small muted">n° ${esc(c.num)}</span>`:""):`<span class="small muted">Aucun reçu ${y}.</span>`;
+  $("anGen").hidden=!(c&&c.statut==="paye"&&+c.montant>0);
+  $("anGen").textContent=c&&c.recu?`Refaire le reçu ${y}`:`Générer le reçu ${y}`;
+  $("anSend").hidden=!(c&&c.recu&&c.recu.u);
+  $("anRecuY").textContent=y;
+}
+const _openAnn=openAnn;
+openAnn=function(id){
+  _openAnn(id);
+  const a=aEditing||{};
+  $("anForme").value=a.forme||""; $("anSiren").value=a.siren||""; $("anNum").value=a.adrNum||""; $("anRue").value=a.adrRue||""; $("anCp").value=a.adrCp||""; $("anVille").value=a.adrVille||"";
+  renderAnnDocs();
+};
+$("anLogoAdd").onclick=()=>{if(!aEditing)return;openDocAdd({kind:"ann-logo",id:aEditing.id,nom:aEditing.nom,label:aEditing.nom});};
+$("anRecuAdd").onclick=()=>{if(!aEditing)return;openDocAdd({kind:"ann-recu",id:aEditing.id,nom:aEditing.nom,annee:aYear,label:`${aEditing.nom} · ${aYear}`});};
+$("anSend").onclick=async()=>{
+  const a=aEditing, y=aYear, c=a&&(a.encarts||{})[y]; if(!c||!c.recu)return;
+  const o=P().organisme||{}, sub=`Reçu fiscal ${y} – ${o.nom||ASSO||"Comité des fêtes"}`;
+  const body=`Bonjour,\n\nVeuillez trouver votre reçu fiscal pour votre soutien ${y} (${fm(+c.montant||0)}) :\n${c.recu.u}\n\nMerci pour votre fidélité.\n\nLe trésorier\n${o.nom||ASSO||""}`;
+  location.href=`mailto:${encodeURIComponent(a.email||"")}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+  const enc=JSON.parse(JSON.stringify(a.encarts)); enc[y].cerfa="mail";
+  await run(store.commit([{t:"update",col:"annonceurs",id:a.id,data:{encarts:enc}}],{action:"Encarts",texte:`${a.nom} : reçu ${y} envoyé par mail`}),"Reçu marqué « envoyé par mail ».");
+  aEditing=S.annonceurs.find(x=>x.id===a.id)||a; $("anCerfa").value="mail"; renderAnnDocs();
+};
+
+/* ---------- reçus fiscaux : génération du CERFA 2041-MEC-SD (16216) ---------- */
+function enLettres(n){
+  const U=["zéro","un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","onze","douze","treize","quatorze","quinze","seize","dix-sept","dix-huit","dix-neuf"],T=["","","vingt","trente","quarante","cinquante","soixante"];
+  const sub100=n=>{if(n<20)return U[n];const t=Math.floor(n/10),u=n%10;if(t===7||t===9)return (t===7?"soixante":"quatre-vingt")+(u===1&&t===7?"-et-onze":"-"+U[10+u]);if(t===8)return "quatre-vingt"+(u?"-"+U[u]:"s");return T[t]+(u===1?"-et-un":u?"-"+U[u]:"");};
+  const sub1000=n=>{const c=Math.floor(n/100),r=n%100;let s=c?(c>1?U[c]+"-cent":"cent")+(r?"":c>1?"s":""):"";if(r)s+=(s?"-":"")+sub100(r);return s;};
+  const words=n=>{if(n===0)return "zéro";let s="";const mil=Math.floor(n/1e6),k=Math.floor(n%1e6/1000),r=n%1000;if(mil)s+=(mil>1?words(mil)+"-millions":"un-million");if(k)s+=(s?"-":"")+(k>1?sub1000(k).replace(/cents$/,"cent")+"-mille":"mille");if(r)s+=(s?"-":"")+sub1000(r);return s;};
+  const e=Math.floor(n+1e-9), c=Math.round((n-e)*100);
+  const w=words(e).replace(/-/g," ").replace(/ et /g," et ");
+  return (w.charAt(0).toUpperCase()+w.slice(1))+(e>1?" euros":" euro")+(c?" et "+words(c).replace(/-/g," ")+(c>1?" centimes":" centime"):"");
+}
+const nextCerfa=()=>{let m=+((P().organisme||{}).prochainRecu)||0;for(const a of S.annonceurs)for(const c of Object.values(a.encarts||{}))if(c&&+c.num>=m)m=+c.num+1;return m||1;};
+async function cerfaBytes(a,y,c,num){
+  await loadScript("https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js");
+  const {PDFDocument,PDFName,StandardFonts}=PDFLib, o=P().organisme||{};
+  const pdf=await PDFDocument.load(await (await fetch("cerfa-2041-mec-sd.pdf")).arrayBuffer()), form=pdf.getForm();
+  const helv=await pdf.embedFont(StandardFonts.Helvetica);
+  const set=(n,v)=>{try{form.getTextField(n).setText(String(v==null?"":v));}catch(e){}};
+  const m=(+c.montant||0), mt=m.toFixed(2).replace(".",","), lettres=enLettres(m);
+  set("a1",num); if(o.nom)set("a2",o.nom); if(o.rna)set("a4",o.rna); if(o.num!=null&&o.num!=="")set("a5",o.num); if(o.rue)set("a6",o.rue); if(o.cp)set("a7",o.cp); if(o.ville)set("a8",o.ville);
+  set("a10",(o.objet||"FETE {annee} - ENCARTS").replace("{annee}",y));
+  set("b4",a.nomLegal||a.nom); set("b5",a.forme||""); set("b6",a.siren||""); set("b7",a.adrNum||""); set("b8",a.adrRue||""); set("b9",a.adrCp||""); set("b10",a.adrVille||"");
+  set("b15",mt); set("b16",lettres); set("b18",mt); set("b19",lettres);
+  set("b20",c.date?fdate(c.date):""); set("b21",fdate(today()));
+  // forme des versements : cases de la page 2 (valeur « A »)
+  const box={Espece:"CAC2",Cheques:"CAC3",Virement:"CAC4",CB:"CAC4",SEPA:"CAC4"}[c.type]||(c.type?"CAC5":"");
+  for(const n of ["CAC2","CAC3","CAC4","CAC5"]){
+    try{const f=form.getField(n).acroField, on=n===box;
+      f.dict.set(PDFName.of("V"),PDFName.of(on?"A":"Off"));
+      for(const w of f.getWidgets()){const ap=w.dict.lookup(PDFName.of("AP")),N=ap&&ap.lookup(PDFName.of("N"));const hasA=N&&N.keys&&N.keys().some(k=>k.asString()==="/A");w.dict.set(PDFName.of("AS"),PDFName.of(on&&hasA?"A":"Off"));}
+    }catch(e){}
+  }
+  form.updateFieldAppearances(helv); form.flatten();
+  return pdf.save();
+}
+async function makeRecu(a,y,opts){
+  const c=(a.encarts||{})[y]; if(!c||c.statut!=="paye"||!(+c.montant>0))throw new Error(`${a.nom} : encart ${y} non payé.`);
+  const num=c.num||nextCerfa(), bytes=await cerfaBytes(a,y,c,num);
+  const name=`COMITE_BDB_CERFA_encart_${y}_${a.nom.replace(/[^\wÀ-ÿ-]+/g,"_")}.pdf`;
+  let doc={n:name,m:"application/pdf",t:"recu",d:today()};
+  if(driveOn()){const r=await driveUpload(new File([bytes],name,{type:"application/pdf"}),[String(y),"Reçus fiscaux"],name);doc=Object.assign(doc,{u:r.webViewLink,id:r.id});}
+  else download(new Blob([bytes],{type:"application/pdf"}),name);
+  const enc=JSON.parse(JSON.stringify(a.encarts)); enc[y]=Object.assign(enc[y],{recu:doc,num,cerfa:enc[y].cerfa&&enc[y].cerfa!=="refuse"?enc[y].cerfa:"afaire"});
+  const ops=[{t:"update",col:"annonceurs",id:a.id,data:{encarts:enc}},{t:"merge",col:"parametres",id:"general",data:{organisme:Object.assign({},P().organisme||{},{prochainRecu:Math.max(+num+1,+((P().organisme||{}).prochainRecu)||0)})}}];
+  await store.commit(ops,{action:"Encarts",texte:`${a.nom} : reçu fiscal ${y} n° ${num} (${fm(+c.montant)})${doc.u?" rangé dans le Drive":""}`});
+  return {num,doc};
+}
+$("anGen").onclick=async()=>{
+  const a=aEditing, y=aYear; if(!a)return; driveWarm();
+  const miss=[!a.siren&&"SIREN",!(a.adrRue&&a.adrCp&&a.adrVille)&&"adresse"].filter(Boolean);
+  if(miss.length&&!await ask(`Il manque ${miss.join(" et ")} de ${a.nom} pour un reçu complet. Enregistrez d'abord la fiche avec ces informations, ou générez quand même.`,"Générer quand même"))return;
+  try{$("anGen").disabled=true;const r=await makeRecu(a,y);flash(`Reçu n° ${r.num} généré${r.doc.u?" et rangé dans le Drive":" (téléchargé)"}.`);aEditing=S.annonceurs.find(x=>x.id===a.id)||a;renderAnnDocs();}
+  catch(e){flash(e.message||String(e),true);} finally{$("anGen").disabled=false;}
+};
+$("aRecus").onclick=async()=>{
+  driveWarm();
+  const y=aYear, l=S.annonceurs.filter(a=>{const c=(a.encarts||{})[y];return c&&c.statut==="paye"&&+c.montant>0&&!c.recu&&c.cerfa!=="refuse";});
+  if(!l.length){flash(`Tous les encarts payés en ${y} ont leur reçu.`);return;}
+  const ok=l.filter(a=>a.siren&&a.adrVille), ko=l.filter(a=>!(a.siren&&a.adrVille));
+  if(!await ask(`Générer ${l.length} reçu(s) fiscal(aux) ${y}, numérotés à partir du n° ${nextCerfa()}${driveOn()?", rangés dans le Drive":", téléchargés un par un"} ?${ko.length?`\n\n${ko.length} annonceur(s) sans SIREN ou adresse auront un reçu incomplet : ${ko.map(a=>a.nom).join(", ")}.`:""}`,"Générer"))return;
+  let n=0;
+  for(const a of l){try{flash(`Reçu ${n+1} / ${l.length} : ${a.nom}…`);await makeRecu(S.annonceurs.find(x=>x.id===a.id)||a,y);n++;}catch(e){flash(`${a.nom} : ${e.message||e}`,true);break;}}
+  if(n)flash(`${n} reçu(s) ${y} généré(s).`);
+};
+
+/* ---------- reçus déjà faits : rattachement depuis le Drive ---------- */
+let RLINK=null;
+async function readCerfa(id){
+  try{
+    await loadScript("https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js");
+    const pdf=await PDFLib.PDFDocument.load(await driveDownload(id)), f=pdf.getForm(), g=n=>{try{return f.getTextField(n).getText()||"";}catch(e){return "";}};
+    if(!g("b4")&&!g("b6"))return null;
+    return {num:g("a1").trim(),nom:g("b4").trim(),forme:g("b5").trim(),siren:g("b6").replace(/\s+/g,""),adrNum:g("b7").trim(),adrRue:g("b8").trim(),adrCp:g("b9").trim(),adrVille:g("b10").trim(),montant:round2(parseNum(g("b18")||g("b15"))),date:parseDate(g("b20"))||parseDate(g("b21"))};
+  }catch(e){return null;}
+}
+function matchAnn(txt){
+  const k=annKey(txt); let best=null,score=0;
+  for(const a of S.annonceurs){
+    const ak=annKey(a.nom); if(!ak)continue;
+    let s=k.includes(ak)?ak.length*2:0;
+    if(!s){const toks=strip(a.nom).split(/[^a-z0-9]+/).filter(t=>t.length>=3&&!GENERIC.has(t));s=toks.filter(t=>k.includes(t)).reduce((x,t)=>x+t.length,0);}
+    if(s>score){score=s;best=a;}
+  }
+  return score>=3?best:null;
+}
+$("aLinkRecus").onclick=async()=>{
+  try{
+    const l=await drivePick({mime:"application/pdf",title:"Choisir les reçus fiscaux déjà faits"}); if(!l.length)return;
+    flash("Lecture des reçus…");
+    const rows=[];
+    for(const d of l){
+      const info=await readCerfa(d.id), y=+(((d.n||"").match(/20\d\d/)||[])[0]||aYear);
+      const a=matchAnn(d.n.replace(/\.pdf$/i,"").replace(/cerfa|encart|comite|bdb|recu/gi," "))||(info&&info.nom?matchAnn(info.nom):null);
+      rows.push({d,info,y,a});
+    }
+    RLINK=rows;
+    $("rlTable").innerHTML=`<thead><tr><th>Fichier</th><th>Annonceur</th><th>Année</th><th>Lu dans le reçu</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td class="small">${esc(r.d.n)}</td><td><select data-rla="${i}" aria-label="Annonceur"><option value="">· ne pas rattacher</option>${S.annonceurs.slice().sort((x,z)=>String(x.nom).localeCompare(String(z.nom),"fr")).map(a=>`<option value="${esc(a.id)}" ${r.a&&r.a.id===a.id?"selected":""}>${esc(a.nom)}</option>`).join("")}</select></td><td><input type="text" inputmode="numeric" data-rly="${i}" value="${r.y}" style="width:70px" aria-label="Année"></td><td class="small">${r.info?`${r.info.num?"n° "+esc(r.info.num)+" · ":`<span class="neg">sans numéro</span> · `}${fm(r.info.montant||0)} · SIREN ${esc(r.info.siren||"·")}`:"<span class=\"muted\">pas un formulaire CERFA lisible</span>"}</td></tr>`).join("")}</tbody>`;
+    $("dlgRL").showModal();
+  }catch(e){flash(e.message||String(e),true);}
+};
+$("fRL").addEventListener("submit",async ev=>{
+  ev.preventDefault(); const rows=RLINK; if(!rows)return;
+  const sent=$("rlSent").checked, ops=[], by=new Map(); let n=0, maxNum=0;
+  rows.forEach((r,i)=>{
+    const id=document.querySelector(`[data-rla="${i}"]`).value, y=parseInt(document.querySelector(`[data-rly="${i}"]`).value); if(!id||!y)return;
+    const a=by.get(id)||JSON.parse(JSON.stringify(S.annonceurs.find(x=>x.id===id))); by.set(id,a);
+    const enc=a.encarts=a.encarts||{}, c=enc[y]=enc[y]||{montant:(r.info&&r.info.montant)||0,statut:"paye"};
+    c.recu={n:r.d.n,u:r.d.u||`https://drive.google.com/file/d/${r.d.id}/view`,id:r.d.id,m:"application/pdf",t:"recu",d:today()};
+    if(r.info&&r.info.num){c.num=r.info.num;maxNum=Math.max(maxNum,+r.info.num||0);}
+    if(sent&&c.cerfa!=="papier")c.cerfa="mail"; else if(!c.cerfa)c.cerfa="afaire";
+    if(r.info){for(const k of ["forme","siren","adrNum","adrRue","adrCp","adrVille"])if(r.info[k]&&!a[k])a[k]=r.info[k]; if(r.info.nom&&!a.nomLegal&&annKey(r.info.nom)!==annKey(a.nom))a.nomLegal=r.info.nom;}
+    n++;
+  });
+  by.forEach(a=>{const {id,...data}=a;ops.push({t:"set",col:"annonceurs",id,data});});
+  if(maxNum)ops.push({t:"merge",col:"parametres",id:"general",data:{organisme:Object.assign({},P().organisme||{},{prochainRecu:Math.max(maxNum+1,+((P().organisme||{}).prochainRecu)||0)})}});
+  if(!n){$("dlgRL").close();return;}
+  if(await run(store.commit(ops,{action:"Encarts",texte:`${n} reçu(s) fiscal(aux) rattaché(s) depuis le Drive`}),`${n} reçu(s) rattaché(s).`)){$("dlgRL").close();RLINK=null;}
+});
+
+/* ---------- réglages : Google Drive et organisme ---------- */
+function renderDriveState(){
+  const c=dcfg();
+  if(!$("gdState"))return;
+  $("gdState").innerHTML=!driveOn()?`<span class="pill neutral">Non relié</span>`:DRV.tok&&Date.now()<DRV.exp?`<span class="pill good">Connecté</span>`:`<span class="pill warn">Relié, connexion à faire</span>`;
+  $("gdRoot").innerHTML=c.rootId?`Dossier : <a href="https://drive.google.com/drive/folders/${esc(c.rootId)}" target="_blank" rel="noopener">${esc(c.rootName||"Comité des fêtes – Documents")}</a>`:driveOn()?"Le dossier « Comité des fêtes – Documents » sera créé au premier envoi.":"";
+}
+function renderDriveSettings(){
+  const c=dcfg(), o=P().organisme||{};
+  $("gdClient").value=c.clientId||""; $("gdKey").value=c.apiKey||""; $("gdApp").value=c.appId||"";
+  $("orgNom").value=o.nom||"Comité des fêtes de la Bastide de Bousignac"; $("orgRna").value=o.rna||"W092001220"; $("orgNum").value=o.num||"1"; $("orgRue").value=o.rue||"Place du Général de Gaulle - Mairie"; $("orgCp").value=o.cp||"09500"; $("orgVille").value=o.ville||"LA BASTIDE DE BOUSIGNAC"; $("orgObjet").value=o.objet||"FETE {annee} - ENCARTS"; $("orgNext").value=nextCerfa();
+  $("gdOrigin").textContent=location.origin;
+  renderDriveState();
+}
+$("gdSave").onclick=async()=>{
+  const d=Object.assign({},dcfg(),{clientId:$("gdClient").value.trim(),apiKey:$("gdKey").value.trim(),appId:$("gdApp").value.trim()});
+  if(await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{drive:d}}],{action:"Réglages",texte:"Liaison Google Drive enregistrée"}),"Liaison Google Drive enregistrée.")){DRV.tok=null;drivePreload();renderDriveState();}
+};
+$("gdConnect").onclick=async()=>{try{await driveToken();await driveFolder([]);renderDriveSettings();flash("Drive connecté.");}catch(e){flash(e.message||String(e),true);}};
+$("gdPickRoot").onclick=async()=>{
+  try{const l=await drivePick({multi:false,mime:"application/vnd.google-apps.folder",title:"Choisir le dossier du comité"});if(!l.length)return;
+    await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{drive:Object.assign({},dcfg(),{rootId:l[0].id,rootName:l[0].n})}}],{action:"Réglages",texte:`Dossier Drive du comité : ${l[0].n}`}),"Dossier choisi.");DRV.folders={};renderDriveSettings();}
+  catch(e){flash(e.message||String(e),true);}
+};
+$("orgSave").onclick=()=>run(store.commit([{t:"merge",col:"parametres",id:"general",data:{organisme:{nom:$("orgNom").value.trim(),rna:$("orgRna").value.trim(),num:$("orgNum").value.trim(),rue:$("orgRue").value.trim(),cp:$("orgCp").value.trim(),ville:$("orgVille").value.trim(),objet:$("orgObjet").value.trim(),prochainRecu:parseInt($("orgNext").value)||nextCerfa()}}}],{action:"Réglages",texte:"Coordonnées du comité pour les reçus fiscaux"}),"Coordonnées enregistrées.");
+
+function annData(a){const d=JSON.parse(JSON.stringify(a));delete d.id;return d;}
+{const _od=onData;onData=()=>{_od();if(!DRV.pre&&S.ready&&canWrite()&&driveOn()){DRV.pre=1;drivePreload();}};}
+
 </script>
 </body>
 </html>
