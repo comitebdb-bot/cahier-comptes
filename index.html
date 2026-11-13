@@ -1024,7 +1024,7 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
       <div class="grid2"><div class="field"><label for="gdClient">ID client OAuth</label><input type="text" id="gdClient" placeholder="123456-abc.apps.googleusercontent.com" autocomplete="off"></div><div class="field"><label for="gdKey">Clé d'API (Picker)</label><input type="text" id="gdKey" placeholder="AIza…" autocomplete="off"></div></div>
       <div class="field" style="max-width:260px"><label for="gdApp">Numéro du projet Google Cloud</label><input type="text" id="gdApp" inputmode="numeric" autocomplete="off"></div>
       <p class="small" style="margin:0" id="gdRoot"></p>
-      <div class="row"><button type="button" class="primary" id="gdSave">Enregistrer</button><button type="button" id="gdConnect">Se connecter au Drive</button><button type="button" id="gdPickRoot">Choisir un dossier existant</button></div></div>
+      <div class="row"><button type="button" class="primary" id="gdSave">Enregistrer</button><button type="button" id="gdConnect">Se connecter au Drive</button><button type="button" id="gdPickRoot">Choisir un dossier existant</button><button type="button" id="gdTree">Reprendre l'arborescence existante</button></div></div>
     <div class="card w"><h2>Reçus fiscaux (CERFA 2041-MEC-SD)</h2>
       <p class="small muted" style="margin:0">Coordonnées du comité reprises sur chaque reçu. Dans l'objet, {annee} est remplacé par l'année de l'encart.</p>
       <div class="grid2"><div class="field"><label for="orgNom">Dénomination</label><input type="text" id="orgNom"></div><div class="field"><label for="orgRna">N° RNA</label><input type="text" id="orgRna"></div></div>
@@ -1329,6 +1329,15 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
   <p class="msg" id="dProg" hidden></p>
   <div id="dErr" class="msg err" hidden></div>
   <div class="row" style="justify-content:flex-end"><button type="button" data-close>Fermer</button></div>
+</form></dialog>
+<dialog id="dlgTree" class="wide"><form id="fTree">
+  <h2>Reprendre l'arborescence du Drive</h2>
+  <p class="small muted" style="margin:0">Pour chaque dossier, indiquez à quoi il correspond. Les sous-dossiers suivent leur parent (ex. « FETE 2025 / Factures »). Les nouveaux fichiers seront rangés dans ces dossiers, rien n'est déplacé ni renommé.</p>
+  <p class="msg" id="trProg" hidden></p>
+  <div class="scroll" style="max-height:52vh"><table id="trTable"></table></div>
+  <p class="small" style="margin:0" id="trSum"></p>
+  <label class="small"><input type="checkbox" id="trFiles" checked> Référencer aussi les fichiers déjà présents (factures, devis, reçus, logos)</label>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary" id="trGo">Relier</button></div>
 </form></dialog>
 <dialog id="dlgRL"><form id="fRL">
   <h2>Rattacher des reçus fiscaux</h2>
@@ -4287,7 +4296,7 @@ function driveToken(){
   if(DRV.tok&&Date.now()<DRV.exp-60000)return Promise.resolve(DRV.tok);
   const c=dcfg(); if(!driveOn())return Promise.reject(new Error("Google Drive n'est pas encore relié : Réglages → Google Drive."));
   const go=()=>new Promise((ok,ko)=>{
-    const tc=google.accounts.oauth2.initTokenClient({client_id:c.clientId,scope:"https://www.googleapis.com/auth/drive.file",
+    const tc=google.accounts.oauth2.initTokenClient({client_id:c.clientId,scope:"https://www.googleapis.com/auth/drive",
       callback:r=>{if(!r||r.error)return ko(new Error("Accès au Drive refusé."));DRV.tok=r.access_token;DRV.exp=Date.now()+(+r.expires_in||3600)*1000;renderDriveState();ok(DRV.tok);},
       error_callback:e=>ko(new Error(e&&e.type==="popup_closed"?"Fenêtre Google fermée avant la fin.":e&&e.type==="popup_failed_to_open"?"Le navigateur a bloqué la fenêtre Google : autorisez les fenêtres pour ce site.":"Connexion à Google impossible."))});
     tc.requestAccessToken({prompt:""});
@@ -4313,6 +4322,9 @@ async function driveFolder(path){
     const r=await (await gfetch(GD+"?fields=id",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:"Comité des fêtes – Documents",mimeType:"application/vnd.google-apps.folder"})})).json();
     parent=r.id; await store.commit([{t:"merge",col:"parametres",id:"general",data:{drive:Object.assign({},dcfg(),{rootId:parent,rootName:"Comité des fêtes – Documents"})}}],{action:"Réglages",texte:"Dossier « Comité des fêtes – Documents » créé dans le Drive"});
   }
+  const fx=k=>DRV.folders[k]||(dcfg().folders||{})[k];
+  const full=fx([parent,...path].join("/"))||(path.length>1&&fx([parent,"*",...path.slice(1)].join("/")));
+  if(full)return full;
   let key=parent;
   for(const part of path){
     key+=(key?"/":"")+part;
@@ -4677,6 +4689,146 @@ $("orgSave").onclick=()=>run(store.commit([{t:"merge",col:"parametres",id:"gener
 
 function annData(a){const d=JSON.parse(JSON.stringify(a));delete d.id;return d;}
 {const _od=onData;onData=()=>{_od();if(!DRV.pre&&S.ready&&canWrite()&&driveOn()){DRV.pre=1;drivePreload();}};}
+
+/* ---------- v12b : reprise de l'arborescence Drive existante ---------- */
+const DTYPE_HINT=[[/cerfa|re[cç]u.?fisc/i,"recu"],[/logo/i,"logo"],[/devis/i,"devis"],[/factur|ticket|achat/i,"facture"],[/contrat|convention|sacem|guso/i,"contrat"],[/assuranc/i,"assurance"],[/compte.?rendu|\bcr\b|pv|proc[eè]s.?verbal|r[eé]union|ag\b/i,"cr"]];
+const typeHint=s=>{for(const [r,t] of DTYPE_HINT)if(r.test(s||""))return t;return "";};
+async function driveList(id){
+  let out=[],tok="";
+  do{
+    const q=`'${id}' in parents and trashed=false`;
+    const r=await (await gfetch(GD+"?pageSize=1000&supportsAllDrives=true&includeItemsFromAllDrives=true&fields=nextPageToken,files(id,name,mimeType,webViewLink,modifiedTime)&q="+encodeURIComponent(q)+(tok?"&pageToken="+tok:""))).json();
+    out=out.concat(r.files||[]); tok=r.nextPageToken||"";
+  }while(tok);
+  return out;
+}
+function matchEvFolder(name,year){
+  const k=strip(name).replace(/\d{4}/g," "), toks=k.split(/[^a-z0-9]+/).filter(t=>t.length>=3);
+  let best=null,score=0;
+  for(const ev of allEventNames()){
+    if(year&&yearOf(ev)!==year)continue;
+    const fk=strip(famOf(ev)), ft=fk.split(/[^a-z0-9]+/).filter(t=>t.length>=3);
+    let s=ft.filter(t=>toks.some(x=>x.startsWith(t.slice(0,5))||t.startsWith(x.slice(0,5)))).length/Math.max(ft.length,1);
+    if(fk.replace(/[^a-z0-9]/g,"")===k.replace(/[^a-z0-9]/g,""))s=2;
+    if(s>score){score=s;best=ev;}
+  }
+  return score>=0.5?best:null;
+}
+let TREE=null;
+async function scanTree(){
+  const root=dcfg().rootId; if(!root)throw new Error("Choisissez d'abord le dossier du comité : « Choisir un dossier existant ».");
+  const folders=[], files=[], q=[{id:root,path:[],depth:0}];
+  while(q.length&&folders.length<500){
+    const f=q.shift(); $("trProg").textContent=`Lecture du Drive : ${folders.length} dossier(s), ${files.length} fichier(s)…`;
+    for(const x of await driveList(f.id)){
+      if(x.mimeType==="application/vnd.google-apps.folder"){const n={id:x.id,name:x.name,path:f.path.concat(x.name),depth:f.depth+1,parent:f.id};folders.push(n);if(n.depth<5)q.push(n);}
+      else files.push({id:x.id,n:x.name,u:x.webViewLink,m:x.mimeType,d:(x.modifiedTime||"").slice(0,10),folder:f.id});
+    }
+  }
+  // proposition d'usage pour chaque dossier
+  const byId=new Map(folders.map(f=>[f.id,f]));
+  for(const f of folders){
+    const yp=f.path.map(p=>(String(p).match(/(20\d\d)/)||[])[1]).filter(Boolean), y=yp.length?+yp[yp.length-1]:null;
+    f.year=y;
+    const par=byId.get(f.parent);
+    if(/^\s*20\d\d\s*$/.test(f.name))f.use="annee";
+    else if(/cerfa|re[cç]us?.?fisc/i.test(f.name))f.use="recus";
+    else if(/logo/i.test(f.name))f.use="logos";
+    else{const ev=matchEvFolder(f.name,y);f.use=ev?"ev:"+ev:par&&par.use&&par.use!=="annee"?"":"";}
+  }
+  // ordre d'affichage : chaque dossier suivi de ses sous-dossiers
+  const kids=new Map(); for(const f of folders){if(!kids.has(f.parent))kids.set(f.parent,[]);kids.get(f.parent).push(f);}
+  const ord=[], walk=id=>{for(const f of (kids.get(id)||[]).sort((x,z)=>x.name.localeCompare(z.name,"fr",{numeric:true}))){ord.push(f);walk(f.id);}}; walk(root);
+  TREE={folders:ord,files,byId};
+}
+function useOf(f){
+  // usage effectif : le sien, sinon celui du dossier parent le plus proche
+  let x=f; while(x){if(x.use==="annee")return {use:"comite",f:x};if(x.use)return {use:x.use,f:x};x=TREE.byId.get(x.parent);}return null;
+}
+function renderTree(){
+  const evs=allEventNames().sort((a,b)=>(yearOf(b)||0)-(yearOf(a)||0)||a.localeCompare(b,"fr"));
+  const opt=f=>`<option value="">${f.depth>1?"· comme le dossier au-dessus":"· ignorer"}</option><option value="annee" ${f.use==="annee"?"selected":""}>Dossier d'une année</option><option value="recus" ${f.use==="recus"?"selected":""}>Reçus fiscaux (CERFA)</option><option value="logos" ${f.use==="logos"?"selected":""}>Logos des annonceurs</option><option value="comite" ${f.use==="comite"?"selected":""}>Documents du comité</option><option value="skip" ${f.use==="skip"?"selected":""}>Ne pas reprendre</option><optgroup label="Événement">${evs.map(e=>`<option value="ev:${esc(e)}" ${f.use==="ev:"+e?"selected":""}>${esc(e)}</option>`).join("")}</optgroup>`;
+  const nf=id=>TREE.files.filter(x=>x.folder===id).length;
+  $("trTable").innerHTML=`<thead><tr><th>Dossier du Drive</th><th class="r">Fichiers</th><th>Correspond à</th><th>Année</th></tr></thead><tbody>${TREE.folders.map((f,i)=>`<tr><td><span style="padding-left:${(f.depth-1)*16}px">${f.depth>1?"└ ":""}<a href="https://drive.google.com/drive/folders/${esc(f.id)}" target="_blank" rel="noopener">${esc(f.name)}</a></span></td><td class="r num small">${nf(f.id)||"·"}</td><td><select data-tru="${i}" aria-label="Usage de ${esc(f.name)}">${opt(f)}</select></td><td><input type="text" inputmode="numeric" data-try="${i}" value="${f.year||""}" style="width:64px" aria-label="Année"></td></tr>`).join("")||`<tr><td colspan="4" class="muted">Aucun sous-dossier.</td></tr>`}</tbody>`;
+  treeSum();
+}
+function treeSum(){
+  const c={ev:0,recus:0,logos:0,comite:0,skip:0};
+  for(const x of TREE.files){const f=TREE.byId.get(x.folder), u=f?useOf(f):null; const k=!u||u.use==="skip"?"skip":u.use.startsWith("ev:")?"ev":u.use; c[k]++;}
+  const known=knownFids();
+  const dup=TREE.files.filter(x=>known.has(x.id)).length;
+  $("trSum").innerHTML=`${TREE.folders.length} dossier(s), ${TREE.files.length} fichier(s) : <b>${c.ev}</b> rattaché(s) à un événement, <b>${c.recus}</b> reçu(s) fiscal(aux), <b>${c.logos}</b> logo(s), <b>${c.comite}</b> du comité, ${c.skip} non repris${dup?`, ${dup} déjà connu(s) de l'application`:""}.`;
+}
+function knownFids(){
+  const s=new Set(S.documents.map(d=>d.fid).filter(Boolean));
+  for(const e of S.ecr)for(const p of e.pieces||[])if(p.id)s.add(p.id);
+  for(const a of S.annonceurs){if(a.logo&&a.logo.id)s.add(a.logo.id);for(const c of Object.values(a.encarts||{}))if(c&&c.recu&&c.recu.id)s.add(c.recu.id);}
+  return s;
+}
+document.addEventListener("change",e=>{
+  const t=e.target; if(!TREE)return;
+  if(t.dataset.tru!=null){TREE.folders[+t.dataset.tru].use=t.value;treeSum();}
+  else if(t.dataset.try!=null){TREE.folders[+t.dataset.try].year=parseInt(t.value)||null;}
+});
+$("gdTree").onclick=async()=>{
+  try{
+    await driveToken(); $("trTable").innerHTML=""; $("trSum").textContent=""; $("trProg").hidden=false; $("dlgTree").showModal();
+    await scanTree(); $("trProg").hidden=true; renderTree();
+  }catch(e){$("trProg").hidden=true;if($("dlgTree").open)$("dlgTree").close();flash(e.message||String(e),true);}
+};
+$("fTree").addEventListener("submit",async ev=>{
+  ev.preventDefault(); if(!TREE)return;
+  const root=dcfg().rootId, map={}, go=$("trGo");
+  // 1. correspondances de dossiers : l'application rangera les nouveaux fichiers dedans
+  for(const f of TREE.folders){
+    const y=f.year;
+    if(f.use==="annee"&&y)map[`${root}/${y}`]=f.id;
+    else if(f.use==="recus")map[`${root}/${y||"*"}/Reçus fiscaux`]=f.id;
+    else if(f.use==="logos")map[`${root}/Logos`]=f.id;
+    else if(f.use==="comite"&&y)map[`${root}/${y}/Comité`]=f.id;
+    else if(f.use&&f.use.startsWith("ev:")){const n=f.use.slice(3);map[`${root}/${yearOf(n)||y}/${n}`]=f.id;}
+  }
+  // 2. fichiers existants
+  const known=knownFids(), ops=[], docs=[], d0=today(); let nR=0,nL=0,nD=0,noMatch=[];
+  const ann=new Map();
+  const getA=id=>{if(!ann.has(id))ann.set(id,JSON.parse(JSON.stringify(S.annonceurs.find(x=>x.id===id))));return ann.get(id);};
+  if($("trFiles").checked){
+    go.disabled=true;
+    const list=TREE.files.filter(x=>!known.has(x.id));
+    for(let i=0;i<list.length;i++){
+      const x=list[i], f=TREE.byId.get(x.folder), u=f?useOf(f):null; if(!u||u.use==="skip")continue;
+      const sub=[]; {let z=f;while(z&&z!==u.f){sub.unshift(z.name);z=TREE.byId.get(z.parent);}}
+      const y=String(u.f.year||f.year||(x.n.match(/20\d\d/)||[])[0]||(x.d||d0).slice(0,4));
+      const piece={n:x.n,u:x.u||`https://drive.google.com/file/d/${x.id}/view`,id:x.id,m:x.m,d:x.d||d0};
+      if(u.use==="recus"&&/pdf/.test(x.m||"")){
+        $("trSum").textContent=`Lecture des reçus : ${i+1} / ${list.length}…`;
+        const info=await readCerfa(x.id), yy=+((x.n.match(/20\d\d/)||[])[0]||y);
+        const a=matchAnn(x.n.replace(/\.pdf$/i,"").replace(/cerfa|encart|comite|bdb|recu|20\d\d/gi," "))||(info&&info.nom?matchAnn(info.nom):null);
+        if(a){
+          const A=getA(a.id), enc=A.encarts=A.encarts||{}, c=enc[yy]=enc[yy]||{montant:(info&&info.montant)||0,statut:"paye"};
+          c.recu=Object.assign(piece,{t:"recu"}); if(info&&info.num)c.num=info.num; if(!c.cerfa||c.cerfa==="afaire")c.cerfa="mail";
+          if(info)for(const k of ["forme","siren","adrNum","adrRue","adrCp","adrVille"])if(info[k]&&!A[k])A[k]=info[k];
+          nR++; continue;
+        }
+        noMatch.push(x.n);
+      }
+      if(u.use==="logos"){const a=matchAnn(x.n.replace(/\.\w+$/,"").replace(/logo/gi," "));if(a){getA(a.id).logo=Object.assign(piece,{t:"logo"});nL++;continue;}}
+      const evn=u.use.startsWith("ev:")?u.use.slice(3):"";
+      docs.push({t:typeHint(x.n)||typeHint(sub.join(" "))||(u.use==="recus"?"recu":u.use==="logos"?"logo":"autre"),n:x.n,u:piece.u,m:x.m,fid:x.id,d:piece.d,annee:String(evn?yearOf(evn)||y:y),evenement:evn,par:S.user.nom,dossier:sub.join(" / ")});
+      nD++;
+    }
+  }
+  ann.forEach(a=>{const {id,...data}=a;ops.push({t:"set",col:"annonceurs",id,data});});
+  docs.forEach(d=>ops.push({t:"set",col:"documents",id:store.newId("documents"),data:d}));
+  const maxNum=Math.max(0,...[...ann.values()].flatMap(a=>Object.values(a.encarts||{}).map(c=>+(c&&c.num)||0)));
+  const drive=Object.assign({},dcfg(),{folders:Object.assign({},dcfg().folders||{},map)});
+  ops.push({t:"merge",col:"parametres",id:"general",data:Object.assign({drive},maxNum?{organisme:Object.assign({},P().organisme||{},{prochainRecu:Math.max(maxNum+1,+((P().organisme||{}).prochainRecu)||0)})}:{})});
+  Object.assign(DRV.folders,map);
+  const ok=await run(store.commit(ops,{action:"Documents",texte:`Arborescence Drive reprise : ${Object.keys(map).length} dossier(s) reliés, ${nD} document(s), ${nR} reçu(s) fiscal(aux), ${nL} logo(s)`}),
+    `${Object.keys(map).length} dossier(s) reliés · ${nD} document(s) · ${nR} reçu(s) · ${nL} logo(s) repris.`);
+  go.disabled=false;
+  if(ok){$("dlgTree").close();TREE=null;if(noMatch.length)flash(`${noMatch.length} reçu(s) sans annonceur reconnu, gardés comme documents : ${noMatch.slice(0,5).join(", ")}${noMatch.length>5?"…":""}`);}
+});
 
 </script>
 </body>
