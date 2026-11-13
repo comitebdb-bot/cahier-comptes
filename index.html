@@ -591,6 +591,13 @@ ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;g
 .ceq span{font-size:12px;color:var(--muted)}.ceq b{font-size:17px;font-variant-numeric:tabular-nums}
 .ceq em{font-style:normal;color:var(--muted);font-size:18px}
 .ceq .ok{background:var(--good-soft)}.ceq .ok b{color:var(--good)}.ceq .due{background:var(--warn-soft)}.ceq .due b{color:var(--warn)}.ceq .over{background:var(--bad-soft)}.ceq .over b{color:var(--bad)}
+details.pvs{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:10px}
+details.pvs>summary{cursor:pointer;font-weight:600;font-size:15px;list-style-position:inside}
+details.pvs[open]>summary{margin-bottom:10px}
+#pvTable tr.sub td{color:var(--muted);border-top:0}
+#pvTable tr.total.big td{font-size:16px}
+td.sv{width:22%}.svb{height:8px;border-radius:4px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden}
+.svb>div{height:100%;border-radius:4px;background:var(--accent)}.svb>div.over{background:var(--bad)}
 @media (display-mode:standalone){.side{padding-top:max(18px,env(safe-area-inset-top))}}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('cahier-theme')||'nuit'}catch(e){document.documentElement.dataset.theme='nuit'}</script>
@@ -816,7 +823,11 @@ ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;g
       </div>
       <div class="tiles" id="pvTiles"></div>
       <div class="scroll"><table id="pvTable"></table></div>
-      <p class="small muted" style="margin:0">Réalisé : opérations du cahier pour cet événement, par poste. Écart positif : mieux que prévu. « Pour l'équilibre » : quantité à vendre, les autres lignes restant identiques, pour un résultat nul. Une dépense « engagée » correspond à un devis signé ou une commande passée. Le total du prévisionnel devient le budget de l'événement.</p>
+      <p class="small muted" style="margin:0">« Pour l'équilibre » : quantité à vendre, les autres lignes restant identiques, pour un résultat nul. Une dépense « engagée » correspond à un devis signé ou une commande passée.</p>
+      <details class="pvs" id="pvSuivi" hidden><summary id="pvSuiviSum">Suivi : prévu face au réalisé</summary>
+        <div class="scroll"><table id="pvCmp"></table></div>
+        <p class="small muted" style="margin:0">Réalisé : opérations du cahier pour cet événement. Écart positif : mieux que prévu. « Hors budget » : dépensé dans une catégorie qui n'a aucune ligne prévue.</p>
+      </details>
     </div>
     <div class="card" id="prjCard">
       <div class="row between"><h2>Trésorerie prévisionnelle sur 12 mois</h2><span id="prjPill"></span></div>
@@ -3135,26 +3146,46 @@ function renderPrev(){
     <div class="tile"><h3>Dépenses prévues</h3><div class="v">${fm(pDep)}</div><div class="s">réalisées à date ${fm(rDep)}</div></div>
     <div class="tile ${tone(res)}"><h3>Résultat prévu</h3><div class="v ${cls(res)}">${sg(res)}</div><div class="s">réalisé à date ${sg(rRec-rDep)}</div></div>
     <div class="tile ${engRest>0.005?"acc":""}"><h3>Engagé, reste à payer</h3><div class="v">${fm(engRest)}</div><div class="s">devis signés et commandes</div></div>`;
-  const nc=w?10:9;
+  // 1. le budget : uniquement les lignes prévues
+  const nc=w?8:7;
   const block=(sens,title)=>{
-    const lines=L.filter(l=>l.sens===sens), real=e?(sens==="rec"?e.recCat:e.depCat):{};
-    const postes=[...new Set([...lines.map(l=>l.poste),...Object.keys(real).filter(k=>k!=="Fond de caisse"&&Math.abs(real[k])>0.005)])];
+    const lines=L.filter(l=>l.sens===sens), tot=sumOf(lines,l=>+l.montant||0);
     const pvOf=p=>sumOf(lines.filter(l=>l.poste===p),l=>+l.montant||0);
-    postes.sort((a,b)=>(pvOf(b)||real[b]||0)-(pvOf(a)||real[a]||0));
+    const postes=[...new Set(lines.map(l=>l.poste))].sort((a,b)=>pvOf(b)-pvOf(a));
     let h=`<tr class="grp"><td colspan="${nc}">${title}</td></tr>`;
     for(const p of postes){
-      const ls=lines.filter(l=>l.poste===p), pv=pvOf(p), rv=real[p]||0, ec=sens==="rec"?rv-pv:pv-rv;
+      const ls=lines.filter(l=>l.poste===p);
       for(const l of ls){
         const need=sens==="rec"&&+l.qte>0&&+l.pu>0?(res>=0?"atteint":qfmt(Math.ceil(+l.qte+(-res)/(+l.pu)))):"";
         const st=sens==="dep"?(l.statut==="engage"?`<span class="pill warn">Engagé</span>`:`<span class="pill neutral">Prévu</span>`)+(l.echeance?` <span class="small muted">${fdate(l.echeance)}</span>`:""):"";
-        h+=`<tr><td class="small muted">${esc(p)}</td><td>${esc(l.libelle||"")}${l.note?`<div class="small muted">${esc(l.note)}</div>`:""}</td><td class="r num">${l.qte?qfmt(l.qte):""}</td><td class="r num">${+l.pu?fm(+l.pu):""}</td><td class="r num">${fm(+l.montant||0)}</td><td></td><td></td><td>${st}</td><td class="r num small">${need}</td>${w?`<td><button type="button" class="mini" data-pvl="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
+        h+=`<tr><td class="small muted">${esc(p)}</td><td>${esc(l.libelle||"")}${l.note?`<div class="small muted">${esc(l.note)}</div>`:""}</td><td class="r num">${l.qte?qfmt(l.qte):""}</td><td class="r num">${+l.pu?fm(+l.pu):""}</td><td class="r num">${fm(+l.montant||0)}</td><td>${st}</td><td class="r num small">${need}</td>${w?`<td><button type="button" class="mini" data-pvl="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
       }
-      h+=`<tr class="total"><td colspan="4">${esc(p)}${ls.length?"":` <span class="pill warn">non prévu</span>`}</td><td class="r num">${fm(pv)}</td><td class="r num">${fm(rv)}</td><td class="r num ${cls(ec)}">${Math.abs(ec)<0.005?"·":sg(ec)}</td><td colspan="${nc-7}"></td></tr>`;
+      if(ls.length>1)h+=`<tr class="sub"><td colspan="4" class="small">Sous-total ${esc(p)}</td><td class="r num small">${fm(pvOf(p))}</td><td colspan="${nc-5}"></td></tr>`;
     }
-    if(!postes.length)h+=`<tr><td colspan="${nc}" class="muted">Aucune ligne.</td></tr>`;
+    h+=lines.length?`<tr class="total"><td colspan="4">Total ${title.toLowerCase()} prévues</td><td class="r num">${fm(tot)}</td><td colspan="${nc-5}"></td></tr>`:`<tr><td colspan="${nc}" class="muted">Aucune ${sens==="rec"?"recette":"dépense"} prévue. ${w?`Ajoutez-en avec « + ${sens==="rec"?"Recette":"Dépense"} prévue ».`:""}</td></tr>`;
     return h;
   };
-  $("pvTable").innerHTML=`<thead><tr><th>Poste</th><th>Libellé</th><th class="r">Qté</th><th class="r">Prix unit.</th><th class="r">Prévu</th><th class="r">Réalisé</th><th class="r">Écart</th><th>Statut</th><th class="r">Pour l'équilibre</th>${w?"<th></th>":""}</tr></thead><tbody>${block("rec","Recettes")}${block("dep","Dépenses")}<tr class="total"><td colspan="4">Résultat</td><td class="r num ${cls(res)}">${sg(res)}</td><td class="r num ${cls(rRec-rDep)}">${sg(rRec-rDep)}</td><td colspan="${nc-6}"></td></tr></tbody>`;
+  $("pvTable").innerHTML=`<thead><tr><th>Catégorie</th><th>Libellé</th><th class="r">Qté</th><th class="r">Prix unit.</th><th class="r">Montant</th><th>Statut</th><th class="r">Pour l'équilibre</th>${w?"<th></th>":""}</tr></thead><tbody>${block("rec","Recettes")}${block("dep","Dépenses")}<tr class="total big"><td colspan="4">Résultat prévu</td><td class="r num ${cls(res)}">${sg(res)}</td><td colspan="${nc-5}"></td></tr></tbody>`;
+  // 2. le suivi : prévu face au réalisé, à part
+  const box=$("pvSuivi"), hasReal=!!e&&(rRec>0.005||rDep>0.005);
+  box.hidden=!hasReal&&!L.length;
+  if(box.hidden)return;
+  const cmp=(sens,title)=>{
+    const lines=L.filter(l=>l.sens===sens), real=e?(sens==="rec"?e.recCat:e.depCat):{};
+    const pvOf=p=>sumOf(lines.filter(l=>l.poste===p),l=>+l.montant||0);
+    const inB=[...new Set(lines.map(l=>l.poste))].sort((a,b)=>pvOf(b)-pvOf(a));
+    const out=Object.keys(real).filter(k=>k!=="Fond de caisse"&&Math.abs(real[k])>0.005&&!inB.includes(k)).sort((a,b)=>real[b]-real[a]);
+    const row=(p,pv,rv,hb)=>{const ec=sens==="rec"?rv-pv:pv-rv, used=pv>0.005?Math.min(100,rv/pv*100):0;
+      return `<tr><td>${esc(p)}${hb?` <span class="pill warn">hors budget</span>`:""}</td><td class="r num">${hb?"·":fm(pv)}</td><td class="r num">${fm(rv)}</td><td class="sv">${hb||pv<=0.005?"":`<div class="svb"><div style="width:${used}%" class="${sens==="dep"&&rv>pv+0.005?"over":""}"></div></div>`}</td><td class="r num ${cls(ec)}">${Math.abs(ec)<0.005?"·":sg(ec)}</td></tr>`;};
+    let h=`<tr class="grp"><td colspan="5">${title}</td></tr>`;
+    for(const p of inB)h+=row(p,pvOf(p),real[p]||0,false);
+    for(const p of out)h+=row(p,0,real[p],true);
+    if(!inB.length&&!out.length)h+=`<tr><td colspan="5" class="muted">Rien pour l'instant.</td></tr>`;
+    return h;
+  };
+  const nb=e?Object.entries(e.depCat).filter(([k,v])=>k!=="Fond de caisse"&&v>0.005&&!L.some(l=>l.sens==="dep"&&l.poste===k)):[];
+  $("pvSuiviSum").innerHTML=`Suivi : prévu face au réalisé${hasReal?` <span class="small muted">· réalisé à date ${sg(rRec-rDep)}${nb.length?` · ${fm(sumOf(nb,([,v])=>v))} de dépenses hors budget`:""}</span>`:""}`;
+  $("pvCmp").innerHTML=`<thead><tr><th>Catégorie</th><th class="r">Prévu</th><th class="r">Réalisé</th><th>Consommé</th><th class="r">Écart</th></tr></thead><tbody>${cmp("rec","Recettes")}${cmp("dep","Dépenses")}<tr class="total"><td>Résultat</td><td class="r num ${cls(res)}">${sg(res)}</td><td class="r num ${cls(rRec-rDep)}">${sg(rRec-rDep)}</td><td></td><td></td></tr></tbody>`;
 }
 function projection(){
   const seuil=+P().seuilTreso||0, t=today(), start=t.slice(0,7), months=[...Array(12)].map((_,i)=>addMonth(start,i));
