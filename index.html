@@ -1024,7 +1024,8 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
       <div class="grid2"><div class="field"><label for="gdClient">ID client OAuth</label><input type="text" id="gdClient" placeholder="123456-abc.apps.googleusercontent.com" autocomplete="off"></div><div class="field"><label for="gdKey">Clé d'API (Picker)</label><input type="text" id="gdKey" placeholder="AIza…" autocomplete="off"></div></div>
       <div class="field" style="max-width:260px"><label for="gdApp">Numéro du projet Google Cloud</label><input type="text" id="gdApp" inputmode="numeric" autocomplete="off"></div>
       <p class="small" style="margin:0" id="gdRoot"></p>
-      <div class="row"><button type="button" class="primary" id="gdSave">Enregistrer</button><button type="button" id="gdConnect">Se connecter au Drive</button><button type="button" id="gdPickRoot">Choisir un dossier existant</button><button type="button" id="gdTree">Reprendre l'arborescence existante</button></div></div>
+      <div class="row"><button type="button" class="primary" id="gdSave">Enregistrer</button><button type="button" id="gdConnect">Se connecter au Drive</button><button type="button" id="gdPickRoot">Choisir un dossier existant</button><button type="button" id="gdTree">Reprendre l'arborescence existante</button></div>
+      <div class="row"><input type="text" id="gdRootUrl" placeholder="Ou collez le lien du dossier du comité (https://drive.google.com/drive/folders/…)" aria-label="Lien du dossier du comité" style="flex:1;min-width:240px"><button type="button" id="gdRootSet">Utiliser ce dossier</button></div></div>
     <div class="card w"><h2>Reçus fiscaux (CERFA 2041-MEC-SD)</h2>
       <p class="small muted" style="margin:0">Coordonnées du comité reprises sur chaque reçu. Dans l'objet, {annee} est remplacé par l'année de l'encart.</p>
       <div class="grid2"><div class="field"><label for="orgNom">Dénomination</label><input type="text" id="orgNom"></div><div class="field"><label for="orgRna">N° RNA</label><input type="text" id="orgRna"></div></div>
@@ -4363,9 +4364,16 @@ async function drivePick(opt){
   const tok=await driveToken();
   if(!(window.google&&google.picker)){await loadScript("https://apis.google.com/js/api.js");await new Promise(r=>gapi.load("picker",r));}
   return new Promise(ok=>{
-    const view=new google.picker.DocsView(google.picker.ViewId.DOCS).setIncludeFolders(true).setOwnedByMe(false);
-    if(opt.mime)view.setMimeTypes(opt.mime);
-    const b=new google.picker.PickerBuilder().addView(view).addView(new google.picker.DocsUploadView())
+    // onglets : Mon Drive (navigation dans les dossiers), Partagés avec moi, Drives partagés
+    const G=google.picker, folder=opt.mime==="application/vnd.google-apps.folder";
+    const mk=(label,f)=>{const v=new G.DocsView(folder?G.ViewId.FOLDERS:G.ViewId.DOCS).setIncludeFolders(true);if(folder&&v.setSelectFolderEnabled)v.setSelectFolderEnabled(true);if(opt.mime)v.setMimeTypes(opt.mime);f(v);if(v.setLabel)v.setLabel(label);return v;};
+    const b=new G.PickerBuilder()
+      .addView(mk("Mon Drive",v=>v.setParent("root")))
+      .addView(mk("Partagés avec moi",v=>v.setOwnedByMe(false)))
+      .addView(mk("Drives partagés",v=>v.setEnableDrives&&v.setEnableDrives(true)));
+    if(!folder)b.addView(new G.DocsUploadView());
+    if(G.Feature.SUPPORT_DRIVES)b.enableFeature(G.Feature.SUPPORT_DRIVES);
+    b
       .setOAuthToken(tok).setDeveloperKey(dcfg().apiKey).setLocale("fr").setTitle(opt.title||"Choisir dans le Drive")
       .setCallback(d=>{if(d.action===google.picker.Action.PICKED)ok((d.docs||[]).map(x=>({n:x.name,u:x.url,id:x.id,m:x.mimeType})));else if(d.action===google.picker.Action.CANCEL)ok([]);});
     if(dcfg().appId)b.setAppId(String(dcfg().appId));
@@ -4830,6 +4838,17 @@ $("fTree").addEventListener("submit",async ev=>{
   if(ok){$("dlgTree").close();TREE=null;if(noMatch.length)flash(`${noMatch.length} reçu(s) sans annonceur reconnu, gardés comme documents : ${noMatch.slice(0,5).join(", ")}${noMatch.length>5?"…":""}`);}
 });
 
+
+$("gdRootSet").onclick=async()=>{
+  const v=$("gdRootUrl").value.trim(), id=(v.match(/folders\/([\w-]{10,})/)||v.match(/[?&]id=([\w-]{10,})/)||v.match(/^([\w-]{20,})$/)||[])[1];
+  if(!id){flash("Collez le lien du dossier, tel qu'il s'affiche dans la barre d'adresse du Drive.",true);return;}
+  try{
+    const f=await (await gfetch(GD+"/"+id+"?supportsAllDrives=true&fields=id,name,mimeType")).json();
+    if(f.mimeType!=="application/vnd.google-apps.folder")throw new Error("Ce lien n'est pas celui d'un dossier.");
+    await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{drive:Object.assign({},dcfg(),{rootId:f.id,rootName:f.name})}}],{action:"Réglages",texte:`Dossier Drive du comité : ${f.name}`}),`Dossier « ${f.name} » choisi.`);
+    DRV.folders={}; $("gdRootUrl").value=""; renderDriveSettings();
+  }catch(e){flash(e.message||String(e),true);}
+};
 </script>
 </body>
 </html>
