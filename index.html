@@ -179,6 +179,11 @@ dialog form{display:flex;flex-direction:column;gap:12px}
 .seg label:has(input:checked){background:var(--accent);color:var(--surface)}
 .seg label:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:-2px}
 body:not(.can-write) .w{display:none !important}
+body:not(.can-enc) .we{display:none !important}
+body:not(.can-doc) .wd{display:none !important}
+body:not(.is-admin) .wa{display:none !important}
+.lvl{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:10px;padding:8px 12px}.lvl label{display:flex;gap:8px;align-items:flex-start}
+#mDroits .drow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
 /* v12 documents */
 .entbox{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px}
 button.entr{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;width:100%;padding:8px 10px;font-weight:400}
@@ -656,8 +661,8 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
 <div class="wrap" id="scrWait" hidden>
   <div class="auth card">
     <h1>Accès en attente</h1>
-    <p style="margin:0">Votre compte est créé. Le trésorier doit maintenant valider votre accès au cahier des comptes.</p>
-    <div class="field"><label for="wUid">Votre identifiant (à transmettre au trésorier si besoin)</label><input type="text" id="wUid" readonly></div>
+    <p style="margin:0">Votre compte est créé et votre demande est transmise à l'administrateur. Il va valider votre accès et choisir vos droits ; cliquez ensuite sur « Réessayer ».</p>
+    <div class="field"><label for="wUid">Votre identifiant (à transmettre à l'administrateur si besoin)</label><input type="text" id="wUid" readonly></div>
     <div class="row"><button type="button" class="primary" id="wRetry">Réessayer</button><button type="button" id="wOut">Se déconnecter</button></div>
   </div>
 </div>
@@ -863,15 +868,15 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
     <div class="card">
       <div class="row between">
         <div class="row"><h2>Encarts publicitaires</h2><select id="aYear" aria-label="Année"></select></div>
-        <div class="row"><details class="menu w"><summary class="btn">Importer / exporter</summary><div class="pop">
+        <div class="row"><details class="menu we"><summary class="btn">Importer / exporter</summary><div class="pop">
           <label class="mi" for="aFile">Importer une liste d'encarts (Excel)</label>
           <button type="button" id="aExport">Exporter la liste de l'année (Excel)</button>
           <button type="button" id="aSeed">Reprendre les annonceurs du cahier</button></div></details>
-          <details class="menu w"><summary class="btn">Reçus fiscaux</summary><div class="pop">
+          <details class="menu we"><summary class="btn">Reçus fiscaux</summary><div class="pop">
           <button type="button" id="aFill">Compléter les fiches sans SIREN (annuaire)</button>
           <button type="button" id="aRecus">Générer les reçus manquants de l'année</button>
           <button type="button" id="aLinkRecus">Rattacher des reçus déjà faits (Drive)</button></div></details><input type="file" id="aFile" accept=".xlsx,.xls,.csv" hidden>
-          <button type="button" class="w" id="aRenew">Reconduire</button><button type="button" class="primary w" id="aNew">+ Annonceur</button></div>
+          <button type="button" class="we" id="aRenew">Reconduire</button><button type="button" class="primary we" id="aNew">+ Annonceur</button></div>
       </div>
       <div class="tiles" id="aTiles"></div>
       <div class="row between"><div class="chips" id="aFilt"></div>
@@ -934,7 +939,8 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
 
   <section class="view" id="v-journal">
     <div class="card"><h2>Historique des modifications</h2>
-      <p class="small muted" style="margin:0">Les 300 dernières opérations. Le journal ne peut être ni modifié ni effacé depuis l'application.</p>
+      <p class="small muted" style="margin:0">Les 1 000 dernières modifications, avec leur auteur. Le journal ne peut être ni modifié ni effacé depuis l'application.</p>
+      <div class="row"><select id="jWho" aria-label="Personne"></select><select id="jAct" aria-label="Type"></select><input type="search" id="jQ" placeholder="Rechercher dans le détail" aria-label="Rechercher" style="flex:1;min-width:180px"></div>
       <div class="scroll"><table id="jTable"></table></div></div>
   </section>
 
@@ -997,7 +1003,7 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
 
   <section class="view" id="v-documents">
     <div class="card">
-      <div class="row between"><h2>Documents</h2><button type="button" class="primary w" id="docAdd">+ Ajouter</button></div>
+      <div class="row between"><h2>Documents</h2><button type="button" class="primary wd" id="docAdd">+ Ajouter</button></div>
       <p class="small muted" style="margin:0" id="docState"></p>
       <div class="row"><input type="search" id="docQ" placeholder="Rechercher un document, un fournisseur, un annonceur…" aria-label="Rechercher" style="flex:1;min-width:200px"><select id="docYear" aria-label="Année"></select></div>
       <div class="chips" id="docChips"></div>
@@ -1006,16 +1012,22 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
   </section>
   <section class="view" id="v-evdocs">
     <div class="card">
-      <div class="row between"><h2>Documents de l'événement</h2><button type="button" class="primary w" id="evDocAdd">+ Ajouter</button></div>
+      <div class="row between"><h2>Documents de l'événement</h2><button type="button" class="primary wd" id="evDocAdd">+ Ajouter</button></div>
       <p class="small muted" style="margin:0">Factures, devis, contrats, assurances, comptes rendus. Les pièces jointes aux opérations de l'événement apparaissent aussi.</p>
       <div id="evDocs"></div>
     </div>
   </section>
   <section class="view" id="v-reglages">
-    <div class="card w"><h2>Demandes d'accès</h2><div class="scroll"><table id="dTable"></table></div></div>
-    <div class="card w"><h2>Membres</h2>
-      <p class="small muted" style="margin:0">Un lecteur consulte tout sans rien modifier. Un gestionnaire de stock consulte tout et gère uniquement le stock. Un trésorier gère tout, y compris les accès.</p>
+    <div class="card wa"><h2>Demandes d'accès</h2><div class="scroll"><table id="dTable"></table></div></div>
+    <div class="card wa"><h2>Membres et droits</h2>
+      <p class="small muted" style="margin:0">L'administrateur gère tout, y compris les accès. Un trésorier modifie tout sauf les accès. Pour les autres membres du bureau, choisissez lecture ou écriture par domaine : comptes, stock et buvette, encarts, documents. Tout le monde peut consulter.</p>
       <div class="scroll"><table id="mTable"></table></div></div>
+    <div class="card wa"><h2>Être prévenu des demandes d'accès</h2>
+      <p class="small muted" style="margin:0">Un mail est envoyé à l'administrateur à chaque nouvelle demande, via un petit script Google installé une fois sur le compte Gmail du comité (voir le guide, partie « Accès et droits »).</p>
+      <div class="row"><input type="url" id="nfUrl" placeholder="https://script.google.com/macros/s/…/exec" aria-label="Adresse du script de notification" style="flex:1;min-width:240px"><button type="button" class="primary" id="nfSave">Enregistrer</button><button type="button" id="nfTest">Envoyer un test</button></div></div>
+    <div class="card wa"><div class="row between"><h2>Journal des connexions</h2><select id="cxWho" aria-label="Personne"></select></div>
+      <p class="small muted" style="margin:0">Connexions, ouvertures de l'application, déconnexions et demandes d'accès. Ni modifiable ni effaçable depuis l'application. Les modifications faites dans le cahier sont dans Bilans → Historique des modifications.</p>
+      <div class="scroll" style="max-height:420px"><table id="cxTable"></table></div></div>
     <div class="card w"><h2>Saisie</h2>
       <div class="row"><div class="field" style="max-width:260px"><label for="sFrais">Frais bancaires par virement (€)</label><input type="text" inputmode="decimal" id="sFrais"></div><div class="field" style="max-width:260px"><label for="sSeuil">Seuil d'alerte de trésorerie (€)</label><input type="text" inputmode="decimal" id="sSeuil"></div><button type="button" id="sFraisOk">Enregistrer</button></div>
       <p class="small muted" style="margin:0">Frais : montant proposé par la case « Ajouter aussi les frais de virement » (0 pour masquer la case). Seuil : la trésorerie prévisionnelle vous alerte si elle descend en dessous.</p></div>
@@ -1354,6 +1366,19 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
   <p class="small" style="margin:0" id="efSum"></p>
   <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Compléter</button></div>
 </form></dialog>
+<dialog id="dlgM"><form id="fM">
+  <h2 id="mTitle">Droits du membre</h2>
+  <div class="grid2"><div class="field"><label for="mNom">Nom</label><input type="text" id="mNom"></div><div class="field"><label for="mMail">E-mail</label><input type="text" id="mMail" readonly></div></div>
+  <div class="field"><label for="mFonction">Fonction au comité</label><select id="mFonction"></select></div>
+  <fieldset class="lvl"><legend class="small">Niveau d'accès</legend>
+    <label><input type="radio" name="mLvl" value="admin"><span><b>Administrateur</b><br><span class="small muted">tout, y compris valider les comptes et choisir les droits</span></span></label>
+    <label><input type="radio" name="mLvl" value="tresorier"><span><b>Trésorier</b><br><span class="small muted">modifie tout, sans gérer les accès</span></span></label>
+    <label><input type="radio" name="mLvl" value="bureau"><span><b>Droits choisis</b><br><span class="small muted">lecture ou écriture par domaine</span></span></label>
+  </fieldset>
+  <div class="docbox" id="mDroits"></div>
+  <div id="mErr" class="msg err" hidden></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+</form></dialog>
 <dialog id="dlgRL"><form id="fRL">
   <h2>Rattacher des reçus fiscaux</h2>
   <p class="small muted" style="margin:0">Chaque fichier est rapproché d'un annonceur par son nom. Le SIREN, l'adresse et le numéro d'ordre lus dans le reçu complètent la fiche.</p>
@@ -1649,7 +1674,7 @@ function build(ecr){
 /* ================= stockage : Firebase ou démonstration ================= */
 // Toutes les opérations en base passent par commit(ops, journal) : une liste d'opérations
 // {t:"set"|"update"|"merge"|"delete", col, id, data} appliquées par lots, plus les lignes du journal.
-const S={ready:false,user:null,role:null,ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},pending:0,previsions:[],articles:[],mouvements:[],documents:[]};
+const S={ready:false,user:null,role:null,droits:null,me:null,connexions:[],publicCfg:{},ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},pending:0,previsions:[],articles:[],mouvements:[],documents:[]};
 let onData=()=>{};
 const slug=s=>strip(s).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"sans-nom";
 const resume=e=>`${fdate(e.date)} · ${e.compte==="LA"?"Livret A":"Compte courant"} · ${e.evenement} · ${e.designation} · ${(+e.recette||0)>0?"+"+fm(+e.recette):"−"+fm(+e.depense||0)}`;
@@ -1663,21 +1688,39 @@ function firebaseStore(){
   const auth=firebase.auth(), db=firebase.firestore();
   try{db.enablePersistence({synchronizeTabs:true}).catch(()=>{});}catch(e){}
   const now=()=>firebase.firestore.FieldValue.serverTimestamp();
-  const pend={}; let unsub=[], pendingName="";
+  const pend={}; let unsub=[], pendingName="", justIn=false;
   const me=()=>({uid:S.user.uid,nom:S.user.nom});
   const stop=()=>{unsub.forEach(f=>f());unsub=[];};
   const within=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej({code:"timeout"}),ms))]);
+  const UA=()=>{const u=navigator.userAgent;const os=/iPhone|iPad/.test(u)?"iPhone/iPad":/Android/.test(u)?"Android":/Windows/.test(u)?"Windows":/Mac/.test(u)?"Mac":/Linux/.test(u)?"Linux":"Autre";const br=/Edg\//.test(u)?"Edge":/Firefox\//.test(u)?"Firefox":/Chrome\//.test(u)?"Chrome":/Safari\//.test(u)?"Safari":"Navigateur";return `${br} · ${os}${matchMedia("(display-mode: standalone)").matches?" · application installée":""}`;};
+  function logCx(u,ev,statut){
+    // journal des connexions : ajout seulement, lu par l'administrateur
+    try{db.collection("connexions").add({uid:u.uid,email:u.email||"",nom:S.user?S.user.nom:(u.displayName||u.email||""),ev,statut:statut||"",ua:UA(),at:now()}).catch(()=>{});}catch(e){}
+  }
   async function role(u){
-    // le rôle est gardé sur l'appareil pour pouvoir ouvrir l'application hors connexion
-    const key="cahier-role-"+u.uid; let cached=null; try{cached=localStorage.getItem(key);}catch(e){}
-    const keep=r=>{try{if(r)localStorage.setItem(key,r);else localStorage.removeItem(key);}catch(e){}return r;};
+    // la fiche du membre est gardée sur l'appareil pour pouvoir ouvrir l'application hors connexion
+    const key="cahier-membre-"+u.uid; let cached=null; try{cached=JSON.parse(localStorage.getItem(key)||"null");}catch(e){}
+    const keep=m=>{try{if(m)localStorage.setItem(key,JSON.stringify(m));else localStorage.removeItem(key);}catch(e){}return m;};
     let d;
     try{d=await within(db.doc("membres/"+u.uid).get(),8000);}catch(e){return cached;}
-    if(d.exists) {const rr=d.data().role;return keep(rr==="tresorier"||rr==="stock"?rr:"lecteur");}
+    if(d.exists){
+      const m=d.data();
+      // ancien trésorier principal (désigné dans les règles) : devient administrateur
+      if(m.role==="tresorier"||m.role==="stock"||m.role==="lecteur"){try{await within(db.doc("membres/"+u.uid).set({role:"admin"},{merge:true}),6000);m.role="admin";}catch(e){}}
+      return keep({email:m.email,nom:m.nom,role:m.role,fonction:m.fonction||"",droits:m.droits||null});
+    }
     if(!navigator.onLine) return cached;
-    // le premier trésorier est désigné par son identifiant dans les règles de sécurité
-    try{await within(db.doc("membres/"+u.uid).set({email:u.email,nom:S.user.nom,role:"tresorier",at:now()}),8000);return keep("tresorier");}catch(e){}
-    try{await within(db.doc("demandes/"+u.uid).set({email:u.email,nom:S.user.nom,at:now()}),8000);}catch(e){}
+    // le premier administrateur est désigné par son identifiant dans les règles de sécurité
+    try{await within(db.doc("membres/"+u.uid).set({email:u.email,nom:S.user.nom,role:"admin",fonction:"",at:now()}),8000);return keep({email:u.email,nom:S.user.nom,role:"admin"});}catch(e){}
+    try{
+      const dm=await within(db.doc("demandes/"+u.uid).get(),8000);
+      if(!dm.exists){
+        await within(db.doc("demandes/"+u.uid).set({email:u.email,nom:S.user.nom,at:now()}),8000);
+        logCx(u,"demande d'accès","en attente");
+        try{const pc=await within(db.doc("public/config").get(),6000);const url=pc.exists&&pc.data().notifUrl;
+          if(url)await notifyAdmin(url,`Demande d'accès : ${S.user.nom}`,`${S.user.nom} (${u.email}) demande l'accès au cahier des comptes${ASSO?" de "+ASSO:""}.\n\nPour valider et choisir ses droits : ${location.origin+location.pathname}#reglages`);}catch(e){}
+      }
+    }catch(e){}
     return keep(null);
   }
   function listen(){
@@ -1688,15 +1731,21 @@ function firebaseStore(){
       afterData();onData();
     },err));
     for(const c of ["ecritures","budgets","evenements","caisses","annonceurs","parametres","previsions","articles","mouvements","documents"]) col(db.collection(c),KEYS[c],true);
-    col(db.collection("journal").orderBy("at","desc").limit(300),"journal",false);
-    if(S.role==="tresorier"){col(db.collection("membres"),"membres",true);col(db.collection("demandes"),"demandes",false);}
+    col(db.collection("journal").orderBy("at","desc").limit(1000),"journal",false);
+    if(S.role==="admin"){col(db.collection("membres"),"membres",true);col(db.collection("demandes"),"demandes",false);col(db.collection("connexions").orderBy("at","desc").limit(500),"connexions",false);
+      unsub.push(db.doc("public/config").onSnapshot(d=>{S.publicCfg=d.exists?d.data():{};onData();},()=>{}));}
   }
   auth.onAuthStateChanged(async u=>{
-    stop(); Object.assign(S,{ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},role:null,pending:0,previsions:[],articles:[],mouvements:[],documents:[]});
+    stop(); Object.assign(S,{droits:null,me:null,connexions:[],publicCfg:{},ecr:[],budgets:[],journal:[],membres:[],demandes:[],evenements:[],caisses:[],annonceurs:[],paramsList:[],params:{},role:null,pending:0,previsions:[],articles:[],mouvements:[],documents:[]});
     if(!u){S.user=null;S.ready=true;onData();return;}
     S.user={uid:u.uid,email:u.email,nom:pendingName||u.displayName||u.email};
-    S.role=await role(u); S.ready=true; onData();
-    if(S.role)listen();
+    const m=await role(u); S.me=m; if(m&&m.nom)S.user.nom=m.nom; S.role=m?m.role:null; S.droits=droitsOf(m); S.ready=true; onData();
+    if(m){
+      // une ligne par connexion, et au plus une « ouverture » par appareil toutes les 30 minutes
+      const k="cahier-cx-"+u.uid, last=+(localStorage.getItem(k)||0);
+      if(justIn||Date.now()-last>30*60000){logCx(u,justIn?"connexion":"ouverture",ROLE_LBL[m.role]||m.role);try{localStorage.setItem(k,String(Date.now()));}catch(e){}}
+      justIn=false; listen();
+    }
   });
   const newId=c=>db.collection(c).doc().id;
   async function commit(ops,journal){
@@ -1719,10 +1768,10 @@ function firebaseStore(){
   }
   return {
     now, newId, commit,
-    signIn:(m,p)=>auth.signInWithEmailAndPassword(m,p),
-    async signUp(nom,m,p){pendingName=nom;const c=await auth.createUserWithEmailAndPassword(m,p);try{await c.user.updateProfile({displayName:nom});}catch(e){}},
+    signIn:(m,p)=>{justIn=true;return auth.signInWithEmailAndPassword(m,p);},
+    async signUp(nom,m,p){pendingName=nom;justIn=true;const c=await auth.createUserWithEmailAndPassword(m,p);try{await c.user.updateProfile({displayName:nom});}catch(e){}},
     reset:m=>auth.sendPasswordResetEmail(m),
-    signOut:()=>auth.signOut()
+    async signOut(){const u=auth.currentUser;if(u&&S.role){logCx(u,"déconnexion","");await new Promise(r=>setTimeout(r,300));}try{localStorage.removeItem("cahier-cx-"+(u&&u.uid));}catch(e){}return auth.signOut();}
   };
 }
 
@@ -1733,7 +1782,7 @@ function demoStore(){
   for(const k of LIST) if(!Array.isArray(D[k]))D[k]=[];
   const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
   const sync=()=>{try{localStorage.setItem(KEY,JSON.stringify(D));}catch(e){} for(const k of LIST)S[k]=D[k].slice(); S.journal=D.journal.slice(0,300); afterData(); onData();};
-  S.user={uid:"demo",email:"",nom:"Démonstration"};S.role="tresorier";S.ready=true;
+  S.user={uid:"demo",email:"",nom:"Démonstration"};S.role="admin";S.me={role:"admin"};S.droits=droitsOf(S.me);S.ready=true;
   setTimeout(sync,0);
   return {
     now:()=>new Date().toISOString(), newId:()=>uid(),
@@ -1757,9 +1806,17 @@ function demoStore(){
 /* ================= état d'affichage ================= */
 let store, M=build([]), season="all", curEv=null, curFam=null, editing=null, pendingImport=null;
 const SEL=new Set(); let lastPick=null, shownIds=[];
-const canWrite=()=>S.role==="tresorier";
-const canStock=()=>S.role==="tresorier"||S.role==="stock";
-const ROLE_LBL={tresorier:"trésorier",stock:"gestionnaire de stock",lecteur:"lecteur"};
+// droits par domaine : "w" écriture, "r" lecture
+function droitsOf(m){
+  if(!m)return null;
+  if(m.role==="admin"||m.role==="tresorier")return {compta:"w",stock:"w",encarts:"w",docs:"w"};
+  if(m.role==="stock")return {compta:"r",stock:"w",encarts:"r",docs:"r"};
+  return Object.assign({compta:"r",stock:"r",encarts:"r",docs:"r"},m.droits||{});
+}
+const dw=k=>!!(S.droits&&S.droits[k]==="w");
+const canWrite=()=>dw("compta"), canStock=()=>dw("stock"), canEnc=()=>dw("encarts"), canDoc=()=>dw("docs"), isAdmin=()=>S.role==="admin";
+const ROLE_LBL={admin:"administrateur",tresorier:"trésorier",bureau:"membre du bureau",stock:"gestionnaire de stock",lecteur:"lecteur"};
+function notifyAdmin(url,sujet,texte){return fetch(url,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({sujet,texte})}).catch(()=>{});}
 const seasonsOf=()=>[...new Set(M.events.map(e=>e.year).filter(Boolean))].sort();
 const inSeason=e=>season==="all"||e.year===+season;
 const lineInSeason=l=>season==="all"||l.year===+season;
@@ -2067,7 +2124,10 @@ function renderControles(){
 }
 function tsText(x){const d=x&&x.toDate?x.toDate():x?new Date(x):null;return d&&!isNaN(d)?d.toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"}):"à l'instant";}
 function renderJournal(){
-  $("jTable").innerHTML=`<thead><tr><th>Quand</th><th>Qui</th><th>Opération</th><th>Détail</th></tr></thead><tbody>`+(S.journal.length?S.journal.map(j=>`<tr><td class="num small">${esc(tsText(j.at))}</td><td class="small">${esc(j.nom||"")}</td><td><span class="pill ${j.action==="Suppression"?"bad":j.action==="Modification"?"warn":"neutral"}">${esc(j.action)}</span></td><td class="small">${esc(j.texte||"")}</td></tr>`).join(""):`<tr><td colspan="4" class="muted">Aucune opération enregistrée.</td></tr>`)+`</tbody>`;
+  const sel=(id,vals,lbl)=>{const v=$(id).value;$(id).innerHTML=`<option value="">${lbl}</option>`+vals.map(x=>`<option ${x===v?"selected":""}>${esc(x)}</option>`).join("");return vals.includes(v)?v:"";};
+  const who=sel("jWho",[...new Set(S.journal.map(j=>j.nom).filter(Boolean))].sort(),"Tout le monde"), act=sel("jAct",[...new Set(S.journal.map(j=>j.action).filter(Boolean))].sort(),"Tous les types"), q=strip($("jQ").value);
+  const JL=S.journal.filter(j=>(!who||j.nom===who)&&(!act||j.action===act)&&(!q||strip(j.texte||"").includes(q)));
+  $("jTable").innerHTML=`<thead><tr><th>Quand</th><th>Qui</th><th>Opération</th><th>Détail</th></tr></thead><tbody>`+(JL.length?JL.slice(0,500).map(j=>`<tr><td class="num small">${esc(tsText(j.at))}</td><td class="small">${esc(j.nom||"")}</td><td><span class="pill ${j.action==="Suppression"?"bad":j.action==="Modification"?"warn":"neutral"}">${esc(j.action)}</span></td><td class="small">${esc(j.texte||"")}</td></tr>`).join(""):`<tr><td colspan="4" class="muted">${S.journal.length?"Rien pour ce filtre.":"Aucune opération enregistrée."}</td></tr>`)+`</tbody>`;
 }
 /* ---------- opérations régulières ---------- */
 function recPending(){
@@ -2096,15 +2156,14 @@ function renderReglages(){
   $("instTxt").innerHTML=standalone?"L'application est installée sur cet appareil.":installEvt?"Installez l'application pour l'ouvrir depuis l'écran d'accueil, comme une application.":ios?"Sur iPhone ou iPad : ouvrez l'adresse dans Safari, touchez <b>Partager</b> puis <b>Sur l'écran d'accueil</b>.":"Dans le menu du navigateur, choisissez <b>Installer l'application</b> ou <b>Ajouter à l'écran d'accueil</b>.";
   $("instBtn").hidden=!installEvt||standalone;
   $("offTxt").textContent=DEMO?"En mode démonstration, les données restent sur cet appareil.":"Hors connexion, l'application reste utilisable : les opérations saisies sont gardées sur l'appareil puis envoyées au retour du réseau. Il faut s'être connecté au moins une fois sur l'appareil avec Internet.";
+  renderAcces();
   if(!canWrite())return;
   renderDriveSettings();
   if(document.activeElement!==$("sFrais"))$("sFrais").value=String(P().fraisVirement).replace(".",",");
   if(document.activeElement!==$("sSeuil"))$("sSeuil").value=String(P().seuilTreso).replace(".",",");
   const rs=P().recurrentes||[];
   $("uTable").innerHTML=`<thead><tr><th>Intitulé</th><th>Compte</th><th>Événement</th><th class="r">Montant</th><th>Paiement</th><th>Jour</th><th>Depuis</th><th>Dernière créée</th><th></th></tr></thead><tbody>${rs.length?rs.map(r=>`<tr><td>${esc(r.designation)}</td><td class="small">${r.compte==="LA"?"Livret A":"Compte courant"}</td><td class="small">${esc(r.evenement)}</td><td class="r num ${r.sens==="rec"?"pos":"neg"}">${r.sens==="rec"?"+":"−"}${fm(+r.montant||0)}</td><td class="small">${esc(r.type)}</td><td class="num">${esc(r.jour)}</td><td class="small num">${esc(monthLabel(r.depuis))}</td><td class="small num">${esc(monthLabel(r.derniere))}</td><td><button type="button" class="mini" data-uedit="${esc(r.id)}">Modifier</button></td></tr>`).join(""):`<tr><td colspan="9" class="muted">Aucune opération régulière. Exemple : tenue de compte, 5,65 € le 11 de chaque mois.</td></tr>`}</tbody>`;
-  if(DEMO){$("dTable").innerHTML=`<tbody><tr><td class="muted">La gestion des accès s'active une fois la connexion configurée.</td></tr></tbody>`;$("mTable").innerHTML="";return;}
-  $("dTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Demandé le</th><th></th></tr></thead><tbody>`+(S.demandes.length?S.demandes.map(d=>`<tr><td>${esc(d.nom||"")}</td><td>${esc(d.email||"")}</td><td class="small num">${esc(tsText(d.at))}</td><td><button type="button" class="mini primary" data-ok="${esc(d.id)}">Accepter en lecteur</button><button type="button" class="mini" data-no="${esc(d.id)}">Refuser</button></td></tr>`).join(""):`<tr><td colspan="4" class="muted">Aucune demande en attente. Un nouveau membre ouvre l'application, clique sur « Créer mon compte », puis sa demande apparaît ici.</td></tr>`)+`</tbody>`;
-  $("mTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th><th></th></tr></thead><tbody>`+S.membres.map(m=>{const self=m.id===S.user.uid;return `<tr><td>${esc(m.nom||"")}${self?` <span class="muted small">(vous)</span>`:""}</td><td>${esc(m.email||"")}</td><td><select data-role="${esc(m.id)}" ${self?"disabled":""} aria-label="Rôle"><option value="lecteur" ${m.role!=="tresorier"&&m.role!=="stock"?"selected":""}>Lecteur</option><option value="stock" ${m.role==="stock"?"selected":""}>Gestionnaire de stock</option><option value="tresorier" ${m.role==="tresorier"?"selected":""}>Trésorier</option></select></td><td>${self?"":`<button type="button" class="mini danger" data-rm="${esc(m.id)}">Retirer l'accès</button>`}</td></tr>`;}).join("")+`</tbody>`;
+  renderAcces();
 }
 
 /* ---------- caisse d'un événement ---------- */
@@ -2175,7 +2234,7 @@ function renderEncarts(){
   $("aFilt").innerHTML=[["all","Tous"],["relancer","À relancer"],["promis","Promis"],["paye","Payés"],["refuse","Refusés"],["sans","Sans encart "+y]].map(([k,l])=>`<button type="button" class="chip ${aFilter===k?"on":""}" data-af="${k}">${l} · ${cnt(k)}</button>`).join("");
   const refs=[...new Set(all.map(a=>a.referent).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr")), rf=$("aRef").value;
   $("aRef").innerHTML=`<option value="">Tous les membres</option>`+refs.map(r=>`<option ${r===rf?"selected":""}>${esc(r)}</option>`).join("");
-  const q=strip($("aQ").value), w=canWrite();
+  const q=strip($("aQ").value), w=canEnc(), wc=canWrite();
   const rows=all.filter(a=>(!rf||a.referent===rf)&&(aFilter==="all"||(aFilter==="sans"?!en(a,y):en(a,y)&&en(a,y).statut===aFilter))&&(!q||strip(a.nom+" "+(a.contact||"")).includes(q)));
   // une colonne par année qui a des encarts (5 dernières jusqu'à l'année affichée)
   const YC=[...new Set(S.annonceurs.flatMap(a=>Object.keys(a.encarts||{}).map(Number)))].filter(v=>v<=y).concat([y]).filter((v,i,ar)=>ar.indexOf(v)===i).sort((a,b)=>a-b).slice(-5);
@@ -2186,7 +2245,7 @@ function renderEncarts(){
     const c=en(a,y), p=en(a,py), contact=[a.contact,a.tel,a.email].filter(Boolean).join(" · ");
     const stSel=w?`<select data-astat="${esc(a.id)}" aria-label="Statut ${y}"><option value="">Pas d'encart</option>${Object.entries(ASTAT).map(([k,[l]])=>`<option value="${k}" ${c&&c.statut===k?"selected":""}>${l}</option>`).join("")}</select>`:(c?`<span class="pill ${ast(c.statut)[1]}">${ast(c.statut)[0]}</span>`:"·");
     const cf=c&&c.cerfa&&CERFA[c.cerfa];
-    return `<tr><td>${w?`<button type="button" class="link" data-aedit="${esc(a.id)}" title="Modifier la fiche"><b>${esc(a.nom)}</b></button>`:`<b>${esc(a.nom)}</b>`}${a.logo&&a.logo.u?` <a class="pill neutral" href="${esc(a.logo.u)}" target="_blank" rel="noopener" title="Ouvrir le logo">logo</a>`:a.logo?` <span class="pill neutral" title="Logo reçu">logo</span>`:""}${contact?`<div class="small muted">${esc(contact)}</div>`:""}${c&&c.com?`<div class="small muted">${esc(c.com)}</div>`:a.note?`<div class="small muted">${esc(a.note)}</div>`:""}</td><td class="small">${esc(a.referent||"")}</td>${YC.map(yy=>cell(en(a,yy),yy)).join("")}<td>${stSel}</td><td class="small num">${c&&c.statut==="paye"&&c.date?fdate(c.date):"·"}${c&&c.statut==="paye"&&c.type?`<div class="muted">${esc(c.type)}</div>`:""}</td><td>${cf?`<span class="pill ${cf[1]}">${esc(cf[0])}</span>`:"·"}${c&&c.recu&&c.recu.u?` <a class="pill neutral" href="${esc(c.recu.u)}" target="_blank" rel="noopener" title="${esc(c.recu.n||"")}">PDF${c.num?" n° "+esc(c.num):""}</a>`:""}</td>${w?`<td>${!c||c.statut!=="paye"?`<button type="button" class="mini primary" data-apay="${esc(a.id)}">Encaisser</button>`:""}</td>`:""}</tr>`;
+    return `<tr><td>${w?`<button type="button" class="link" data-aedit="${esc(a.id)}" title="Modifier la fiche"><b>${esc(a.nom)}</b></button>`:`<b>${esc(a.nom)}</b>`}${a.logo&&a.logo.u?` <a class="pill neutral" href="${esc(a.logo.u)}" target="_blank" rel="noopener" title="Ouvrir le logo">logo</a>`:a.logo?` <span class="pill neutral" title="Logo reçu">logo</span>`:""}${contact?`<div class="small muted">${esc(contact)}</div>`:""}${c&&c.com?`<div class="small muted">${esc(c.com)}</div>`:a.note?`<div class="small muted">${esc(a.note)}</div>`:""}</td><td class="small">${esc(a.referent||"")}</td>${YC.map(yy=>cell(en(a,yy),yy)).join("")}<td>${stSel}</td><td class="small num">${c&&c.statut==="paye"&&c.date?fdate(c.date):"·"}${c&&c.statut==="paye"&&c.type?`<div class="muted">${esc(c.type)}</div>`:""}</td><td>${cf?`<span class="pill ${cf[1]}">${esc(cf[0])}</span>`:"·"}${c&&c.recu&&c.recu.u?` <a class="pill neutral" href="${esc(c.recu.u)}" target="_blank" rel="noopener" title="${esc(c.recu.n||"")}">PDF${c.num?" n° "+esc(c.num):""}</a>`:""}</td>${w?`<td>${wc&&(!c||c.statut!=="paye")?`<button type="button" class="mini primary" data-apay="${esc(a.id)}">Encaisser</button>`:""}</td>`:""}</tr>`;
   }).join(""):`<tr><td colspan="${7+YC.length}" class="muted">${S.annonceurs.length?"Aucun annonceur pour ce filtre.":"Aucun annonceur. « Reprendre les annonceurs du cahier » part des encarts déjà encaissés."}</td></tr>`}</tbody>${rows.length?`<tfoot><tr class="total"><td colspan="2">Total payé (${rows.length} annonceur(s) affiché(s))</td>${YC.map(yy=>`<td class="r num yc ${yy===y?"cur":""}">${fm0(totY(yy))}</td>`).join("")}<td colspan="${w?4:3}"></td></tr></tfoot>`:""}`;
   $("aSeed").disabled=!M.lines.some(isEncartLine);
 }
@@ -2464,7 +2523,7 @@ function show(){
   }
   FICHE=null;
   h=ALIAS[h]||h;
-  if(!ROUTES[h])h=S.role==="stock"?"stock":"accueil";
+  if(!ROUTES[h])h=!canWrite()&&canStock()?"stock":"accueil";
   const r=ROUTES[h]; b.dataset.route=h;
   $("pgTitle").textContent=r.title;
   document.querySelectorAll("#sideNav a[data-sec],#sideNav2 a[data-sec],.botnav a[data-sec]").forEach(a=>a.classList.toggle("on",a.dataset.sec===r.sec));
@@ -2512,15 +2571,16 @@ function render(){
     for(const s of ["scrLoad","scrAuth","scrWait","app"])$(s).hidden=s!==scr;
     document.body.classList.toggle("can-write",canWrite());
     document.body.classList.toggle("can-stock",canStock());
+    document.body.classList.toggle("can-enc",canEnc()); document.body.classList.toggle("can-doc",canDoc()); document.body.classList.toggle("is-admin",isAdmin());
     if(scr==="scrWait")$("wUid").value=S.user.uid;
     if(scr!=="app")return;
     M=build(S.ecr);
     $("demo").hidden=!DEMO;
     renderNet();
     $("src").textContent=[ASSO,M.maxIso?`dernière opération le ${fdate(M.maxIso)}`:""].filter(Boolean).join(" · ");
-    $("who").textContent=S.user.nom; $("whoRole").textContent=ROLE_LBL[S.role]||S.role;
+    $("who").textContent=S.user.nom; $("whoRole").textContent=(S.me&&S.me.fonction)||ROLE_LBL[S.role]||S.role;
     $("whoIni").textContent=String(S.user.nom||"?").split(/\s+/).map(w=>w[0]||"").join("").slice(0,2).toUpperCase();
-    $("newMenuWrap").hidden=!canStock(); $("assoSide").textContent=ASSO||"Comité des fêtes";
+    $("newMenuWrap").hidden=!(canStock()||canWrite()||canEnc()); $("assoSide").textContent=ASSO||"Comité des fêtes";
     if(season!=="all"&&!seasonsOf().includes(+season))season="all";
     show();
   });
@@ -3278,6 +3338,8 @@ function exportXlsx(){
   for(const m of S.mouvements.slice().sort(byOrder))mvR.push([m.date||"",(MVT[m.type]||["?"])[0],(S.articles.find(a=>a.id===m.article)||{nom:m.articleNom}).nom,+m.qte||0,+m.pu||0,m.evenement||"",m.note||"",m.par||"",m.fournisseur||"",m.facture||""]);
   add("Mouvements de stock",mvR);
   add("Grille buvette",[["Id","Produit vendu","Famille","Prix"],...tarifs().map(x=>[x.id,x.nom,x.famille,+x.prix])]);
+  add("Journal des modifications",[["Quand","Qui","Type","Détail"],...S.journal.map(j=>[tsText(j.at),j.nom||"",j.action||"",j.texte||""])]);
+  if(isAdmin()&&S.connexions.length)add("Journal des connexions",[["Quand","Qui","E-mail","Événement","Statut","Appareil"],...S.connexions.map(c=>[tsText(c.at),c.nom||"",c.email||"",c.ev||"",c.statut||"",c.ua||""])]);
   add("Réglages",[["Paramètre","Valeur"],["Frais par virement",+P().fraisVirement],["Seuil d'alerte de trésorerie",+P().seuilTreso],["Marge visée buvette (%)",+P().margeCible]]);
   download(new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),`Cahier_des_comptes_${today()}.xlsx`);
   try{localStorage.setItem("cahier-derniere-sauvegarde",today());}catch(e){}
@@ -3309,7 +3371,6 @@ document.addEventListener("click",async e=>{
   if((t=e.target.closest("[data-qedit]"))){openComptage(t.dataset.qedit);return;}
   if((t=e.target.closest("[data-uedit]"))){openRec(t.dataset.uedit);return;}
   if((t=e.target.closest("[data-gen]"))){openGen();return;}
-  if((t=e.target.closest("[data-ok]"))){const d=S.demandes.find(x=>x.id===t.dataset.ok);if(d)await run(store.commit([{t:"set",col:"membres",id:d.id,data:{email:d.email||"",nom:d.nom||"",role:"lecteur",at:store.now()}},{t:"delete",col:"demandes",id:d.id}],{action:"Accès",texte:`${d.nom||d.email} : lecteur`}),"Accès accordé en lecture.");return;}
   if((t=e.target.closest("[data-no]"))){const d=S.demandes.find(x=>x.id===t.dataset.no);if(d)await run(store.commit([{t:"delete",col:"demandes",id:d.id}],{action:"Accès",texte:`${d.nom||d.email} : demande refusée`}),"Demande refusée.");return;}
   if((t=e.target.closest("[data-rm]"))){const m=S.membres.find(x=>x.id===t.dataset.rm);if(m&&await ask(`Retirer l'accès de ${m.nom||m.email} ?`,"Retirer"))await run(store.commit([{t:"delete",col:"membres",id:m.id}],{action:"Accès",texte:`${m.nom||m.email} : accès retiré`}),"Accès retiré.");return;}
 });
@@ -3325,7 +3386,6 @@ document.addEventListener("change",async e=>{
     if(l&&!await run(store.commit([{t:"update",col:"ecritures",id:l.id,data:{pointe:t.checked}}],{action:t.checked?"Vérification":"Dévérification",texte:resume({date:l.iso,compte:l.acc,evenement:l.evt,designation:l.des,recette:l.rec,depense:l.dep})})))t.checked=!t.checked;
     return;
   }
-  if(t.dataset.role){const m=S.membres.find(x=>x.id===t.dataset.role);if(m)await run(store.commit([{t:"merge",col:"membres",id:m.id,data:{role:t.value}}],{action:"Accès",texte:`${m.nom||m.email} : ${ROLE_LBL[t.value]||t.value}`}),"Rôle modifié.");return;}
   if(t.dataset.astat){
     const a=S.annonceurs.find(x=>x.id===t.dataset.astat); if(!a)return;
     const v=t.value, y=aYear, enc=Object.assign({},a.encarts||{});
@@ -3996,6 +4056,7 @@ function renderAccueil(){
     <div class="tile"><h3>Déjà engagé pour la suite</h3><div class="v ${cls(acompte)}">${sg(acompte)}</div><div class="s">${up.length?"déjà au cahier pour "+up.map(e=>e.name).join(", "):"aucun événement à venir"}</div></div>`;
   // À faire
   const T=[], w=canWrite(), add=(n,txt,href,lvl,btn)=>T.push(`<li><span class="pill ${lvl||"warn"}">${n}</span><span class="tx">${txt}</span>${btn||`<a href="${href}" class="btn mini">Voir</a>`}</li>`);
+  if(isAdmin()&&S.demandes.length)add(S.demandes.length,`demande(s) d'accès à valider : ${S.demandes.map(d=>esc(d.nom||d.email)).join(", ")}`,"#reglages","bad",`<a href="#reglages" class="btn mini primary">Valider</a>`);
   if(w){const p=recPending(); if(p.length)add(p.length,`opération(s) régulière(s) à créer (${esc(p.slice(0,2).map(x=>x.r.designation).join(", "))}${p.length>2?"…":""})`,"",null,`<button type="button" class="mini primary" data-gen="1">Créer</button>`);}
   const lim=new Date(Date.now()-30*864e5).toISOString().slice(0,10), np=M.lines.filter(l=>l.acc==="CC"&&!l.pointe&&l.iso&&l.iso<lim);
   if(np.length)add(np.length,`opération(s) pas encore vue(s) en banque depuis plus de 30 jours (${fm(sumOf(np,l=>l.rec-l.dep))})`,"#rapprochement");
@@ -4080,7 +4141,7 @@ function gqItems(q){
   for(const n of allEventNames())if(strip(n).includes(s))push("Événements",n,"",ficheHash(n).slice(1));
   M.lines.filter(l=>strip(l.des+" "+l.com+" "+l.evt).includes(s)).slice(-8).reverse().forEach(l=>push("Opérations",l.des,`${fdate(l.iso)} · ${l.rec?"+"+fm(l.rec):"−"+fm(l.dep)}`,canWrite()?"edit:"+l.id:"operations"));
   S.articles.filter(a=>strip(a.nom).includes(s)).slice(0,5).forEach(a=>push("Articles",a.nom,a.categorie||"","art:"+a.nom));
-  S.annonceurs.filter(a=>strip(a.nom+" "+(a.contact||"")).includes(s)).slice(0,5).forEach(a=>push("Annonceurs",a.nom,a.contact||"",canWrite()?"ann:"+a.id:"encarts"));
+  S.annonceurs.filter(a=>strip(a.nom+" "+(a.contact||"")).includes(s)).slice(0,5).forEach(a=>push("Annonceurs",a.nom,a.contact||"",canEnc()?"ann:"+a.id:"encarts"));
   return out.slice(0,24);
 }
 function renderGq(){
@@ -4306,7 +4367,7 @@ function loadScript(src){
 }
 // à charger tôt : la fenêtre de connexion Google doit s'ouvrir directement au clic, sinon le navigateur la bloque
 const driveWarm=()=>{if(driveOn()&&!(DRV.tok&&Date.now()<DRV.exp-60000)&&window.google&&google.accounts)driveToken().catch(()=>{});};
-function drivePreload(){if(driveOn()&&canWrite()){loadScript("https://accounts.google.com/gsi/client").catch(()=>{});loadScript("https://apis.google.com/js/api.js").catch(()=>{});}}
+function drivePreload(){if(driveOn()){loadScript("https://accounts.google.com/gsi/client").catch(()=>{});loadScript("https://apis.google.com/js/api.js").catch(()=>{});}}
 function driveToken(){
   if(DRV.tok&&Date.now()<DRV.exp-60000)return Promise.resolve(DRV.tok);
   const c=dcfg(); if(!driveOn())return Promise.reject(new Error("Google Drive n'est pas encore relié : Réglages → Google Drive."));
@@ -4397,7 +4458,7 @@ async function drivePick(opt){
 }
 const docIcon=m=>/pdf/.test(m||"")?"PDF":/image/.test(m||"")?"IMG":/sheet|excel/.test(m||"")?"XLS":/word|document/.test(m||"")?"DOC":"LIEN";
 function docChip(d,rm,noT){
-  return `<span class="dchip"><span class="dk">${docIcon(d.m)}</span>${d.u?`<a href="${esc(d.u)}" target="_blank" rel="noopener">${esc(d.n||"Document")}</a>`:`<span>${esc(d.n||"Document")}</span>`}${!noT&&d.t&&DOC_TYPES[d.t]?`<span class="small muted">${esc(DOC_TYPES[d.t])}</span>`:""}${rm&&canWrite()?`<button type="button" class="dx" data-docrm="${esc(rm)}" aria-label="Retirer ${esc(d.n||"")}">×</button>`:""}</span>`;
+  return `<span class="dchip"><span class="dk">${docIcon(d.m)}</span>${d.u?`<a href="${esc(d.u)}" target="_blank" rel="noopener">${esc(d.n||"Document")}</a>`:`<span>${esc(d.n||"Document")}</span>`}${!noT&&d.t&&DOC_TYPES[d.t]?`<span class="small muted">${esc(DOC_TYPES[d.t])}</span>`:""}${rm&&(rm.startsWith("e:")?canWrite():/^[lr]:/.test(rm)?canEnc():canDoc())?`<button type="button" class="dx" data-docrm="${esc(rm)}" aria-label="Retirer ${esc(d.n||"")}">×</button>`:""}</span>`;
 }
 
 /* ---------- ajout de documents (appareil, Drive, lien) ---------- */
@@ -4506,7 +4567,7 @@ function renderDocuments(){
   const cnt=t=>all.filter(d=>(!docF.y||d.annee===docF.y)&&(!t||d.t===t)).length;
   $("docChips").innerHTML=[["","Tous"],...Object.entries(DOC_TYPES)].map(([k,l])=>{const n=cnt(k);return n||!k?`<button type="button" class="chip ${docF.t===k?"on":""}" data-docf="${k}">${l} · ${n}</button>`:"";}).join("");
   const ls=all.filter(d=>(!docF.y||d.annee===docF.y)&&(!docF.t||d.t===docF.t)&&(!q||strip(`${d.n} ${d.ref} ${d.evenement}`).includes(q))).sort((a,b)=>String(b.d||"").localeCompare(String(a.d||""))||String(a.n).localeCompare(String(b.n)));
-  $("docTable").innerHTML=`<thead><tr><th>Document</th><th>Type</th><th>Événement</th><th>Rattaché à</th><th>Ajouté le</th>${canWrite()?"<th></th>":""}</tr></thead><tbody>${ls.map(d=>`<tr><td>${docChip(d,null,1)}</td><td class="small">${esc(DOC_TYPES[d.t]||"")}</td><td class="small">${d.evenement?`<button type="button" class="link" data-ev="${esc(eventKey(d.evenement).parent)}">${esc(eventKey(d.evenement).parent)}</button>`:"·"}</td><td class="small">${d.ecr&&canWrite()?`<button type="button" class="link" data-edit="${esc(d.ecr)}">${esc(d.ref)}</button>`:d.ann&&canWrite()?`<button type="button" class="link" data-aedit="${esc(d.ann)}">${esc(d.ref)}</button>`:esc(d.ref||"")}</td><td class="small num">${d.d?fdate(d.d):"·"}</td>${canWrite()?`<td>${d.src==="doc"?`<button type="button" class="mini" data-docrm="${esc(d.key)}">Retirer</button>`:""}</td>`:""}</tr>`).join("")||`<tr><td colspan="6" class="muted">${all.length?"Aucun document pour ce filtre.":"Aucun document pour l'instant. Ajoutez des factures depuis une opération, des reçus et logos depuis la fiche d'un annonceur, ou un document du comité avec « + Ajouter »."}</td></tr>`}</tbody>`;
+  $("docTable").innerHTML=`<thead><tr><th>Document</th><th>Type</th><th>Événement</th><th>Rattaché à</th><th>Ajouté le</th>${canDoc()?"<th></th>":""}</tr></thead><tbody>${ls.map(d=>`<tr><td>${docChip(d,null,1)}</td><td class="small">${esc(DOC_TYPES[d.t]||"")}</td><td class="small">${d.evenement?`<button type="button" class="link" data-ev="${esc(eventKey(d.evenement).parent)}">${esc(eventKey(d.evenement).parent)}</button>`:"·"}</td><td class="small">${d.ecr&&canWrite()?`<button type="button" class="link" data-edit="${esc(d.ecr)}">${esc(d.ref)}</button>`:d.ann&&canWrite()?`<button type="button" class="link" data-aedit="${esc(d.ann)}">${esc(d.ref)}</button>`:esc(d.ref||"")}</td><td class="small num">${d.d?fdate(d.d):"·"}</td>${canDoc()?`<td>${d.src==="doc"&&canDoc()?`<button type="button" class="mini" data-docrm="${esc(d.key)}">Retirer</button>`:""}</td>`:""}</tr>`).join("")||`<tr><td colspan="6" class="muted">${all.length?"Aucun document pour ce filtre.":"Aucun document pour l'instant. Ajoutez des factures depuis une opération, des reçus et logos depuis la fiche d'un annonceur, ou un document du comité avec « + Ajouter »."}</td></tr>`}</tbody>`;
   $("docState").innerHTML=driveOn()?(dcfg().rootId?`Rangés dans le Drive, dossier <a href="https://drive.google.com/drive/folders/${esc(dcfg().rootId)}" target="_blank" rel="noopener">${esc(dcfg().rootName||"du comité")}</a>.`:"Le dossier du comité sera créé dans le Drive au premier envoi."):`Google Drive n'est pas relié : seuls les liens collés sont possibles. <a href="#reglages">Relier le Drive</a>`;
 }
 $("docQ").addEventListener("input",renderDocuments);
@@ -4607,7 +4668,8 @@ async function makeRecu(a,y,opts){
   if(driveOn()){const r=await driveUpload(new File([bytes],name,{type:"application/pdf"}),[String(y),"Reçus fiscaux"],name);doc=Object.assign(doc,{u:r.webViewLink,id:r.id});}
   else download(new Blob([bytes],{type:"application/pdf"}),name);
   const enc=JSON.parse(JSON.stringify(a.encarts)); enc[y]=Object.assign(enc[y],{recu:doc,num,cerfa:enc[y].cerfa&&enc[y].cerfa!=="refuse"?enc[y].cerfa:"afaire"});
-  const ops=[{t:"update",col:"annonceurs",id:a.id,data:{encarts:enc}},{t:"merge",col:"parametres",id:"general",data:{organisme:Object.assign({},P().organisme||{},{prochainRecu:Math.max(+num+1,+((P().organisme||{}).prochainRecu)||0)})}}];
+  const ops=[{t:"update",col:"annonceurs",id:a.id,data:{encarts:enc}}];
+  if(canWrite())ops.push({t:"merge",col:"parametres",id:"general",data:{organisme:Object.assign({},P().organisme||{},{prochainRecu:Math.max(+num+1,+((P().organisme||{}).prochainRecu)||0)})}});
   await store.commit(ops,{action:"Encarts",texte:`${a.nom} : reçu fiscal ${y} n° ${num} (${fm(+c.montant)})${doc.u?" rangé dans le Drive":""}`});
   return {num,doc};
 }
@@ -4678,7 +4740,7 @@ $("fRL").addEventListener("submit",async ev=>{
     n++;
   });
   by.forEach(a=>{const {id,...data}=a;ops.push({t:"set",col:"annonceurs",id,data});});
-  if(maxNum)ops.push({t:"merge",col:"parametres",id:"general",data:{organisme:Object.assign({},P().organisme||{},{prochainRecu:Math.max(maxNum+1,+((P().organisme||{}).prochainRecu)||0)})}});
+  if(maxNum&&canWrite())ops.push({t:"merge",col:"parametres",id:"general",data:{organisme:Object.assign({},P().organisme||{},{prochainRecu:Math.max(maxNum+1,+((P().organisme||{}).prochainRecu)||0)})}});
   if(!n){$("dlgRL").close();return;}
   if(await run(store.commit(ops,{action:"Encarts",texte:`${n} reçu(s) fiscal(aux) rattaché(s) depuis le Drive`}),`${n} reçu(s) rattaché(s).`)){$("dlgRL").close();RLINK=null;}
 });
@@ -4710,7 +4772,7 @@ $("gdPickRoot").onclick=async()=>{
 $("orgSave").onclick=()=>run(store.commit([{t:"merge",col:"parametres",id:"general",data:{organisme:{nom:$("orgNom").value.trim(),rna:$("orgRna").value.trim(),num:$("orgNum").value.trim(),rue:$("orgRue").value.trim(),cp:$("orgCp").value.trim(),ville:$("orgVille").value.trim(),objet:$("orgObjet").value.trim(),prochainRecu:parseInt($("orgNext").value)||nextCerfa()}}}],{action:"Réglages",texte:"Coordonnées du comité pour les reçus fiscaux"}),"Coordonnées enregistrées.");
 
 function annData(a){const d=JSON.parse(JSON.stringify(a));delete d.id;return d;}
-{const _od=onData;onData=()=>{_od();if(!DRV.pre&&S.ready&&canWrite()&&driveOn()){DRV.pre=1;drivePreload();}};}
+{const _od=onData;onData=()=>{_od();if(!DRV.pre&&S.ready&&(canWrite()||canDoc()||canEnc())&&driveOn()){DRV.pre=1;drivePreload();}};}
 
 /* ---------- v12b : reprise de l'arborescence Drive existante ---------- */
 const DTYPE_HINT=[[/cerfa|re[cç]u.?fisc/i,"recu"],[/logo/i,"logo"],[/devis/i,"devis"],[/factur|ticket|achat/i,"facture"],[/contrat|convention|sacem|guso/i,"contrat"],[/assuranc/i,"assurance"],[/compte.?rendu|\bcr\b|pv|proc[eè]s.?verbal|r[eé]union|ag\b/i,"cr"]];
@@ -4942,6 +5004,90 @@ $("fEF").addEventListener("submit",async ev=>{
   if(!ops.length){$("dlgEF").close();return;}
   if(await run(store.commit(ops,{action:"Encarts",texte:`${ops.length} fiche(s) annonceur complétée(s) depuis l'annuaire des entreprises`}),`${ops.length} fiche(s) complétée(s).`)){$("dlgEF").close();EFILL=null;}
 });
+/* ================= v13 : accès, notifications, connexions ================= */
+const FONCTIONS=["Président","Vice-président","Trésorier","Trésorier adjoint","Secrétaire","Secrétaire adjoint","Membre du bureau","Bénévole"];
+const DOMAINES=[["compta","Comptes","opérations, budgets, événements, caisse, réglages"],["stock","Stock et buvette","articles, réceptions, inventaires, prix"],["encarts","Encarts","annonceurs, reçus fiscaux"],["docs","Documents","factures, devis, contrats"]];
+const NIVEAUX={admin:"Administrateur",tresorier:"Trésorier (tout en écriture)",bureau:"Droits choisis"};
+function droitsTxt(m){
+  const d=droitsOf(m)||{}; if(m.role==="admin")return `<span class="pill good">Administrateur</span>`;
+  if(m.role==="tresorier")return `<span class="pill good">Tout en écriture</span>`;
+  const w=DOMAINES.filter(([k])=>d[k]==="w").map(([,l])=>l);
+  return w.length?`<span class="pill warn">Écriture : ${esc(w.join(", "))}</span>`:`<span class="pill neutral">Lecture seule</span>`;
+}
+const lastCx=uid=>S.connexions.find(c=>c.uid===uid&&c.ev!=="déconnexion");
+function renderAcces(){
+  if(!isAdmin())return;
+  if(DEMO){$("dTable").innerHTML=`<tbody><tr><td class="muted">La gestion des accès s'active une fois la connexion configurée.</td></tr></tbody>`;$("mTable").innerHTML="";$("cxTable").innerHTML="";return;}
+  $("dTable").innerHTML=`<thead><tr><th>Nom</th><th>E-mail</th><th>Demandé le</th><th></th></tr></thead><tbody>`+(S.demandes.length?S.demandes.map(d=>`<tr><td>${esc(d.nom||"")}</td><td>${esc(d.email||"")}</td><td class="small num">${esc(tsText(d.at))}</td><td><button type="button" class="mini primary" data-dval="${esc(d.id)}">Valider…</button><button type="button" class="mini" data-no="${esc(d.id)}">Refuser</button></td></tr>`).join(""):`<tr><td colspan="4" class="muted">Aucune demande en attente. Un nouveau membre ouvre l'application et clique sur « Créer mon compte » ; vous êtes prévenu${(P2().notifUrl)?" par mail":""} et la demande apparaît ici.</td></tr>`)+`</tbody>`;
+  const ms=S.membres.slice().sort((a,b)=>(a.role==="admin"?0:a.role==="tresorier"?1:2)-(b.role==="admin"?0:b.role==="tresorier"?1:2)||String(a.nom).localeCompare(String(b.nom),"fr"));
+  $("mTable").innerHTML=`<thead><tr><th>Nom</th><th>Fonction</th><th>Droits</th><th>Dernière connexion</th><th></th></tr></thead><tbody>`+ms.map(m=>{const self=m.id===S.user.uid, c=lastCx(m.id);return `<tr><td><b>${esc(m.nom||"")}</b>${self?` <span class="muted small">(vous)</span>`:""}<div class="small muted">${esc(m.email||"")}</div></td><td class="small">${esc(m.fonction||"")}</td><td>${droitsTxt(m)}</td><td class="small num">${c?esc(tsText(c.at)):"·"}</td><td>${self?"":`<button type="button" class="mini" data-medit="${esc(m.id)}">Modifier</button><button type="button" class="mini danger" data-rm="${esc(m.id)}">Retirer</button>`}</td></tr>`;}).join("")+`</tbody>`;
+  $("nfUrl").value=P2().notifUrl||"";
+  renderCx();
+}
+let cxF="";
+function renderCx(){
+  const who=[...new Set(S.connexions.map(c=>c.nom||c.email).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
+  if(cxF&&!who.includes(cxF))cxF="";
+  $("cxWho").innerHTML=`<option value="">Tout le monde</option>`+who.map(w=>`<option ${w===cxF?"selected":""}>${esc(w)}</option>`).join("");
+  const ls=S.connexions.filter(c=>!cxF||(c.nom||c.email)===cxF).slice(0,300);
+  $("cxTable").innerHTML=`<thead><tr><th>Quand</th><th>Qui</th><th>Événement</th><th>Appareil</th></tr></thead><tbody>${ls.map(c=>`<tr><td class="small num">${esc(tsText(c.at))}</td><td class="small"><b>${esc(c.nom||"")}</b> <span class="muted">${esc(c.email||"")}</span></td><td><span class="pill ${c.ev==="connexion"?"good":c.ev==="demande d'accès"?"warn":c.ev==="déconnexion"?"neutral":"neutral"}">${esc(c.ev||"")}</span>${c.statut?` <span class="small muted">${esc(c.statut)}</span>`:""}</td><td class="small muted">${esc(c.ua||"")}</td></tr>`).join("")||`<tr><td colspan="4" class="muted">Aucune connexion enregistrée pour l'instant.</td></tr>`}</tbody>`;
+}
+$("cxWho").addEventListener("change",e=>{cxF=e.target.value;renderCx();});
+
+/* ---------- fiche d'accès d'un membre ---------- */
+let MEDIT=null;
+function openMembre(src){
+  // src : {id, nom, email, demande:bool, role, fonction, droits}
+  MEDIT=src;
+  $("mTitle").textContent=src.demande?"Valider l'accès":"Droits du membre";
+  $("mNom").value=src.nom||""; $("mMail").value=src.email||"";
+  $("mFonction").innerHTML=`<option value="">·</option>`+FONCTIONS.map(f=>`<option ${f===src.fonction?"selected":""}>${f}</option>`).join("");
+  const lvl=src.role==="admin"?"admin":src.role==="tresorier"?"tresorier":"bureau";
+  document.querySelectorAll('[name="mLvl"]').forEach(r=>r.checked=r.value===lvl);
+  const d=droitsOf(Object.assign({role:"bureau"},src.role==="admin"||src.role==="tresorier"?{}:src));
+  $("mDroits").innerHTML=DOMAINES.map(([k,l,h])=>`<div class="drow" style="justify-content:space-between"><span><b>${l}</b><span class="small muted"> · ${h}</span></span><span class="seg" role="radiogroup" aria-label="${l}"><label><input type="radio" name="md-${k}" value="r" ${d[k]!=="w"?"checked":""}> Lecture</label><label><input type="radio" name="md-${k}" value="w" ${d[k]==="w"?"checked":""}> Écriture</label></span></div>`).join("");
+  mLvlSync(); $("mErr").hidden=true; $("dlgM").showModal();
+}
+function mLvlSync(){const v=(document.querySelector('[name="mLvl"]:checked')||{}).value;$("mDroits").hidden=v!=="bureau";}
+document.addEventListener("change",e=>{if(e.target.name==="mLvl")mLvlSync();});
+$("mFonction").addEventListener("change",e=>{
+  // proposition : président et trésorier en écriture complète, les autres en lecture
+  if(!MEDIT||!MEDIT.demande)return;
+  const f=e.target.value, lvl=/^Trésorier/.test(f)?"tresorier":"bureau";
+  document.querySelectorAll('[name="mLvl"]').forEach(r=>r.checked=r.value===lvl); mLvlSync();
+});
+$("fM").addEventListener("submit",async ev=>{
+  ev.preventDefault(); const m=MEDIT; if(!m)return;
+  const lvl=(document.querySelector('[name="mLvl"]:checked')||{}).value||"bureau";
+  const droits={}; for(const [k] of DOMAINES)droits[k]=(document.querySelector(`[name="md-${k}"]:checked`)||{}).value||"r";
+  const data={email:m.email||"",nom:$("mNom").value.trim()||m.nom||m.email||"",fonction:$("mFonction").value,role:lvl,droits:lvl==="bureau"?droits:{compta:"w",stock:"w",encarts:"w",docs:"w"}};
+  if(m.demande)Object.assign(data,{at:store.now(),validePar:S.user.nom});
+  const ops=[{t:"set",col:"membres",id:m.id,data:Object.assign({},m.demande?{}:annData(S.membres.find(x=>x.id===m.id)||{}),data)}];
+  if(m.demande)ops.push({t:"delete",col:"demandes",id:m.id});
+  const desc=`${data.nom}${data.fonction?" ("+data.fonction+")":""} : ${lvl==="bureau"?DOMAINES.map(([k,l])=>`${l} ${droits[k]==="w"?"écriture":"lecture"}`).join(", "):NIVEAUX[lvl]}`;
+  if(await run(store.commit(ops,{action:"Accès",texte:(m.demande?"Accès validé · ":"Droits modifiés · ")+desc}),m.demande?"Accès validé.":"Droits enregistrés.")){$("dlgM").close();MEDIT=null;}
+});
+document.addEventListener("click",e=>{
+  let t;
+  if((t=e.target.closest("[data-dval]"))){const d=S.demandes.find(x=>x.id===t.dataset.dval);if(d)openMembre({id:d.id,nom:d.nom,email:d.email,demande:true,role:"bureau"});}
+  else if((t=e.target.closest("[data-medit]"))){const m=S.membres.find(x=>x.id===t.dataset.medit);if(m)openMembre(Object.assign({},m));}
+});
+
+/* ---------- notification de l'administrateur ---------- */
+const P2=()=>(S.publicCfg||{});
+$("nfSave").onclick=async()=>{
+  const u=$("nfUrl").value.trim();
+  if(u&&!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)&&!/^https:\/\//.test(u)){flash("Collez l'adresse https:// du script de notification.",true);return;}
+  if(await run(store.commit([{t:"merge",col:"public",id:"config",data:{notifUrl:u}}],{action:"Réglages",texte:u?"Notification des demandes d'accès par mail activée":"Notification des demandes d'accès désactivée"}),"Enregistré.")){S.publicCfg=Object.assign({},S.publicCfg,{notifUrl:u});}
+};
+$("nfTest").onclick=async()=>{
+  const u=$("nfUrl").value.trim()||P2().notifUrl; if(!u){flash("Collez d'abord l'adresse du script.",true);return;}
+  await notifyAdmin(u,"Test de notification – Cahier des comptes",`Ceci est un test envoyé par ${S.user.nom} depuis le cahier des comptes.\n\n${location.origin+location.pathname}#reglages`);
+  flash("Test envoyé : vérifiez la boîte mail de l'administrateur (et les indésirables).");
+};
+
+$("jWho").addEventListener("change",renderJournal); $("jAct").addEventListener("change",renderJournal); $("jQ").addEventListener("input",renderJournal);
+
 </script>
 </body>
 </html>
