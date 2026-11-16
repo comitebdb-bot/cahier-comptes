@@ -87,7 +87,7 @@ tr.grp td{background:var(--bg);font-weight:600;font-size:12.5px;text-transform:u
 .hb .val{text-align:right}
 ul.notes{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px}
 ul.notes li{max-width:78ch}
-select,input[type=search],input[type=text],input[type=email],input[type=password],input[type=date],textarea{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);max-width:100%}
+select,input[type=search],input[type=text],input[type=email],input[type=url],input[type=password],input[type=date],textarea{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);max-width:100%}
 .msg{padding:10px 14px;border-radius:8px;background:var(--accent-soft);color:var(--ink);font-size:14px}
 .msg.err{background:var(--bad-soft)} .msg.warn{background:var(--warn-soft)}
 svg text{font-family:var(--body);fill:var(--muted);font-size:11px}
@@ -185,6 +185,8 @@ body:not(.is-admin) .wa{display:none !important}
 .lvl{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:10px;padding:8px 12px}.lvl label{display:flex;gap:8px;align-items:flex-start}
 #mDroits .drow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
 /* v12 documents */
+.vside{display:block;padding:0;margin-top:2px;font-size:11.5px;opacity:.7;text-align:left}
+.verb{padding:6px 0;border-bottom:1px solid var(--line)}.verb ul{margin:4px 0 0;padding-left:18px}.verb li{font-size:14px;margin:2px 0}
 .entbox{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px}
 button.entr{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;width:100%;padding:8px 10px;font-weight:400}
 .dchip{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:3px 6px 3px 4px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:13.5px;margin:2px 4px 2px 0;vertical-align:middle}
@@ -672,7 +674,7 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
 <!-- application -->
 <div class="shell" id="app" hidden>
   <aside class="side" aria-label="Menu principal">
-    <div class="brand"><div class="logo" aria-hidden="true">€</div><div><b>Cahier des comptes</b><span id="assoSide">Comité des fêtes</span></div></div>
+    <div class="brand"><div class="logo" aria-hidden="true">€</div><div><b>Cahier des comptes</b><span id="assoSide">Comité des fêtes</span><button type="button" class="link small vside" id="verSide" title="Version et nouveautés"></button></div></div>
     <nav id="sideNav">
       <a href="#accueil" data-sec="accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>Accueil</a>
       <a href="#operations" data-sec="operations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Opérations</a>
@@ -716,6 +718,7 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
         </div>
       </details>
     </header>
+    <div id="verBar" class="msg warn" hidden>Nouvelle version <b id="verNew"></b> disponible. <button type="button" class="mini primary" id="verGo">Mettre à jour</button></div>
     <div id="demo" class="msg warn" hidden>Mode démonstration : aucune connexion n'est configurée, les données restent sur cet appareil. Renseignez <b>config.js</b> pour activer les comptes et le partage (voir le guide d'installation).</div>
     <div id="net" class="msg warn" hidden></div>
     <div id="flash" class="msg" hidden></div>
@@ -1048,6 +1051,10 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
       <div class="grid2"><div class="field"><label for="orgCp">Code postal</label><input type="text" id="orgCp"></div><div class="field"><label for="orgVille">Commune</label><input type="text" id="orgVille"></div></div>
       <div class="grid2"><div class="field"><label for="orgObjet">Objet</label><input type="text" id="orgObjet"></div><div class="field"><label for="orgNext">Prochain numéro d'ordre</label><input type="text" inputmode="numeric" id="orgNext"></div></div>
       <div class="row"><button type="button" class="primary" id="orgSave">Enregistrer</button></div></div>
+    <div class="card"><div class="row between"><h2>Version de l'application</h2><span id="verState"></span></div>
+      <p style="margin:0">Version installée : <b id="verNum"></b></p>
+      <div id="verLast"></div>
+      <div class="row"><button type="button" id="verUpd">Vérifier les mises à jour</button></div></div>
     <div class="card"><h2>Application sur téléphone</h2>
       <p style="margin:0" id="instTxt"></p>
       <p class="small muted" style="margin:0" id="offTxt"></p>
@@ -1378,6 +1385,11 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
   <div class="docbox" id="mDroits"></div>
   <div id="mErr" class="msg err" hidden></div>
   <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+</form></dialog>
+<dialog id="dlgVer"><form method="dialog">
+  <h2 id="verHead">Versions et nouveautés</h2>
+  <div id="verList" style="max-height:60vh;overflow:auto"></div>
+  <div class="row" style="justify-content:flex-end"><button type="submit" class="primary">Fermer</button></div>
 </form></dialog>
 <dialog id="dlgRL"><form id="fRL">
   <h2>Rattacher des reçus fiscaux</h2>
@@ -5087,6 +5099,48 @@ $("nfTest").onclick=async()=>{
 };
 
 $("jWho").addEventListener("change",renderJournal); $("jAct").addEventListener("change",renderJournal); $("jQ").addEventListener("input",renderJournal);
+
+/* ---------- version de l'application ---------- */
+const APP_VERSION="13.1", APP_DATE="2026-11-16";
+const CHANGELOG=[
+  ["13.1","2026-11-16",["Numéro de version affiché dans le menu et dans Réglages, avec l'historique des nouveautés.","Alerte quand une nouvelle version est en ligne, avec un bouton « Mettre à jour »."]],
+  ["13","2026-11-16",["Administrateur, trésorier et membres du bureau avec droits en lecture ou écriture par domaine (comptes, stock, encarts, documents).","Mail à l'administrateur à chaque demande d'accès.","Journal des connexions et filtres dans l'historique des modifications."]],
+  ["12d","2026-11-13",["Fiche annonceur complétée depuis l'annuaire officiel des entreprises (SIREN, forme, adresse)."]],
+  ["12c","2026-11-13",["Sélecteur Google Drive avec « Mon Drive », choix du dossier par lien."]],
+  ["12b","2026-11-13",["Reprise de l'arborescence Drive existante (années, événements, reçus, logos)."]],
+  ["12","2026-11-13",["Documents et pièces jointes rangés dans Google Drive.","Reçus fiscaux CERFA générés, numérotés et envoyés par mail."]],
+  ["11","2026-11-12",["Encarts : import des listes, une colonne par année, reconduction."]],
+  ["10","2026-11-11",["Présentations plus lisibles, fond de caisse avant l'événement, budget sans le réalisé."]]
+];
+function verHtml(n){
+  return CHANGELOG.slice(0,n||CHANGELOG.length).map(([v,d,it])=>`<div class="verb"><div class="row" style="gap:8px"><b>Version ${esc(v)}</b><span class="small muted">${fdate(d)}</span>${v===APP_VERSION?`<span class="pill good">installée</span>`:""}</div><ul>${it.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");
+}
+let NEWV=null;
+async function checkVersion(manual){
+  try{
+    const t=await (await fetch("index.html?v="+Date.now(),{cache:"no-store"})).text();
+    const v=(t.match(/const APP_VERSION="([^"]+)"/)||[])[1];
+    NEWV=v&&v!==APP_VERSION?v:null;
+    $("verBar").hidden=!NEWV; if(NEWV)$("verNew").textContent=NEWV;
+    if($("verState"))$("verState").innerHTML=NEWV?`<span class="pill warn">version ${esc(NEWV)} disponible</span>`:`<span class="pill good">à jour</span>`;
+    if(manual)flash(NEWV?`Version ${NEWV} disponible.`:"L'application est à jour.");
+  }catch(e){if(manual)flash("Vérification impossible hors connexion.",true);}
+}
+async function updateApp(){
+  try{const r=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(r)await r.update();}catch(e){}
+  try{for(const k of await caches.keys())await caches.delete(k);}catch(e){}
+  location.reload();
+}
+$("verSide").textContent="v"+APP_VERSION;
+$("verSide").onclick=()=>{$("verList").innerHTML=verHtml();$("dlgVer").showModal();};
+$("verGo").onclick=updateApp; $("verUpd").onclick=()=>NEWV?updateApp():checkVersion(true);
+function renderVersion(){$("verNum").textContent=`${APP_VERSION} du ${fdate(APP_DATE)}`;$("verLast").innerHTML=verHtml(3);}
+{const _r=renderReglages;renderReglages=function(){_r();renderVersion();};VIEWS.reglages=renderReglages;}
+// nouveautés affichées une fois après une mise à jour
+try{const seen=localStorage.getItem("cahier-version");if(seen&&seen!==APP_VERSION){setTimeout(()=>{$("verList").innerHTML=verHtml(CHANGELOG.findIndex(c=>c[0]===seen)>0?CHANGELOG.findIndex(c=>c[0]===seen):1);$("verHead").textContent=`Nouveautés de la version ${APP_VERSION}`;$("dlgVer").showModal();},1500);}localStorage.setItem("cahier-version",APP_VERSION);}catch(e){}
+setTimeout(()=>checkVersion(false),4000);
+setInterval(()=>{if(document.visibilityState==="visible")checkVersion(false);},30*60000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkVersion(false);});
 
 </script>
 </body>

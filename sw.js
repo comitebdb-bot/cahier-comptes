@@ -2,7 +2,7 @@
 // Fichiers de l'application : réseau d'abord, cache si hors connexion (les mises à jour arrivent donc tout de suite).
 // Bibliothèques (Firebase, lecture Excel, polices) : cache d'abord, ce sont des versions figées.
 // Les échanges avec la base Firebase ne passent pas par ce cache : Firebase gère lui-même le hors connexion.
-const CACHE="cahier-comptes-v13";
+const CACHE="cahier-comptes-v13.1";
 const SHELL=["./","./index.html","./config.js","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./cerfa-2041-mec-sd.pdf"];
 const LIBS=[
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
@@ -20,6 +20,7 @@ self.addEventListener("activate",e=>{
 self.addEventListener("fetch",e=>{
   const r=e.request; if(r.method!=="GET")return;
   const u=new URL(r.url);
+  if(u.searchParams.has("v"))return;   // vérification de version : toujours sur le réseau, jamais en cache
   if(u.origin===self.location.origin){
     e.respondWith(fetch(r).then(res=>{if(res.ok){const cp=res.clone();caches.open(CACHE).then(c=>c.put(r,cp));}return res;})
       .catch(()=>caches.match(r,{ignoreSearch:true}).then(m=>m||(r.mode==="navigate"?caches.match("./index.html"):null)).then(m=>m||Response.error())));
