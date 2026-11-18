@@ -5244,8 +5244,9 @@ $("nfTest").onclick=async()=>{
 $("jWho").addEventListener("change",renderJournal); $("jAct").addEventListener("change",renderJournal); $("jQ").addEventListener("input",renderJournal);
 
 /* ---------- version de l'application ---------- */
-const APP_VERSION="14.1", APP_DATE="2026-11-18";
+const APP_VERSION="14.2", APP_DATE="2026-11-18";
 const CHANGELOG=[
+  ["14.2","2026-11-18",["Liste Excel : si le script Google n'est pas encore à jour, lecture par le Drive comme avant, sans message d'erreur."]],
   ["14.1","2026-11-18",["La liste Excel des réservations est lue par le script Google du comité : plus de fenêtre Google bloquée sur téléphone.","L'actualisation automatique ne demande plus de connexion Google."]],
   ["14.0","2026-11-18",["Version téléphone : en-tête compact avec recherche derrière une icône, onglets en pastilles sans défilement de côté.","Tableaux affichés en cartes sur téléphone (événements, budget, encarts, stock, bilans…).","Opérations groupées par jour ; glisser une ligne vers la droite pour la vérifier, vers la gauche pour la modifier.","Saisie en panneau bas d'écran : montant en grand, événements récents en un toucher.","Fiche d'un événement : rubriques en liste sur téléphone, actions dans le menu ⋯."]],
   ["13.3","2026-11-18",["Réservations : la dépense traiteur du budget peut être recalculée sur le nombre de repas (même prix adulte et enfant, ou deux prix)."]],
@@ -5369,7 +5370,7 @@ async function xlRead(src,feuille,quiet){
   const hc=HA();
   if(hc.url&&hc.key){
     // lecture par le script Google du comité : aucune fenêtre de connexion, fonctionne sur tous les téléphones
-    const j=await haCall({action:"fichier",id:src.id});
+    let j={}; try{j=await haCall({action:"fichier",id:src.id});}catch(e){if(!/action inconnue/.test(e.message||""))throw e;}  // ancien script : on passe par le Drive
     if(j.data){const bin=atob(j.data), u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);buf=u.buffer;}
   }
   if(buf){}
