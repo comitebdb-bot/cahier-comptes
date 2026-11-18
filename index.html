@@ -5244,8 +5244,9 @@ $("nfTest").onclick=async()=>{
 $("jWho").addEventListener("change",renderJournal); $("jAct").addEventListener("change",renderJournal); $("jQ").addEventListener("input",renderJournal);
 
 /* ---------- version de l'application ---------- */
-const APP_VERSION="14.0", APP_DATE="2026-11-18";
+const APP_VERSION="14.1", APP_DATE="2026-11-18";
 const CHANGELOG=[
+  ["14.1","2026-11-18",["La liste Excel des réservations est lue par le script Google du comité : plus de fenêtre Google bloquée sur téléphone.","L'actualisation automatique ne demande plus de connexion Google."]],
   ["14.0","2026-11-18",["Version téléphone : en-tête compact avec recherche derrière une icône, onglets en pastilles sans défilement de côté.","Tableaux affichés en cartes sur téléphone (événements, budget, encarts, stock, bilans…).","Opérations groupées par jour ; glisser une ligne vers la droite pour la vérifier, vers la gauche pour la modifier.","Saisie en panneau bas d'écran : montant en grand, événements récents en un toucher.","Fiche d'un événement : rubriques en liste sur téléphone, actions dans le menu ⋯."]],
   ["13.3","2026-11-18",["Réservations : la dépense traiteur du budget peut être recalculée sur le nombre de repas (même prix adulte et enfant, ou deux prix)."]],
   ["13.2","2026-11-18",["Onglet Réservations dans la fiche d'un événement : repas adultes et enfants depuis HelloAsso (relié ou export) et depuis la liste Excel du Drive.","Mise à jour du budget avec les quantités réservées."]],
@@ -5363,9 +5364,17 @@ function xlCount(rows){
   }
   return null;
 }
-async function xlRead(src,feuille){
+async function xlRead(src,feuille,quiet){
   let buf;
-  if(/google-apps\.spreadsheet/.test(src.m||""))buf=await (await gfetch(GD+"/"+src.id+"/export?mimeType="+encodeURIComponent("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))).arrayBuffer();
+  const hc=HA();
+  if(hc.url&&hc.key){
+    // lecture par le script Google du comité : aucune fenêtre de connexion, fonctionne sur tous les téléphones
+    const j=await haCall({action:"fichier",id:src.id});
+    if(j.data){const bin=atob(j.data), u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);buf=u.buffer;}
+  }
+  if(buf){}
+  else if(quiet&&!(DRV.tok&&Date.now()<DRV.exp-60000))throw new Error("SKIP");
+  else if(/google-apps\.spreadsheet/.test(src.m||""))buf=await (await gfetch(GD+"/"+src.id+"/export?mimeType="+encodeURIComponent("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))).arrayBuffer();
   else buf=await driveDownload(src.id);
   const wb=XLSX.read(buf,{type:"array",raw:true});
   const want=feuille&&wb.SheetNames.includes(feuille)?feuille:null;
@@ -5376,9 +5385,9 @@ function pickSheet(wb,name,given){
   const k=strip(famOf(name)), y=String(yearOf(name)||"");
   return wb.SheetNames.find(s=>strip(s).includes(k)&&(!y||s.includes(y)))||wb.SheetNames.find(s=>strip(s).includes(k)||k.includes(strip(s)))||wb.SheetNames[0];
 }
-async function xlSync(name,src){
+async function xlSync(name,src,quiet){
   src=src||resaOf(name).xl; if(!src||!src.id)return;
-  const {wb}=await xlRead(src), sh=pickSheet(wb,name,src.feuille);
+  const {wb}=await xlRead(src,null,quiet), sh=pickSheet(wb,name,src.feuille);
   const c=xlCount(XLSX.utils.sheet_to_json(wb.Sheets[sh],{header:1,raw:true,defval:null}));
   if(!c)throw new Error(`Feuille « ${sh} » : aucune colonne « Adultes », « Enfants » ou « Tarif / Repas » trouvée.`);
   await saveResa(name,{xl:Object.assign({id:src.id,n:src.n,u:src.u,m:src.m,feuille:sh,feuilles:wb.SheetNames,at:new Date().toISOString()},c)},`liste « ${src.n} » (${sh}) : ${c.ad} adulte(s), ${c.en} enfant(s)`);
@@ -5391,7 +5400,7 @@ async function resaRefresh(name,quiet){
   if(RESA_BUSY)return; RESA_BUSY=true; const r=resaOf(name), errs=[];
   try{
     if(r.ha&&r.ha.mode==="api"){try{await haSync(name);}catch(e){errs.push(e.message||String(e));}}
-    if(r.xl&&r.xl.id){try{await xlSync(name);}catch(e){errs.push("Liste Excel : "+(e.message||e));}}
+    if(r.xl&&r.xl.id){try{await xlSync(name,null,quiet);}catch(e){if(e.message!=="SKIP"&&!(quiet&&/fenêtre|Google Drive n'est pas/.test(e.message||"")))errs.push("Liste Excel : "+(e.message||e));}}
   }finally{RESA_BUSY=false;}
   if(errs.length)flash(errs.join(" · "),true); else if(!quiet)flash("Réservations à jour.");
   if(FICHE===name)renderResa(name);
@@ -5432,7 +5441,7 @@ function wireResa(){
     const t=e.target.closest("#rsHaLink,#rsHaFile,#rsXlLink,#rsAdjS,[data-rsx],#rsBud,#rsSync"); if(!t||!FICHE)return;
     const n=FICHE;
     try{
-      if(t.id==="rsSync")return resaRefresh(n);
+      if(t.id==="rsSync"){const r=resaOf(n);if(r.xl&&r.xl.id&&!(HA().url&&HA().key))driveWarm();return resaRefresh(n);}
       if(t.id==="rsHaFile")return $("rsFile").click();
       if(t.id==="rsHaLink"){
         flash("Lecture des formulaires HelloAsso…");
