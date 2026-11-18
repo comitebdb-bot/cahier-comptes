@@ -1013,6 +1013,17 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
       <div class="scroll"><table id="docTable"></table></div>
     </div>
   </section>
+  <section class="view" id="v-resa">
+    <div class="card">
+      <div class="row between"><h2>Réservations des repas</h2><button type="button" id="rsSync">Actualiser</button></div>
+      <div class="tiles" id="rsTiles"></div>
+      <div class="scroll"><table id="rsTable"></table></div>
+      <p class="msg warn" id="rsDup" hidden></p>
+      <p class="small muted" style="margin:0">HelloAsso : les billets annulés ou remboursés ne sont pas comptés ; un tarif contenant « enfant » compte un enfant, « adulte » un adulte. Liste Excel : colonnes « Adultes » et « Enfants » (nombres par ligne), ou une colonne « Tarif / Repas / Formule ».</p>
+      <div class="row"><button type="button" class="primary w" id="rsBud" hidden>Mettre à jour le budget avec ces quantités</button></div>
+      <input type="file" id="rsFile" accept=".xlsx,.xls,.csv" hidden>
+    </div>
+  </section>
   <section class="view" id="v-evdocs">
     <div class="card">
       <div class="row between"><h2>Documents de l'événement</h2><button type="button" class="primary wd" id="evDocAdd">+ Ajouter</button></div>
@@ -1044,6 +1055,10 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
       <p class="small" style="margin:0" id="gdRoot"></p>
       <div class="row"><button type="button" class="primary" id="gdSave">Enregistrer</button><button type="button" id="gdConnect">Se connecter au Drive</button><button type="button" id="gdPickRoot">Choisir un dossier existant</button><button type="button" id="gdTree">Reprendre l'arborescence existante</button></div>
       <div class="row"><input type="text" id="gdRootUrl" placeholder="Ou collez le lien du dossier du comité (https://drive.google.com/drive/folders/…)" aria-label="Lien du dossier du comité" style="flex:1;min-width:240px"><button type="button" id="gdRootSet">Utiliser ce dossier</button></div></div>
+    <div class="card w"><h2>HelloAsso</h2>
+      <p class="small muted" style="margin:0">Les réservations sont lues par le script Google du comité (le même que pour les mails), qui garde les codes HelloAsso à l'abri. Mise en place : guide, partie « HelloAsso ».</p>
+      <div class="grid2"><div class="field"><label for="haUrl">Adresse du script</label><input type="url" id="haUrl" placeholder="https://script.google.com/macros/s/…/exec"></div><div class="field"><label for="haKey">Clé de l'application (APP_KEY du script)</label><input type="text" id="haKey" autocomplete="off"></div></div>
+      <div class="row"><button type="button" class="primary" id="haSave">Enregistrer</button><button type="button" id="haTest">Tester</button></div></div>
     <div class="card w"><h2>Reçus fiscaux (CERFA 2041-MEC-SD)</h2>
       <p class="small muted" style="margin:0">Coordonnées du comité reprises sur chaque reçu. Dans l'objet, {annee} est remplacé par l'année de l'encart.</p>
       <div class="grid2"><div class="field"><label for="orgNom">Dénomination</label><input type="text" id="orgNom"></div><div class="field"><label for="orgRna">N° RNA</label><input type="text" id="orgRna"></div></div>
@@ -1390,6 +1405,11 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
   <h2 id="verHead">Versions et nouveautés</h2>
   <div id="verList" style="max-height:60vh;overflow:auto"></div>
   <div class="row" style="justify-content:flex-end"><button type="submit" class="primary">Fermer</button></div>
+</form></dialog>
+<dialog id="dlgHF"><form id="fHF">
+  <h2>Formulaire HelloAsso de <span id="hfFor"></span></h2>
+  <div class="dlist" id="hfList" style="max-height:55vh;overflow:auto"></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" data-close>Annuler</button><button type="submit" class="primary">Relier</button></div>
 </form></dialog>
 <dialog id="dlgRL"><form id="fRL">
   <h2>Rattacher des reçus fiscaux</h2>
@@ -2514,9 +2534,9 @@ const SUBS={
   stock:[["stock","Articles"],["mouvements","Mouvements"],["buvette","Analyse buvette"]],
   rap:[["synthese","Bilan de l'année"],["editions","Comparer les éditions"],["tresorerie","Trésorerie prévisionnelle"],["presentation","Présentation"],["controles","Vérifications"],["journal","Historique"]]
 };
-const FICHE_TABS=[["apercu","Vue d'ensemble"],["budget","Budget"],["caisse","Caisse"],["buvette","Buvette"],["stock","Stock"],["comparer","Comparer"],["docs","Documents"],["ops","Opérations"]];
+const FICHE_TABS=[["apercu","Vue d'ensemble"],["budget","Budget"],["resa","Réservations"],["caisse","Caisse"],["buvette","Buvette"],["stock","Stock"],["comparer","Comparer"],["docs","Documents"],["ops","Opérations"]];
 const ALIAS={ecritures:"operations",budget:"evenements",previsionnel:"evenements",acces:"reglages",stockev:"stock",evenement:"evenements"};
-const VIEWS={documents:()=>renderDocuments(),evdocs:()=>renderEvDocs(FICHE),accueil:renderAccueil,synthese:renderSynthese,ecritures:renderLines,evenements:renderEvenements,previsionnel:renderPrev,evenement:renderEvent,editions:renderEditions,encarts:renderEncarts,rapprochement:renderRap,presentation:renderPres,controles:renderControles,journal:renderJournal,reglages:renderReglages,stock:renderStock,stockev:renderStockEv,mouvements:renderMvts,buvette:renderBuvette};
+const VIEWS={resa:()=>renderResa(FICHE),documents:()=>renderDocuments(),evdocs:()=>renderEvDocs(FICHE),accueil:renderAccueil,synthese:renderSynthese,ecritures:renderLines,evenements:renderEvenements,previsionnel:renderPrev,evenement:renderEvent,editions:renderEditions,encarts:renderEncarts,rapprochement:renderRap,presentation:renderPres,controles:renderControles,journal:renderJournal,reglages:renderReglages,stock:renderStock,stockev:renderStockEv,mouvements:renderMvts,buvette:renderBuvette};
 let FICHE=null;
 const ficheHash=(name,tab)=>"#fiche/"+(tab||"apercu")+"/"+slug(name);
 let FICHE_NEW=null;
@@ -2568,6 +2588,7 @@ function renderFiche(name,tab){
     showView("evenement"); renderEvent();
   } else if(tab==="caisse"){showView("evenement"); renderCaisse({name});}
   else if(tab==="budget"){showView("previsionnel"); renderPrev();}
+  else if(tab==="resa"){showView("resa"); renderResa(name); const r=resaOf(name), old=[r.ha&&r.ha.mode==="api"&&r.ha.at,r.xl&&r.xl.at].filter(Boolean).sort()[0]; if(old&&Date.now()-Date.parse(old)>3600000&&(canWrite()))resaRefresh(name,true);}
   else if(tab==="buvette"){showView("buvette"); renderBuvette();}
   else if(tab==="stock"){showView("stockev"); renderStockEv();}
   else if(tab==="comparer"){showView("editions"); renderEditions();}
@@ -2732,7 +2753,8 @@ $("fV").addEventListener("submit",async ev=>{
     S.mouvements.filter(m=>m.evenement&&eventKey(m.evenement).parent===from).forEach(m=>{const k=eventKey(m.evenement);ops.push({t:"update",col:"mouvements",id:m.id,data:{evenement:k.sub?name+" - "+k.sub:name}});});
     jr.push({action:"Modification",texte:`Événement « ${from} » ${merge?"fusionné avec":"renommé en"} « ${name} » (${ls.length} opérations)`});
   }
-  const doc={nom:name,debut:$("vDeb").value||null,fin:$("vFin").value||null,statut:$("vStat").value,sous:[...new Set($("vSous").value.split(/[,;]/).map(normEv).filter(Boolean))],note:$("vNote").value.trim()};
+  const prevM=S.evenements.find(m=>eventKey(m.nom).parent===(from||name))||S.evenements.find(m=>eventKey(m.nom).parent===name);
+  const doc={...(prevM&&prevM.resa?{resa:prevM.resa}:{}),nom:name,debut:$("vDeb").value||null,fin:$("vFin").value||null,statut:$("vStat").value,sous:[...new Set($("vSous").value.split(/[,;]/).map(normEv).filter(Boolean))],note:$("vNote").value.trim()};
   ops.push({t:"set",col:"evenements",id:slug(name),data:doc});
   const r=$("vRec").value.trim(), d=$("vDep").value.trim(), oldB=S.budgets.find(b=>eventKey(b.evenement).parent===name);
   if(!$("vRec").readOnly){
@@ -3230,7 +3252,7 @@ function restoreOps(x){
     for(const r of x.ev){
       const n=eventKey(r[0]).parent; if(!n)continue;
       const st=strip(r[3]), note=String(r[7]==null?"":r[7]);
-      if(st)ops.push({t:"set",col:"evenements",id:slug(n),data:{nom:n,debut:parseDate(r[1]),fin:parseDate(r[2]),statut:st==="clos"?"clos":"ouvert",sous:String(r[4]||"").split(/[,;]/).map(normEv).filter(Boolean),note}});
+      if(st)ops.push({t:"set",col:"evenements",id:slug(n),data:{nom:n,debut:parseDate(r[1]),fin:parseDate(r[2]),statut:st==="clos"?"clos":"ouvert",sous:String(r[4]||"").split(/[,;]/).map(normEv).filter(Boolean),note,...(r[8]?(()=>{try{return {resa:JSON.parse(r[8])};}catch(e){return {};}})():{})}});
       if((r[5]!=null&&r[5]!=="")||(r[6]!=null&&r[6]!==""))ops.push({t:"set",col:"budgets",id:slug(n),data:{evenement:n,recettes:round2(parseNum(r[5])),depenses:round2(parseNum(r[6])),note}});
     }
   }
@@ -3324,10 +3346,10 @@ function exportXlsx(){
     XLSX.utils.book_append_sheet(wb,ws,title);
   }
   const add=(name,aoa)=>{if(aoa.length>1)XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),name);};
-  const evR=[["Événement","Début","Fin","Statut","Sous-rubriques","Recettes prévues","Dépenses prévues","Note"]];
+  const evR=[["Événement","Début","Fin","Statut","Sous-rubriques","Recettes prévues","Dépenses prévues","Note","Réservations (application)"]];
   for(const n of new Set([...S.evenements.map(m=>eventKey(m.nom).parent),...S.budgets.map(b=>eventKey(b.evenement).parent)])){
     const m=S.evenements.find(x=>eventKey(x.nom).parent===n), b=S.budgets.find(x=>eventKey(x.evenement).parent===n);
-    evR.push([n,(m&&m.debut)||"",(m&&m.fin)||"",m?(m.statut==="clos"?"clos":"en cours"):"",m&&m.sous?m.sous.join(", "):"",b?b.recettes:"",b?b.depenses:"",(m&&m.note)||(b&&b.note)||""]);
+    evR.push([n,(m&&m.debut)||"",(m&&m.fin)||"",m?(m.statut==="clos"?"clos":"en cours"):"",m&&m.sous?m.sous.join(", "):"",b?b.recettes:"",b?b.depenses:"",(m&&m.note)||(b&&b.note)||"",m&&m.resa?JSON.stringify(m.resa):""]);
   }
   add("Événements",evR);
   const anR=[["Annonceur","Contact","Téléphone","E-mail","Note","Année","Montant","Statut","Payé le","Fiche complète (application)"]];
@@ -4092,7 +4114,7 @@ function renderAccueil(){
   $("hEvents").innerHTML=open.length?`<div class="evl">${open.map(x=>{
     const e=x.ev, L=pvLines(x.name), bg=S.budgets.find(b=>eventKey(b.evenement).parent===x.name);
     const prev=L.length?sumOf(L,l=>(l.sens==="rec"?1:-1)*(+l.montant||0)):bg?bg.recettes-bg.depenses:null, d=x.managed&&x.managed.debut;
-    return `<button type="button" data-ev="${esc(x.name)}"><span><b>${esc(x.name)}</b><span class="small muted">${d?fdate(d):"date à fixer"}${e?` · ${e.lines.length} opération(s)`:""}</span></span><span class="r"><b class="num ${e?cls(e.res):""}">${e?sg(e.res):"—"}</b><span class="small muted">${prev!=null?"prévu "+sg(prev):"pas de budget"}</span></span></button>`;}).join("")}</div>`
+    return `<button type="button" data-ev="${esc(x.name)}"><span><b>${esc(x.name)}</b><span class="small muted">${d?fdate(d):"date à fixer"}${e?` · ${e.lines.length} opération(s)`:""}${(()=>{const t=resaTot(resaOf(x.name));return t.ad+t.en?` · ${qfmt(t.ad+t.en)} repas réservés`:"";})()}</span></span><span class="r"><b class="num ${e?cls(e.res):""}">${e?sg(e.res):"—"}</b><span class="small muted">${prev!=null?"prévu "+sg(prev):"pas de budget"}</span></span></button>`;}).join("")}</div>`
     :`<p class="muted" style="margin:0">Aucun événement en cours.</p>${w?`<div class="row"><button type="button" class="primary" data-newev="1">+ Créer un événement</button></div>`:""}`;
   const last=M.lines.filter(l=>l.iso).slice(-8).reverse();
   $("hLast").innerHTML=`<tbody>${last.map(l=>`<tr${w?` class="clk" data-edit="${esc(l.id)}"`:""}><td class="num small">${fdate(l.iso)}</td><td>${esc(l.des)}<div class="small muted">${esc(l.evt.trim())}${l.acc==="LA"?" · Livret A":""}</div></td><td class="small muted">${esc(l.cat)}</td><td class="r num ${l.rec?"pos":"neg"}">${l.rec?"+"+fm(l.rec):"−"+fm(l.dep)}</td><td class="small">${l.pointe?`<span class="pill good">Vérifié</span>`:""}</td></tr>`).join("")||`<tr><td class="muted">Aucune opération.</td></tr>`}</tbody>`;
@@ -5101,8 +5123,9 @@ $("nfTest").onclick=async()=>{
 $("jWho").addEventListener("change",renderJournal); $("jAct").addEventListener("change",renderJournal); $("jQ").addEventListener("input",renderJournal);
 
 /* ---------- version de l'application ---------- */
-const APP_VERSION="13.1", APP_DATE="2026-11-16";
+const APP_VERSION="13.2", APP_DATE="2026-11-18";
 const CHANGELOG=[
+  ["13.2","2026-11-18",["Onglet Réservations dans la fiche d'un événement : repas adultes et enfants depuis HelloAsso (relié ou export) et depuis la liste Excel du Drive.","Mise à jour du budget avec les quantités réservées."]],
   ["13.1","2026-11-16",["Numéro de version affiché dans le menu et dans Réglages, avec l'historique des nouveautés.","Alerte quand une nouvelle version est en ligne, avec un bouton « Mettre à jour »."]],
   ["13","2026-11-16",["Administrateur, trésorier et membres du bureau avec droits en lecture ou écriture par domaine (comptes, stock, encarts, documents).","Mail à l'administrateur à chaque demande d'accès.","Journal des connexions et filtres dans l'historique des modifications."]],
   ["12d","2026-11-13",["Fiche annonceur complétée depuis l'annuaire officiel des entreprises (SIREN, forme, adresse)."]],
@@ -5141,6 +5164,202 @@ try{const seen=localStorage.getItem("cahier-version");if(seen&&seen!==APP_VERSIO
 setTimeout(()=>checkVersion(false),4000);
 setInterval(()=>{if(document.visibilityState==="visible")checkVersion(false);},30*60000);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkVersion(false);});
+
+/* ================= v13.2 : réservations des repas (HelloAsso + liste Excel du Drive) ================= */
+const RESA_SKIP=/annul|cancel|refund|rembours|abandon|contest|refus/i;
+const tarifKind=t=>/enfant|kid|junior|-\s*1[0-2]\s*ans|moins de/i.test(t||"")?"en":/adulte|adult/i.test(t||"")?"ad":"";
+const resaOf=n=>{const m=S.evenements.find(e=>eventKey(e.nom).parent===n);return (m&&m.resa)||{};};
+const HA=()=>Object.assign({url:(S.publicCfg||{}).notifUrl||"",key:""},P().helloasso||{});
+function resaTot(r){
+  const z={ad:0,en:0}; for(const s of [r.ha,r.xl,r.adj])if(s){z.ad+=+s.ad||0;z.en+=+s.en||0;}
+  return z;
+}
+// compte des billets à partir de lignes {tarif, statut, montant, nom}
+function countTickets(rows){
+  const out={ad:0,en:0,autres:{},montant:0,billets:0,commandes:new Set(),noms:new Set(),prix:{}};
+  for(const r of rows){
+    if(RESA_SKIP.test(r.statut||""))continue;
+    const k=tarifKind(r.tarif);
+    if(k){out[k]++;out.billets++;if(+r.montant>0)out.prix[k]=+r.montant;}
+    else if(r.tarif)out.autres[r.tarif]=(out.autres[r.tarif]||0)+1;
+    out.montant+=+r.montant||0; if(r.cmd)out.commandes.add(r.cmd);
+    for(const n of [r.nom,r.nom2])if(n)out.noms.add(strip(n).trim());
+  }
+  return {ad:out.ad,en:out.en,autres:out.autres,montant:round2(out.montant),commandes:out.commandes.size,noms:[...out.noms].filter(Boolean).slice(0,400),prix:out.prix};
+}
+async function saveResa(name,patch,texte){
+  const m=S.evenements.find(e=>eventKey(e.nom).parent===name), r=Object.assign({},(m&&m.resa)||{},patch);
+  const op=m?{t:"update",col:"evenements",id:m.id,data:{resa:r}}:{t:"merge",col:"evenements",id:slug(name),data:{nom:name,resa:r}};
+  return run(store.commit([op],{action:"Réservations",texte:`${name} : ${texte}`}),null);
+}
+
+/* ---------- HelloAsso, via le script Google du comité ---------- */
+async function haCall(params){
+  const c=HA(); if(!c.url||!c.key)throw new Error("HelloAsso n'est pas encore relié : Réglages → HelloAsso.");
+  const r=await fetch(c.url+"?"+new URLSearchParams(Object.assign({key:c.key},params)),{redirect:"follow"});
+  let j; try{j=await r.json();}catch(e){throw new Error("Réponse illisible du script : vérifiez qu'il est déployé en nouvelle version (guide, partie HelloAsso).");}
+  if(j.error)throw new Error("HelloAsso : "+j.error);
+  return j;
+}
+async function haSync(name,link){
+  const l=link||resaOf(name).ha; if(!l||!l.slug)return;
+  const j=await haCall({action:"items",type:l.type,slug:l.slug});
+  const c=countTickets((j.items||[]).map(i=>({tarif:i.tarif,statut:i.etat,montant:i.montant,cmd:i.commande,nom:i.nom,nom2:i.payeur})));
+  await saveResa(name,{ha:Object.assign({},l,{mode:"api",at:new Date().toISOString()},c)},`HelloAsso « ${l.titre||l.slug} » : ${c.ad} adulte(s), ${c.en} enfant(s)`);
+  return c;
+}
+// export HelloAsso (fichier .xlsx ou .csv), utilisable sans relier l'API
+function haFromExport(rows){
+  let h=-1; for(let i=0;i<Math.min(rows.length,10);i++){if((rows[i]||[]).some(x=>/^tarif$/i.test(String(x||"").trim()))){h=i;break;}}
+  if(h<0)return null;
+  const H=rows[h].map(x=>strip(x)), col=re=>H.findIndex(x=>re.test(x));
+  const cT=col(/^tarif$/), cM=col(/^montant tarif|^montant$/), cS=col(/statut/), cC=col(/reference commande|^commande/), cN=col(/^nom participant|^nom$/), cP=col(/^nom payeur/);
+  return countTickets(rows.slice(h+1).filter(r=>r&&r[cT]).map(r=>({tarif:String(r[cT]),montant:parseNum(r[cM]),statut:cS>=0?String(r[cS]||""):"",cmd:cC>=0?r[cC]:null,nom:cN>=0?r[cN]:"",nom2:cP>=0?r[cP]:""})));
+}
+
+/* ---------- liste tenue à la main (Excel ou Google Sheets dans le Drive) ---------- */
+function xlCount(rows){
+  // en-tête : la première ligne qui contient « adulte » ou « enfant » (ou une colonne tarif / repas / formule)
+  for(let i=0;i<Math.min(rows.length,15);i++){
+    const H=(rows[i]||[]).map(x=>strip(x));
+    const cA=H.findIndex(x=>/adulte/.test(x)), cE=H.findIndex(x=>/enfant/.test(x)), cT=H.findIndex(x=>/^(tarif|repas|formule|menu)/.test(x)), cN=H.findIndex(x=>/^nom/.test(x)), cQ=H.findIndex(x=>/^(nombre|nb|qte|quantite|personnes)/.test(x));
+    const cS=H.findIndex(x=>/annul/.test(x));
+    if(cA<0&&cE<0&&cT<0)continue;
+    let ad=0,en=0,lignes=0; const noms=new Set(), ignor=[];
+    for(const r of rows.slice(i+1)){
+      if(!r||r.every(v=>v==null||String(v).trim()===""))continue;
+      if(cN>=0&&/^total/i.test(String(r[cN]||"")))continue;
+      if(cS>=0&&/^(x|oui|o|1|annul)/i.test(String(r[cS]||"").trim()))continue;
+      let a=0,e=0;
+      if(cA>=0||cE>=0){a=cA>=0?(parseNum(r[cA])||0):0;e=cE>=0?(parseNum(r[cE])||0):0;}
+      else{const k=tarifKind(r[cT]);const q=cQ>=0?(parseNum(r[cQ])||1):1;if(k==="ad")a=q;else if(k==="en")e=q;else if(r[cT])ignor.push(String(r[cT]));}
+      if(!a&&!e)continue;
+      ad+=a;en+=e;lignes++; if(cN>=0&&r[cN])noms.add(strip(r[cN]).trim());
+    }
+    return {ad:round2(ad),en:round2(en),lignes,noms:[...noms].slice(0,400),entete:i+1,colonnes:[cA>=0?rows[i][cA]:null,cE>=0?rows[i][cE]:null,cT>=0?rows[i][cT]:null].filter(Boolean).join(", "),ignores:[...new Set(ignor)].slice(0,8)};
+  }
+  return null;
+}
+async function xlRead(src,feuille){
+  let buf;
+  if(/google-apps\.spreadsheet/.test(src.m||""))buf=await (await gfetch(GD+"/"+src.id+"/export?mimeType="+encodeURIComponent("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))).arrayBuffer();
+  else buf=await driveDownload(src.id);
+  const wb=XLSX.read(buf,{type:"array",raw:true});
+  const want=feuille&&wb.SheetNames.includes(feuille)?feuille:null;
+  return {wb,sheets:wb.SheetNames,feuille:want};
+}
+function pickSheet(wb,name,given){
+  if(given&&wb.SheetNames.includes(given))return given;
+  const k=strip(famOf(name)), y=String(yearOf(name)||"");
+  return wb.SheetNames.find(s=>strip(s).includes(k)&&(!y||s.includes(y)))||wb.SheetNames.find(s=>strip(s).includes(k)||k.includes(strip(s)))||wb.SheetNames[0];
+}
+async function xlSync(name,src){
+  src=src||resaOf(name).xl; if(!src||!src.id)return;
+  const {wb}=await xlRead(src), sh=pickSheet(wb,name,src.feuille);
+  const c=xlCount(XLSX.utils.sheet_to_json(wb.Sheets[sh],{header:1,raw:true,defval:null}));
+  if(!c)throw new Error(`Feuille « ${sh} » : aucune colonne « Adultes », « Enfants » ou « Tarif / Repas » trouvée.`);
+  await saveResa(name,{xl:Object.assign({id:src.id,n:src.n,u:src.u,m:src.m,feuille:sh,feuilles:wb.SheetNames,at:new Date().toISOString()},c)},`liste « ${src.n} » (${sh}) : ${c.ad} adulte(s), ${c.en} enfant(s)`);
+  return c;
+}
+
+/* ---------- onglet Réservations de la fiche ---------- */
+let RESA_BUSY=false;
+async function resaRefresh(name,quiet){
+  if(RESA_BUSY)return; RESA_BUSY=true; const r=resaOf(name), errs=[];
+  try{
+    if(r.ha&&r.ha.mode==="api"){try{await haSync(name);}catch(e){errs.push(e.message||String(e));}}
+    if(r.xl&&r.xl.id){try{await xlSync(name);}catch(e){errs.push("Liste Excel : "+(e.message||e));}}
+  }finally{RESA_BUSY=false;}
+  if(errs.length)flash(errs.join(" · "),true); else if(!quiet)flash("Réservations à jour.");
+  if(FICHE===name)renderResa(name);
+}
+function renderResa(name){
+  const r=resaOf(name), t=resaTot(r), w=canWrite(), ha=r.ha, xl=r.xl, adj=r.adj||{};
+  const L=pvLines(name), lAd=L.find(l=>l.sens==="rec"&&tarifKind(l.libelle)==="ad"), lEn=L.find(l=>l.sens==="rec"&&tarifKind(l.libelle)==="en");
+  const ago=d=>{if(!d)return "";const x=new Date(d);return isNaN(x)?d:x.toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}).replace(" "," à ");};
+  const dup=ha&&xl&&ha.noms&&xl.noms?xl.noms.filter(n=>n&&ha.noms.some(h=>h&&(h===n||h.split(" ")[0]===n.split(" ")[0]&&n.split(" ")[0].length>3))):[];
+  const tl=(h,v,sub)=>`<div class="tile"><h3>${h}</h3><div class="v">${v}</div>${sub?`<div class="s">${sub}</div>`:""}</div>`;
+  $("rsTiles").innerHTML=tl("Repas adultes",qfmt(t.ad),lAd?"au budget : "+qfmt(+lAd.qte||0):"pas de ligne au budget")+tl("Repas enfants",qfmt(t.en),lEn?"au budget : "+qfmt(+lEn.qte||0):"pas de ligne au budget")+tl("Total des repas",qfmt(t.ad+t.en),ha&&ha.montant?fm(ha.montant)+" payés sur HelloAsso":"");
+  const row=(lbl,s,extra,act)=>`<tr><td><b>${lbl}</b>${extra?`<div class="small muted">${extra}</div>`:""}</td><td class="r num">${s?qfmt(+s.ad||0):"·"}</td><td class="r num">${s?qfmt(+s.en||0):"·"}</td><td class="small">${act||""}</td></tr>`;
+  $("rsTable").innerHTML=`<thead><tr><th>Source</th><th class="r">Adultes</th><th class="r">Enfants</th><th></th></tr></thead><tbody>
+    ${row("HelloAsso",ha,ha?`${esc(ha.titre||ha.fichier||"")} · ${ha.commandes||0} commande(s)${ha.mode==="api"?" · mis à jour le "+ago(ha.at):" · export du "+ago(ha.at)}${ha.autres&&Object.keys(ha.autres).length?`<br>Autres tarifs non comptés : ${esc(Object.entries(ha.autres).map(([k,v])=>`${k} (${v})`).join(", "))}`:""}`:"Pas encore relié.",w?`<button type="button" class="mini" id="rsHaLink">${ha?"Changer":"Relier un formulaire"}</button><button type="button" class="mini" id="rsHaFile">Importer un export</button>${ha?`<button type="button" class="mini" data-rsx="ha">Retirer</button>`:""}`:"")}
+    ${row("Liste Excel du Drive",xl,xl?`<a href="${esc(xl.u||"#")}" target="_blank" rel="noopener">${esc(xl.n||"")}</a> · feuille ${xl.feuilles&&xl.feuilles.length>1&&w?`<select id="rsSheet" aria-label="Feuille">${xl.feuilles.map(f=>`<option ${f===xl.feuille?"selected":""}>${esc(f)}</option>`).join("")}</select>`:esc(xl.feuille||"")} · ${xl.lignes||0} ligne(s) · colonnes ${esc(xl.colonnes||"")} · lu le ${ago(xl.at)}`:"Pas encore reliée.",w?`<button type="button" class="mini" id="rsXlLink">${xl?"Changer":"Choisir le fichier"}</button>${xl?`<button type="button" class="mini" data-rsx="xl">Retirer</button>`:""}`:"")}
+    <tr><td><b>Ajustement</b><div class="small muted">invités, réservations sur place, corrections${adj.note?" · "+esc(adj.note):""}</div></td><td class="r">${w?`<input type="text" inputmode="numeric" id="rsAdjA" value="${adj.ad||""}" placeholder="0" style="width:64px;text-align:right" aria-label="Ajustement adultes">`:qfmt(+adj.ad||0)}</td><td class="r">${w?`<input type="text" inputmode="numeric" id="rsAdjE" value="${adj.en||""}" placeholder="0" style="width:64px;text-align:right" aria-label="Ajustement enfants">`:qfmt(+adj.en||0)}</td><td>${w?`<input type="text" id="rsAdjN" value="${esc(adj.note||"")}" placeholder="motif" style="width:140px" aria-label="Motif"><button type="button" class="mini" id="rsAdjS">OK</button>`:""}</td></tr>
+  </tbody><tfoot><tr><th>Total</th><th class="r num">${qfmt(t.ad)}</th><th class="r num">${qfmt(t.en)}</th><th></th></tr></tfoot>`;
+  $("rsDup").hidden=!dup.length;
+  $("rsDup").innerHTML=dup.length?`Noms présents dans HelloAsso et dans la liste Excel, à vérifier (comptés deux fois ?) : <b>${esc(dup.join(", "))}</b>. Corrigez si besoin avec l'ajustement.`:"";
+  $("rsBud").hidden=!w||!(ha||xl||adj.ad||adj.en);
+  $("rsSync").hidden=!(ha&&ha.mode==="api"||xl);
+}
+function resaBudgetPlan(name){
+  const r=resaOf(name), t=resaTot(r), L=pvLines(name).map(l=>Object.assign({},l)), ch=[];
+  const prix={ad:(r.ha&&r.ha.prix&&r.ha.prix.ad)||null,en:(r.ha&&r.ha.prix&&r.ha.prix.en)||null};
+  for(const k of ["ad","en"]){
+    const q=t[k]; let l=L.find(x=>x.sens==="rec"&&tarifKind(x.libelle)===k);
+    if(!l){if(!q)continue;const pu=prix[k];l={id:"l"+k+Date.now().toString(36),sens:"rec",poste:"Réservations (repas, emplacements)",libelle:k==="ad"?"Repas adulte":"Repas enfant",qte:null,pu:pu||null,montant:0,statut:"prevu",echeance:"",note:""};L.push(l);ch.push({l,avant:null});}
+    else ch.push({l,avant:{qte:l.qte,montant:l.montant}});
+    l.qte=q; if(!(+l.pu>0)&&prix[k])l.pu=prix[k]; if(+l.pu>0)l.montant=round2(q*(+l.pu)); l.note=`Réservations au ${fdate(today())}`;
+  }
+  return {L,ch};
+}
+function wireResa(){
+  const name=FICHE;
+  document.addEventListener("click",async e=>{
+    const t=e.target.closest("#rsHaLink,#rsHaFile,#rsXlLink,#rsAdjS,[data-rsx],#rsBud,#rsSync"); if(!t||!FICHE)return;
+    const n=FICHE;
+    try{
+      if(t.id==="rsSync")return resaRefresh(n);
+      if(t.id==="rsHaFile")return $("rsFile").click();
+      if(t.id==="rsHaLink"){
+        flash("Lecture des formulaires HelloAsso…");
+        const j=await haCall({action:"forms"}), fs=(j.forms||[]).sort((a,b)=>String(b.debut||"").localeCompare(String(a.debut||"")));
+        if(!fs.length)return flash("Aucun formulaire trouvé sur HelloAsso.",true);
+        const k=strip(famOf(n)), y=String(yearOf(n)||"");
+        const guess=fs.find(f=>strip(f.titre).split(/[^a-z0-9]+/).some(w=>w.length>4&&k.includes(w))&&(!y||String(f.debut||"").startsWith(y)))||fs[0];
+        $("hfList").innerHTML=fs.map(f=>`<label class="drow"><input type="radio" name="hf" value="${esc(f.type+"|"+f.slug)}" ${f===guess?"checked":""}><span><b>${esc(f.titre)}</b> <span class="small muted">${esc(f.typeLbl||f.type)}${f.debut?" · "+fdate(String(f.debut).slice(0,10)):""}${f.etat?" · "+esc(f.etat):""}</span></span></label>`).join("");
+        $("hfFor").textContent=n; $("dlgHF").showModal(); return;
+      }
+      if(t.id==="rsXlLink"){
+        const l=await drivePick({multi:false,mime:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/vnd.google-apps.spreadsheet,text/csv",title:"Choisir la liste des réservations"});
+        if(!l.length)return; flash("Lecture de la liste…");
+        const c=await xlSync(n,Object.assign(l[0],{u:l[0].u||`https://drive.google.com/file/d/${l[0].id}/view`}));
+        flash(`Liste lue : ${c.ad} adulte(s), ${c.en} enfant(s).`); return renderResa(n);
+      }
+      if(t.id==="rsAdjS"){await saveResa(n,{adj:{ad:parseNum($("rsAdjA").value)||0,en:parseNum($("rsAdjE").value)||0,note:$("rsAdjN").value.trim()}},`ajustement ${parseNum($("rsAdjA").value)||0} adulte(s), ${parseNum($("rsAdjE").value)||0} enfant(s)`);return renderResa(n);}
+      if(t.dataset.rsx){if(!await ask(t.dataset.rsx==="ha"?"Retirer HelloAsso de cet événement ?":"Retirer la liste Excel de cet événement ? Le fichier reste dans le Drive.","Retirer"))return;const r=Object.assign({},resaOf(n));delete r[t.dataset.rsx];const m=S.evenements.find(x=>eventKey(x.nom).parent===n);if(m)await run(store.commit([{t:"update",col:"evenements",id:m.id,data:{resa:r}}],{action:"Réservations",texte:`${n} : source retirée`}),"Retiré.");return renderResa(n);}
+      if(t.id==="rsBud"){
+        const {L,ch}=resaBudgetPlan(n);
+        if(!ch.length)return flash("Aucune réservation à reporter.",true);
+        const txt=ch.map(({l,avant})=>`${l.libelle} : ${avant?qfmt(+avant.qte||0)+" → ":""}${qfmt(l.qte)}${+l.pu>0?` × ${fm(+l.pu)} = ${fm(l.montant)}`:" (prix unitaire à saisir dans le budget)"}`).join("\n");
+        if(!await ask(`Mettre à jour le budget de ${n} ?\n\n${txt}`,"Mettre à jour"))return;
+        const keep=pvEv; pvEv=n; await savePv(L,`quantités de repas reprises des réservations (${ch.map(c=>c.l.libelle+" "+qfmt(c.l.qte)).join(", ")})`,"Budget mis à jour."); pvEv=keep; return renderResa(n);
+      }
+    }catch(err){flash(err.message||String(err),true);}
+  });
+  document.addEventListener("change",async e=>{
+    if(e.target.id==="rsSheet"&&FICHE){const n=FICHE,src=Object.assign({},resaOf(n).xl,{feuille:e.target.value});try{await xlSync(n,src);renderResa(n);}catch(err){flash(err.message||String(err),true);}}
+  });
+  $("rsFile").addEventListener("change",async e=>{
+    const f=e.target.files[0]; e.target.value=""; if(!f||!FICHE)return; const n=FICHE;
+    try{const c=haFromExport(await readTable(f)); if(!c)throw new Error("Ce fichier n'est pas un export HelloAsso (colonne « Tarif » introuvable).");
+      const old=resaOf(n).ha||{};
+      await saveResa(n,{ha:Object.assign(old.mode==="api"?{}:old,{mode:"fichier",fichier:f.name,titre:old.titre||"",at:new Date().toISOString()},c)},`export HelloAsso « ${f.name} » : ${c.ad} adulte(s), ${c.en} enfant(s)`);
+      flash(`Export lu : ${c.ad} adulte(s), ${c.en} enfant(s), ${fm(c.montant)}.`); renderResa(n);}
+    catch(err){flash(err.message||String(err),true);}
+  });
+  $("fHF").addEventListener("submit",async ev=>{
+    ev.preventDefault(); const v=(document.querySelector('[name="hf"]:checked')||{}).value; if(!v)return;
+    const [type,slug]=v.split("|"), lbl=document.querySelector('[name="hf"]:checked').closest("label").querySelector("b").textContent, n=$("hfFor").textContent;
+    $("dlgHF").close(); flash("Lecture des réservations HelloAsso…");
+    try{const c=await haSync(n,{type,slug,titre:lbl});flash(`HelloAsso : ${c.ad} adulte(s), ${c.en} enfant(s).`);renderResa(n);}catch(err){flash(err.message||String(err),true);}
+  });
+}
+wireResa();
+// réglages HelloAsso
+function renderHaSettings(){const c=HA();$("haUrl").value=c.url||"";$("haKey").value=c.key||"";}
+$("haSave").onclick=()=>run(store.commit([{t:"merge",col:"parametres",id:"general",data:{helloasso:{url:$("haUrl").value.trim(),key:$("haKey").value.trim()}}}],{action:"Réglages",texte:"Liaison HelloAsso enregistrée"}),"Liaison HelloAsso enregistrée.");
+$("haTest").onclick=async()=>{try{await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{helloasso:{url:$("haUrl").value.trim(),key:$("haKey").value.trim()}}}],[]),null);const j=await haCall({action:"forms"});flash(`HelloAsso relié : ${(j.forms||[]).length} formulaire(s) trouvé(s).`);}catch(e){flash(e.message||String(e),true);}};
+{const _r=renderReglages;renderReglages=function(){_r();if(canWrite())renderHaSettings();};VIEWS.reglages=renderReglages;}
 
 </script>
 </body>
