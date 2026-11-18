@@ -627,6 +627,110 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
 #aTable td.st-promis{color:var(--accent)}#aTable td.st-relancer{color:var(--muted)}#aTable td.st-refuse{color:var(--bad);font-size:12px}
 #aTable td.yc .small{font-weight:400}
 @media (display-mode:standalone){.side{padding-top:max(18px,env(safe-area-inset-top))}}
+/* ================= v14 : version téléphone ================= */
+#gqBtn{display:none}
+tr.dayh td{padding:12px 4px 4px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border:0;background:none !important}
+tr.dayh td span{float:right}
+#lnMore{margin:10px auto 0;display:block}
+.fh-rub,.fh-more{display:none}
+#eEvChips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+#eEvChips button{min-height:34px;padding:0 12px;border-radius:17px;font-size:13.5px}
+#eEvChips button.on{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.mob{display:none}
+@media (min-width:701px){
+  table:has(tr.lr) tr.dayh{display:flex;justify-content:space-between;padding:12px 8px 2px}
+  table:has(tr.lr) tr.dayh td{display:flex;justify-content:space-between;flex:1;padding:0}
+}
+@media (max-width:880px){
+  /* en-tête compact, recherche derrière une icône */
+  .topbar{flex-wrap:nowrap;align-items:center;gap:8px;padding:max(10px,env(safe-area-inset-top)) 0 8px}
+  .topbar .ttl{flex:1 1 auto;min-width:0}
+  .topbar .ttl #src{display:none}
+  .topbar h1{font-size:24px}
+  #gqBtn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:22px;padding:0;flex:none}
+  .gsearch{display:none}
+  body.srch .topbar{flex-wrap:wrap}
+  body.srch .gsearch{display:block;flex:1 1 100%;order:3}
+  /* onglets : pastilles sur plusieurs lignes, plus de défilement de côté */
+  #subnav{flex-wrap:wrap;overflow:visible;gap:6px;border-bottom:0;padding-bottom:4px}
+  #subnav a{border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:13.5px;white-space:nowrap}
+  #subnav a.on{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+  #subnav a.on::after{display:none}
+  .chips{flex-wrap:wrap;overflow:visible}
+  /* fiche d'un événement : rubriques au lieu des onglets */
+  body.fiche #subnav{display:none !important}
+  .fh-rub{display:block}
+  .fh-more{display:block}
+  .fh-top>.row{display:none}
+  .fh-top{flex-wrap:nowrap !important;align-items:flex-start}
+  .rub{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface);margin-top:12px}
+  .rub a{display:flex;align-items:center;gap:12px;padding:0 14px;min-height:54px;border-bottom:1px solid var(--line);color:var(--ink) !important;text-decoration:none}
+  .rub a span{color:var(--ink)}
+  #fE>.row.between{flex-direction:column;align-items:stretch;gap:8px}
+  #fE>.row.between>.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #fE>.row.between>.row>button[type=submit]{grid-column:1 / -1;order:-1;min-height:52px;font-size:17px}
+  #fE>.row.between>.row:first-child:not(:has(button:not([hidden]))){display:none}
+  .rub a:last-child{border-bottom:0}
+  .rub a span:first-child{flex:1;display:flex;flex-direction:column;gap:1px;font-weight:500}
+  .rub a small{font-size:12px;color:var(--muted);font-weight:400}
+  .rub a b{font-size:13px;font-weight:600}
+  .rub a svg{width:18px;height:18px;color:var(--muted);flex:none}
+  .rubback{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+  .rubback a{display:inline-flex;align-items:center;gap:4px;min-height:40px;font-size:14px}
+  .rubback b{font-size:15px}
+  /* saisie : panneau en bas d'écran */
+  dialog#dlgE.drawer{margin:auto 0 0;width:100vw;max-width:100vw;height:auto;max-height:94vh;border-radius:22px 22px 0 0;border-width:1px 0 0;padding:14px 16px 22px}
+  dialog#dlgE[open]{animation:sheet .2s ease-out}
+  #fE{gap:12px}
+  #fE::before{content:"";align-self:center;width:44px;height:5px;border-radius:3px;background:var(--line);order:-10}
+  #eTitle{order:-9;font-size:20px;margin:0}
+  #fE>.grid2:has(#eAmt){order:-8}
+  #fE #eAmt{font-size:30px !important;font-weight:700;text-align:center;height:56px;font-family:var(--display)}
+  #fE>.field:has(#eDes){order:-7}
+  #fE>.field:has(#eEvt){order:-6}
+  #fE>.grid2:has(#ePoste){order:-5}
+  #fE>.grid2:has(#eAcc){order:-4}
+  .mob{display:inline-flex}
+}
+@keyframes sheet{from{transform:translateY(40px);opacity:.4}}
+@media (max-width:700px){
+  /* les tableaux deviennent des cartes : plus besoin de défiler de gauche à droite */
+  table[data-cards]{display:block;border:0}
+  table[data-cards] thead{display:none}
+  table[data-cards] tbody,table[data-cards] tfoot{display:block}
+  table[data-cards] tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;padding:12px 14px;margin:0 0 8px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+  table[data-cards] td,table[data-cards] th{display:flex;flex-direction:column;gap:2px;padding:0;border:0;text-align:left !important;min-width:0;white-space:normal;background:none !important}
+  table[data-cards] td{align-items:flex-start}
+  table[data-cards] td.ct{align-items:flex-start;text-align:left}
+  table[data-cards] td.ct button.link{text-align:left;padding:0}
+  table[data-cards] td .pill{align-self:flex-start;width:auto !important;display:inline-flex !important}
+  table[data-cards] td.ct button.link{text-align:left !important;align-self:flex-start;width:auto !important;justify-content:flex-start}
+  #v-ecritures .card>.row.between{flex-wrap:nowrap;gap:8px}
+  #v-ecritures .card>.row.between>.row{flex:1 1 auto;flex-wrap:nowrap;min-width:0}
+  #v-ecritures #q{flex:1 1 auto !important;min-width:0 !important;width:auto}
+  #v-ecritures .card>.row.between>details>summary{font-size:0;width:44px;padding:0;display:flex;align-items:center;justify-content:center}
+  #v-ecritures .card>.row.between>details>summary::before{content:"⇅";font-size:18px}
+  table[data-cards] td::before{content:attr(data-l);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  table[data-cards] td[data-l=""]::before,table[data-cards] td.ct::before{display:none}
+  table[data-cards] td.ct{grid-column:1 / -1;order:-1;font-weight:600;font-size:15.5px}
+  table[data-cards] td.wide,table[data-cards] td[data-l=""]{grid-column:1 / -1}
+  table[data-cards] td:empty,table[data-cards] td.mt{display:none}
+  table[data-cards] td[data-l=""]:has(button),table[data-cards] td[data-l=""]:has(a.btn){flex-direction:row;flex-wrap:wrap;gap:8px}
+  table[data-cards] tr.full{display:block;border:0;background:none;padding:10px 4px 2px;margin:0}
+  table[data-cards] tr.full td{font-weight:600}
+  table[data-cards] tr.total,table[data-cards] tr.sub{background:var(--accent-soft)}
+  table[data-cards] td input,table[data-cards] td select{width:100%;box-sizing:border-box}
+  .scroll:has(>table[data-cards]){overflow:visible}
+  /* opérations : glisser pour vérifier */
+  tr.lr{touch-action:pan-y;transition:transform .18s ease-out}
+  tr.lr.swiping{transition:none}
+  tr.lr.sw-ok{box-shadow:inset 4px 0 0 var(--good)}
+  tr.lr.sw-ed{box-shadow:inset -4px 0 0 var(--accent)}
+  tr.dayh{display:flex;padding:14px 2px 2px}
+  tr.dayh td{display:flex;justify-content:space-between;flex:1;padding:0}
+  .swhint{display:block;text-align:center;font-size:12px;color:var(--muted);margin:6px 0 0}
+}
+@media (min-width:701px){.swhint{display:none}}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('cahier-theme')||'nuit'}catch(e){document.documentElement.dataset.theme='nuit'}</script>
 <link rel="manifest" href="manifest.webmanifest">
@@ -699,6 +803,7 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
         <kbd aria-hidden="true">Ctrl K</kbd>
         <div class="pop" id="gqRes" hidden></div>
       </div>
+      <button type="button" id="gqBtn" aria-label="Rechercher"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg></button>
       <details class="menu" id="newMenuWrap">
         <summary class="btn primary">+ Nouveau</summary>
         <div class="pop" id="newMenu">
@@ -820,6 +925,8 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
       <span class="muted small"><span id="lnCount"></span><span id="lastSave"></span></span>
       <p class="small muted w" style="margin:0">Cochez des opérations pour les modifier en une fois. Maj + clic coche toute une plage.</p>
       <div class="scroll"><table id="lnTable"></table></div>
+      <button type="button" id="lnMore" hidden>Afficher plus d'opérations</button>
+      <p class="swhint w">Glisser une opération vers la droite : vérifiée · vers la gauche : modifier</p>
     </div>
     <div class="bulk" id="bulk" hidden>
       <span id="bulkInfo" class="small"></span>
@@ -852,7 +959,7 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
         <div class="row w"><button type="button" id="pvPrev">Partir de l'édition précédente</button><button type="button" id="pvAddRec">+ Recette prévue</button><button type="button" class="primary" id="pvAddDep">+ Dépense prévue</button></div>
       </div>
       <div class="tiles" id="pvTiles"></div>
-      <div class="scroll"><table id="pvTable"></table></div>
+      <div class="scroll"><table id="pvTable" data-ct="1"></table></div>
       <p class="small muted" style="margin:0">« Pour l'équilibre » : quantité à vendre, les autres lignes restant identiques, pour un résultat nul. Une dépense « engagée » correspond à un devis signé ou une commande passée.</p>
       <details class="pvs" id="pvSuivi" hidden><summary id="pvSuiviSum">Suivi : prévu face au réalisé</summary>
         <div class="scroll"><table id="pvCmp"></table></div>
@@ -1123,7 +1230,7 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
     <div class="field"><label for="eAcc">Compte</label><select id="eAcc"><option value="CC">Compte courant</option><option value="LA">Livret A</option></select></div>
     <div class="field"><label for="eDate">Date</label><input type="date" id="eDate" required><div class="dq"><button type="button" class="link small" data-dset="0">Aujourd'hui</button><button type="button" class="link small" data-dset="-1">Hier</button></div></div>
   </div>
-  <div class="field"><label for="eEvt">Événement</label><select id="eEvt" class="evsel" required></select></div>
+  <div class="field"><label for="eEvt">Événement</label><select id="eEvt" class="evsel" required></select><div id="eEvChips" aria-label="Événements récents"></div></div>
   <div class="field"><label for="eDes">Intitulé</label><input type="text" id="eDes" list="desList" required autocomplete="off" placeholder="ex. ABD - Boissons - Facture 2600123"><datalist id="desList"></datalist></div>
   <div class="grid2">
     <div class="field"><label>Sens</label><div class="seg"><label><input type="radio" name="eSens" value="rec" id="eRec"><span>Recette</span></label><label><input type="radio" name="eSens" value="dep" id="eDep" checked><span>Dépense</span></label></div></div>
@@ -1932,12 +2039,17 @@ function statusPill(e){
 function linesTable(ls,opt){
   opt=opt||{}; const w=canWrite(), sel=!!opt.sel&&w;
   const head=`<thead><tr>${sel?`<th class="sel"><input type="checkbox" id="selAll" aria-label="Tout sélectionner"></th>`:""}${opt.check?"<th>Vérifié</th>":""}<th></th><th>Date</th><th>Événement</th><th>Intitulé</th><th>Catégorie</th><th class="r">Recette</th><th class="r">Dépense</th><th>Paiement</th><th>Commentaire</th>${opt.check?"":"<th>Vérifié</th>"}${w?"<th></th>":""}</tr></thead>`;
+  const JOURS=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"], MOISL=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  const dayLbl=iso=>{if(!iso)return "Sans date";const d=new Date(iso+"T12:00:00");return `${JOURS[d.getDay()]} ${d.getDate()} ${MOISL[d.getMonth()]} ${d.getFullYear()}`;};
+  const ncol=13; let lastDay=null; const dayTot={}; if(opt.group)for(const l of ls){const k=l.iso||"";dayTot[k]=(dayTot[k]||0)+l.rec-l.dep;}
+  if(opt.lim)ls=ls.slice(0,opt.lim);
   const rows=ls.map(l=>{
+    let dh=""; if(opt.group&&(l.iso||"")!==lastDay){lastDay=l.iso||"";dh=`<tr class="dayh"><td colspan="${ncol}"><span>${esc(dayLbl(l.iso))}</span><span class="num">${sg(dayTot[lastDay])}</span></td></tr>`;}
     const u=/https?:\/\/\S+/.exec(l.com);
     const com=u?(esc(l.com.replace(u[0],"").replace(/[:\s]+$/,""))+` <a href="${esc(u[0])}" target="_blank" rel="noopener">pièce</a>`):esc(l.com);
     const chk=opt.check?`<td class="c-ptc"><input type="checkbox" data-pt="${esc(l.id)}" ${l.pointe?"checked":""} ${w?"":"disabled"} aria-label="Vu en banque"></td>`:"";
     const s=sel?`<td class="sel"><input type="checkbox" data-sel="${esc(l.id)}" ${SEL.has(l.id)?"checked":""} aria-label="Sélectionner"></td>`:"";
-    return `<tr class="lr ${sel&&SEL.has(l.id)?"picked":""}" data-row="${esc(l.id)}">${s}${chk}<td class="c-ic"><span class="io ${l.rec?"in":"out"}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${l.rec?"M17 7L7 17M7 9v8h8":"M7 17L17 7M9 7h8v8"}"/></svg></span></td><td class="num c-date">${fdate(l.iso)}</td><td class="small c-evt">${l.acc==="LA"?"Livret A · ":""}${esc(l.evt.trim())}</td><td class="c-des">${esc(l.des)}${l.pieces?(l.pieces[0].u?`<a class="pc" href="${esc(l.pieces[0].u)}" target="_blank" rel="noopener" title="${esc(l.pieces.map(d=>d.n).join(", "))}">${ICON_CLIP}${l.pieces.length>1?`<span class="small muted">${l.pieces.length}</span>`:""}</a>`:ICON_CLIP):""}</td><td class="small c-cat ${l.poste?"":"muted"}">${esc(l.cat)}</td><td class="r num pos c-rec">${l.rec?fm(l.rec):""}</td><td class="r num neg c-dep">${l.dep?fm(l.dep):""}</td><td class="small c-type">${esc(l.type)}</td><td class="small muted c-com">${com}</td>${opt.check?"":`<td class="small c-pt">${l.pointe?"✓ vérifié":""}</td>`}${w?`<td class="c-act"><button type="button" class="mini" data-edit="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
+    return dh+`<tr class="lr ${sel&&SEL.has(l.id)?"picked":""}" data-row="${esc(l.id)}">${s}${chk}<td class="c-ic"><span class="io ${l.rec?"in":"out"}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${l.rec?"M17 7L7 17M7 9v8h8":"M7 17L17 7M9 7h8v8"}"/></svg></span></td><td class="num c-date">${fdate(l.iso)}</td><td class="small c-evt">${l.acc==="LA"?"Livret A · ":""}${esc(l.evt.trim())}</td><td class="c-des">${esc(l.des)}${l.pieces?(l.pieces[0].u?`<a class="pc" href="${esc(l.pieces[0].u)}" target="_blank" rel="noopener" title="${esc(l.pieces.map(d=>d.n).join(", "))}">${ICON_CLIP}${l.pieces.length>1?`<span class="small muted">${l.pieces.length}</span>`:""}</a>`:ICON_CLIP):""}</td><td class="small c-cat ${l.poste?"":"muted"}">${esc(l.cat)}</td><td class="r num pos c-rec">${l.rec?fm(l.rec):""}</td><td class="r num neg c-dep">${l.dep?fm(l.dep):""}</td><td class="small c-type">${esc(l.type)}</td><td class="small muted c-com">${com}</td>${opt.check?"":`<td class="small c-pt">${l.pointe?"✓ vérifié":""}</td>`}${w?`<td class="c-act"><button type="button" class="mini" data-edit="${esc(l.id)}">Modifier</button></td>`:""}</tr>`;
   }).join("");
   return head+`<tbody>${rows||`<tr><td colspan="13" class="muted">Aucune opération.</td></tr>`}</tbody>`;
 }
@@ -2043,7 +2155,7 @@ function renderEvent(){
   $("evRatios").innerHTML=`<thead><tr><th>Activité</th><th class="r">Recettes</th><th class="r">Coûts</th><th class="r">Solde</th><th class="r">Coût / recette</th></tr></thead><tbody>${rows.join("")||`<tr><td colspan="5" class="muted">Pas assez d'opérations.</td></tr>`}</tbody>`;
   const subs=Object.entries(e.subs);
   $("evSubs").innerHTML=subs.length>1?`<h3 style="margin:8px 0 6px">Sous-rubriques</h3><div class="scroll"><table><thead><tr><th>Rubrique</th><th class="r">Recettes</th><th class="r">Dépenses</th><th class="r">Résultat</th></tr></thead><tbody>${subs.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="r num">${fm(v.rec)}</td><td class="r num">${fm(v.dep)}</td><td class="r num ${cls(v.rec-v.dep)}">${sg(v.rec-v.dep)}</td></tr>`).join("")}</tbody></table></div>`:"";
-  $("evLines").innerHTML=linesTable(e.lines);
+  $("evLines").innerHTML=linesTable(e.lines.slice().reverse(),{group:true});
   renderCaisse(e);
 }
 function renderEditions(){
@@ -2082,7 +2194,8 @@ function renderLines(){
   $("lnCount").textContent=`${ls.length} opérations · recettes ${fm(sumOf(ls,l=>l.rec))} · dépenses ${fm(sumOf(ls,l=>l.dep))}`;
   let sv=null; try{sv=localStorage.getItem("cahier-derniere-sauvegarde");}catch(e){}
   $("lastSave").textContent=sv?` · dernière sauvegarde Excel depuis cet appareil le ${fdate(sv)}`:" · aucune sauvegarde Excel faite depuis cet appareil";
-  $("lnTable").innerHTML=linesTable(ls,{sel:true});
+  $("lnTable").innerHTML=linesTable(ls,{sel:true,group:true,lim:LN_LIM});
+  $("lnMore").hidden=ls.length<=LN_LIM; $("lnMore").textContent=`Afficher plus d'opérations (${ls.length-LN_LIM} de plus)`;
   renderOpViews();
   syncSel();
 }
@@ -2284,7 +2397,7 @@ function renderEncarts(){
     const c=en(a,y), p=en(a,py), contact=[a.contact,a.tel,a.email].filter(Boolean).join(" · ");
     const stSel=w?`<select data-astat="${esc(a.id)}" aria-label="Statut ${y}"><option value="">Pas d'encart</option>${Object.entries(ASTAT).map(([k,[l]])=>`<option value="${k}" ${c&&c.statut===k?"selected":""}>${l}</option>`).join("")}</select>`:(c?`<span class="pill ${ast(c.statut)[1]}">${ast(c.statut)[0]}</span>`:"·");
     const cf=c&&c.cerfa&&CERFA[c.cerfa];
-    return `<tr><td>${w?`<button type="button" class="link" data-aedit="${esc(a.id)}" title="Modifier la fiche"><b>${esc(a.nom)}</b></button>`:`<b>${esc(a.nom)}</b>`}${a.logo&&a.logo.u?` <a class="pill neutral" href="${esc(a.logo.u)}" target="_blank" rel="noopener" title="Ouvrir le logo">logo</a>`:a.logo?` <span class="pill neutral" title="Logo reçu">logo</span>`:""}${contact?`<div class="small muted">${esc(contact)}</div>`:""}${c&&c.com?`<div class="small muted">${esc(c.com)}</div>`:a.note?`<div class="small muted">${esc(a.note)}</div>`:""}</td><td class="small">${esc(a.referent||"")}</td>${YC.map(yy=>cell(en(a,yy),yy)).join("")}<td>${stSel}</td><td class="small num">${c&&c.statut==="paye"&&c.date?fdate(c.date):"·"}${c&&c.statut==="paye"&&c.type?`<div class="muted">${esc(c.type)}</div>`:""}</td><td>${cf?`<span class="pill ${cf[1]}">${esc(cf[0])}</span>`:"·"}${c&&c.recu&&c.recu.u?` <a class="pill neutral" href="${esc(c.recu.u)}" target="_blank" rel="noopener" title="${esc(c.recu.n||"")}">PDF${c.num?" n° "+esc(c.num):""}</a>`:""}</td>${w?`<td>${wc&&(!c||c.statut!=="paye")?`<button type="button" class="mini primary" data-apay="${esc(a.id)}">Encaisser</button>`:""}</td>`:""}</tr>`;
+    return `<tr><td>${w?`<button type="button" class="link" data-aedit="${esc(a.id)}" title="Modifier la fiche"><b>${esc(a.nom)}</b></button>`:`<b>${esc(a.nom)}</b>`}${a.logo&&a.logo.u?` <a class="pill neutral" href="${esc(a.logo.u)}" target="_blank" rel="noopener" title="Ouvrir le logo">logo</a>`:a.logo?` <span class="pill neutral" title="Logo reçu">logo</span>`:""}${contact?`<div class="small muted">${esc(contact)}</div>`:""}${c&&c.com?`<div class="small muted">${esc(c.com)}</div>`:a.note?`<div class="small muted">${esc(a.note)}</div>`:""}</td><td class="small">${esc(a.referent||"")}</td>${YC.map(yy=>cell(en(a,yy),yy)).join("")}<td>${stSel}</td><td class="small num">${c&&c.statut==="paye"&&c.date?fdate(c.date):"·"}${c&&c.statut==="paye"&&c.type?`<div class="muted">${esc(c.type)}</div>`:""}</td><td>${cf?`<span class="pill ${cf[1]}">${esc(cf[0])}</span>`:"·"}${c&&c.recu&&c.recu.u?` <a class="pill neutral" href="${esc(c.recu.u)}" target="_blank" rel="noopener" title="${esc(c.recu.n||"")}">PDF${c.num?" n° "+esc(c.num):""}</a>`:""}</td>${w?`<td>${a.tel?`<a class="btn mini mob" href="tel:${esc(String(a.tel).replace(/[^\d+]/g,""))}">Appeler</a>`:""}${a.email?`<a class="btn mini mob" href="mailto:${esc(a.email)}">Mail</a>`:""}${wc&&(!c||c.statut!=="paye")?`<button type="button" class="mini primary" data-apay="${esc(a.id)}">Encaisser</button>`:""}</td>`:""}</tr>`;
   }).join(""):`<tr><td colspan="${7+YC.length}" class="muted">${S.annonceurs.length?"Aucun annonceur pour ce filtre.":"Aucun annonceur. « Reprendre les annonceurs du cahier » part des encarts déjà encaissés."}</td></tr>`}</tbody>${rows.length?`<tfoot><tr class="total"><td colspan="2">Total payé (${rows.length} annonceur(s) affiché(s))</td>${YC.map(yy=>`<td class="r num yc ${yy===y?"cur":""}">${fm0(totY(yy))}</td>`).join("")}<td colspan="${w?4:3}"></td></tr></tfoot>`:""}`;
   $("aSeed").disabled=!M.lines.some(isEncartLine);
 }
@@ -2586,7 +2699,8 @@ function renderFiche(name,tab){
   const y=yearOf(name), next=y?famOf(name)+" "+(y+1):null, w=canWrite();
   $("evHead").hidden=false;
   $("evHead").innerHTML=`<div class="fh-top"><div class="fh-id"><nav aria-label="Fil d'Ariane" class="small"><a href="#evenements">Événements</a> / ${esc(name)}</nav><div class="fh-title"><h2>${esc(name)}</h2>${st}${res}</div><span class="small muted">${d1?(d2&&d2!==d1?`Du ${fdate(d1)} au ${fdate(d2)}`:`Le ${fdate(d1)}`)+(dateSuspecte(x)?" · date à vérifier (premier acompte ?)":""):"Date à saisir : bouton Modifier"}${m&&m.sous&&m.sous.length?` · sous-rubriques ${esc(m.sous.join(", "))}`:""}</span></div>
-    <div class="row">${w?`<button type="button" data-fhedit="1">Modifier</button>`:""}${w&&next&&!allEventNames().includes(next)?`<button type="button" data-fhnext="${esc(next)}">Préparer ${esc(next)}</button>`:""}<button type="button" class="primary" data-fhpres="1">Présentation</button></div></div>`;
+    <div class="row">${w?`<button type="button" data-fhedit="1">Modifier</button>`:""}${w&&next&&!allEventNames().includes(next)?`<button type="button" data-fhnext="${esc(next)}">Préparer ${esc(next)}</button>`:""}<button type="button" class="primary" data-fhpres="1">Présentation</button></div>
+    <details class="menu fh-more"><summary class="btn" aria-label="Actions de l'événement">⋯</summary><div class="pop">${w?`<button type="button" data-fhedit="1">Modifier l'événement</button>`:""}${w&&next&&!allEventNames().includes(next)?`<button type="button" data-fhnext="${esc(next)}">Préparer ${esc(next)}</button>`:""}<button type="button" data-fhpres="1">Présentation</button></div></details></div>${rubHtml(name,tab,e)}`;
   $("subnav").hidden=false;
   $("subnav").innerHTML=FICHE_TABS.map(([k,l])=>`<a href="${ficheHash(name,k)}" class="${k===tab?"on":""}">${esc(l)}</a>`).join("");
   $("empty").hidden=true;
@@ -5130,8 +5244,9 @@ $("nfTest").onclick=async()=>{
 $("jWho").addEventListener("change",renderJournal); $("jAct").addEventListener("change",renderJournal); $("jQ").addEventListener("input",renderJournal);
 
 /* ---------- version de l'application ---------- */
-const APP_VERSION="13.3", APP_DATE="2026-11-18";
+const APP_VERSION="14.0", APP_DATE="2026-11-18";
 const CHANGELOG=[
+  ["14.0","2026-11-18",["Version téléphone : en-tête compact avec recherche derrière une icône, onglets en pastilles sans défilement de côté.","Tableaux affichés en cartes sur téléphone (événements, budget, encarts, stock, bilans…).","Opérations groupées par jour ; glisser une ligne vers la droite pour la vérifier, vers la gauche pour la modifier.","Saisie en panneau bas d'écran : montant en grand, événements récents en un toucher.","Fiche d'un événement : rubriques en liste sur téléphone, actions dans le menu ⋯."]],
   ["13.3","2026-11-18",["Réservations : la dépense traiteur du budget peut être recalculée sur le nombre de repas (même prix adulte et enfant, ou deux prix)."]],
   ["13.2","2026-11-18",["Onglet Réservations dans la fiche d'un événement : repas adultes et enfants depuis HelloAsso (relié ou export) et depuis la liste Excel du Drive.","Mise à jour du budget avec les quantités réservées."]],
   ["13.1","2026-11-16",["Numéro de version affiché dans le menu et dans Réglages, avec l'historique des nouveautés.","Alerte quand une nouvelle version est en ligne, avec un bouton « Mettre à jour »."]],
@@ -5412,6 +5527,91 @@ resaBudgetPlan=function(name){
   }
   return p;
 };
+/* ================= v14 : version téléphone ================= */
+// recherche : icône sur téléphone
+$("gqBtn").onclick=()=>{document.body.classList.toggle("srch");if(document.body.classList.contains("srch"))setTimeout(()=>$("gq").focus(),30);};
+$("gq").addEventListener("blur",()=>{if(!$("gq").value)setTimeout(()=>document.body.classList.remove("srch"),200);});
+
+// tableaux en cartes : chaque cellule reçoit le titre de sa colonne
+const CARDS_SKIP="#lnTable,#rTable,#evLines,#gqRes table";
+function cardify(root){
+  (root||document).querySelectorAll("table").forEach(t=>{
+    if(t.matches(CARDS_SKIP)||t.querySelector("tr.lr")||t.closest(".nocards")){if(t.dataset.cards)delete t.dataset.cards;return;}
+    const hr=t.tHead&&t.tHead.rows.length?t.tHead.rows[t.tHead.rows.length-1]:null;
+    if(!hr){delete t.dataset.cards;return;}
+    const H=[];[...hr.cells].forEach(c=>{const n=+c.colSpan||1;for(let i=0;i<n;i++)H.push((c.textContent||"").trim());});
+    if(H.length<4){delete t.dataset.cards;return;}
+    const sig=H.join("|")+"#"+t.querySelectorAll("tbody tr,tfoot tr").length;
+    if(t.dataset.cards===sig)return;
+    t.dataset.cards=sig;
+    const ct=t.dataset.ct!=null?+t.dataset.ct:H.findIndex(h=>h);
+    t.querySelectorAll("tbody tr,tfoot tr").forEach(tr=>{
+      const cells=[...tr.cells];
+      if(cells.length===1||cells.length<=2&&cells.some(c=>c.colSpan>2)){tr.classList.add("full");return;}
+      let col=0;
+      cells.forEach(c=>{const n=+c.colSpan||1;c.dataset.l=H[col]||"";c.classList.toggle("ct",col===Math.max(0,ct));c.classList.toggle("wide",n>1);col+=n;});
+    });
+  });
+}
+let CFY=0;
+new MutationObserver(()=>{if(CFY)return;CFY=requestAnimationFrame(()=>{CFY=0;cardify();});}).observe(document.body,{childList:true,subtree:true});
+
+// opérations : glisser vers la droite = vérifiée, vers la gauche = modifier
+(function(){
+  let tr=null,x0=0,y0=0,dx=0,lock=0;
+  document.addEventListener("pointerdown",e=>{
+    if(e.pointerType!=="touch"||!matchMedia("(max-width:700px)").matches)return;
+    const r=e.target.closest("tr.lr"); if(!r||e.target.closest("input,a,button,label"))return;
+    tr=r;x0=e.clientX;y0=e.clientY;dx=0;lock=0;
+  },{passive:true});
+  document.addEventListener("pointermove",e=>{
+    if(!tr)return; const mx=e.clientX-x0,my=e.clientY-y0;
+    if(!lock){if(Math.abs(my)>10){tr=null;return;}if(Math.abs(mx)>12)lock=1;else return;}
+    dx=Math.max(-120,Math.min(120,mx)); tr.classList.add("swiping"); tr.style.transform=`translateX(${dx}px)`;
+    tr.classList.toggle("sw-ok",dx>70); tr.classList.toggle("sw-ed",dx<-70);
+  },{passive:true});
+  const end=async()=>{
+    if(!tr)return; const r=tr,d=dx; tr=null;
+    r.classList.remove("swiping","sw-ok","sw-ed"); r.style.transform="";
+    if(!lock)return;
+    const id=r.dataset.row, e=S.ecr.find(x=>x.id===id); if(!e)return;
+    if(d<=-70){openEcriture(id);return;}
+    if(d>=70&&canWrite()){
+      const v=!e.pointe;
+      await run(store.commit([{t:"update",col:"ecritures",id,data:{pointe:v}}],{action:"Pointage",texte:`${e.designation} : ${v?"vérifiée":"à vérifier"}`}),v?"Opération vérifiée.":"Opération remise à vérifier.");
+    }
+  };
+  document.addEventListener("pointerup",end); document.addEventListener("pointercancel",()=>{if(tr){tr.style.transform="";tr.classList.remove("swiping","sw-ok","sw-ed");tr=null;}});
+})();
+
+// saisie : événements récents en un toucher
+function renderEvChips(){
+  const box=$("eEvChips"); if(!box)return;
+  const sel=$("eEvt"), opts=[...sel.options].map(o=>o.value).filter(v=>v&&v!=="__new");
+  const recent=[]; for(const l of M.lines.slice().reverse()){const p=l.kind==="event"?l.parent:null;if(p&&opts.includes(p)&&!recent.includes(p))recent.push(p);if(recent.length>=3)break;}
+  const open=evList().filter(x=>isOpen(x)).map(x=>x.name).filter(n=>opts.includes(n));
+  const list=[...new Set([...open.slice(0,3),...recent])].slice(0,4);
+  const hors=opts.find(v=>/^hors/i.test(v)||/AUTRE/.test(v));
+  if(hors&&!list.includes(hors))list.push(hors);
+  box.innerHTML=list.map(n=>`<button type="button" class="${sel.value===n?"on":""}" data-evchip="${esc(n)}">${esc(n)}</button>`).join("");
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-evchip]");if(!b)return;const s=$("eEvt");s.value=b.dataset.evchip;s.dispatchEvent(new Event("change",{bubbles:true}));renderEvChips();});
+$("eEvt").addEventListener("change",renderEvChips);
+{const _o=openEcriture;openEcriture=function(id,preset){_o(id,preset);renderEvChips();};}
+
+// opérations : affichage par tranches
+var LN_LIM=150;
+document.addEventListener("click",e=>{if(e.target.id==="lnMore"){LN_LIM+=200;renderLines();}});
+
+function rubHtml(name,tab,e){
+  const chev=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>`;
+  if(tab!=="apercu"){const l=(FICHE_TABS.find(x=>x[0]===tab)||[,""])[1];return `<div class="fh-rub rubback"><a href="${ficheHash(name,"apercu")}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Vue d'ensemble</a><b>${esc(l)}</b></div>`;}
+  const L=pvLines(name), prev=L.length?sumOf(L,l=>(l.sens==="rec"?1:-1)*(+l.montant||0)):null, t=resaTot(resaOf(name));
+  let nd=0; try{nd=allDocs().filter(d=>d.evenement&&eventKey(d.evenement).parent===name).length;}catch(err){}
+  const info={budget:[L.length?`${L.length} ligne(s)`:"à préparer",prev!=null?"prévu "+sg(prev):""],resa:[t.ad+t.en?"HelloAsso et liste du Drive":"aucune source reliée",t.ad+t.en?qfmt(t.ad+t.en)+" repas":""],caisse:["fond de caisse et comptages",""],buvette:["ventes, prix, marge",""],stock:["sorties et retours",""],comparer:["avec les éditions précédentes",""],docs:["factures, devis, contrats",nd?String(nd):""],ops:[e?`${e.lines.length} opération(s)`:"aucune opération",e?sg(e.res):""]};
+  return `<nav class="fh-rub rub" aria-label="Rubriques de l'événement">${FICHE_TABS.filter(([k])=>k!=="apercu").map(([k,l])=>`<a href="${ficheHash(name,k)}"><span>${esc(l)}<small>${esc((info[k]||[""])[0])}</small></span><b>${esc((info[k]||["",""])[1]||"")}</b>${chev}</a>`).join("")}</nav>`;
+}
+
 </script>
 </body>
 </html>
