@@ -1020,6 +1020,13 @@ details.arh{border:1px solid var(--line);border-radius:10px;padding:10px 12px}de
       <div class="scroll"><table id="rsTable"></table></div>
       <p class="msg warn" id="rsDup" hidden></p>
       <p class="small muted" style="margin:0">HelloAsso : les billets annulés ou remboursés ne sont pas comptés ; un tarif contenant « enfant » compte un enfant, « adulte » un adulte. Liste Excel : colonnes « Adultes » et « Enfants » (nombres par ligne), ou une colonne « Tarif / Repas / Formule ».</p>
+      <div class="docbox w" id="rsTr">
+        <div class="row between"><b>Dépense traiteur</b><span class="small muted" id="rsTrInfo"></span></div>
+        <div class="grid2"><div class="field"><label for="rsTrLine">Ligne du budget à mettre à jour</label><select id="rsTrLine"></select></div>
+          <div class="field"><label for="rsTrPa">Prix traiteur par repas (€)</label><input type="text" inputmode="decimal" id="rsTrPa" placeholder="ex. 12,50"></div></div>
+        <label class="small"><input type="checkbox" id="rsTrSame" checked> Même prix pour les repas enfants</label>
+        <div class="field" id="rsTrPeF" hidden style="max-width:260px"><label for="rsTrPe">Prix traiteur par repas enfant (€)</label><input type="text" inputmode="decimal" id="rsTrPe"></div>
+      </div>
       <div class="row"><button type="button" class="primary w" id="rsBud" hidden>Mettre à jour le budget avec ces quantités</button></div>
       <input type="file" id="rsFile" accept=".xlsx,.xls,.csv" hidden>
     </div>
@@ -5123,8 +5130,9 @@ $("nfTest").onclick=async()=>{
 $("jWho").addEventListener("change",renderJournal); $("jAct").addEventListener("change",renderJournal); $("jQ").addEventListener("input",renderJournal);
 
 /* ---------- version de l'application ---------- */
-const APP_VERSION="13.2", APP_DATE="2026-11-18";
+const APP_VERSION="13.3", APP_DATE="2026-11-18";
 const CHANGELOG=[
+  ["13.3","2026-11-18",["Réservations : la dépense traiteur du budget peut être recalculée sur le nombre de repas (même prix adulte et enfant, ou deux prix)."]],
   ["13.2","2026-11-18",["Onglet Réservations dans la fiche d'un événement : repas adultes et enfants depuis HelloAsso (relié ou export) et depuis la liste Excel du Drive.","Mise à jour du budget avec les quantités réservées."]],
   ["13.1","2026-11-16",["Numéro de version affiché dans le menu et dans Réglages, avec l'historique des nouveautés.","Alerte quand une nouvelle version est en ligne, avec un bouton « Mettre à jour »."]],
   ["13","2026-11-16",["Administrateur, trésorier et membres du bureau avec droits en lecture ou écriture par domaine (comptes, stock, encarts, documents).","Mail à l'administrateur à chaque demande d'accès.","Journal des connexions et filtres dans l'historique des modifications."]],
@@ -5289,6 +5297,7 @@ function renderResa(name){
   $("rsDup").hidden=!dup.length;
   $("rsDup").innerHTML=dup.length?`Noms présents dans HelloAsso et dans la liste Excel, à vérifier (comptés deux fois ?) : <b>${esc(dup.join(", "))}</b>. Corrigez si besoin avec l'ajustement.`:"";
   $("rsBud").hidden=!w||!(ha||xl||adj.ad||adj.en);
+  renderTraiteur(name);
   $("rsSync").hidden=!(ha&&ha.mode==="api"||xl);
 }
 function resaBudgetPlan(name){
@@ -5328,11 +5337,12 @@ function wireResa(){
       if(t.id==="rsAdjS"){await saveResa(n,{adj:{ad:parseNum($("rsAdjA").value)||0,en:parseNum($("rsAdjE").value)||0,note:$("rsAdjN").value.trim()}},`ajustement ${parseNum($("rsAdjA").value)||0} adulte(s), ${parseNum($("rsAdjE").value)||0} enfant(s)`);return renderResa(n);}
       if(t.dataset.rsx){if(!await ask(t.dataset.rsx==="ha"?"Retirer HelloAsso de cet événement ?":"Retirer la liste Excel de cet événement ? Le fichier reste dans le Drive.","Retirer"))return;const r=Object.assign({},resaOf(n));delete r[t.dataset.rsx];const m=S.evenements.find(x=>eventKey(x.nom).parent===n);if(m)await run(store.commit([{t:"update",col:"evenements",id:m.id,data:{resa:r}}],{action:"Réservations",texte:`${n} : source retirée`}),"Retiré.");return renderResa(n);}
       if(t.id==="rsBud"){
-        const {L,ch}=resaBudgetPlan(n);
+        const {L,ch,tr}=resaBudgetPlan(n);
         if(!ch.length)return flash("Aucune réservation à reporter.",true);
-        const txt=ch.map(({l,avant})=>`${l.libelle} : ${avant?qfmt(+avant.qte||0)+" → ":""}${qfmt(l.qte)}${+l.pu>0?` × ${fm(+l.pu)} = ${fm(l.montant)}`:" (prix unitaire à saisir dans le budget)"}`).join("\n");
+        const txt=ch.map(({l,avant,dep})=>`${dep?"Dépense":"Recette"} · ${l.libelle} : ${avant&&+avant.qte?qfmt(+avant.qte)+" → ":""}${qfmt(l.qte)}${+l.pu>0?` × ${fm(+l.pu)} = ${fm(l.montant)}`:dep?` repas = ${fm(l.montant)}`:" (prix unitaire à saisir dans le budget)"}${dep&&avant?` (avant ${fm(+avant.montant||0)})`:""}`).join("\n");
         if(!await ask(`Mettre à jour le budget de ${n} ?\n\n${txt}`,"Mettre à jour"))return;
-        const keep=pvEv; pvEv=n; await savePv(L,`quantités de repas reprises des réservations (${ch.map(c=>c.l.libelle+" "+qfmt(c.l.qte)).join(", ")})`,"Budget mis à jour."); pvEv=keep; return renderResa(n);
+        if(tr&&tr.line)await saveResa(n,{traiteur:Object.assign({},tr,{line:(ch.find(c=>c.dep)||{l:{}}).l.id||tr.line})},`traiteur ${tr.pa?fm(tr.pa)+" par repas":""}`);
+        const keep=pvEv; pvEv=n; await savePv(L,`quantités reprises des réservations (${ch.map(c=>c.l.libelle+" "+qfmt(c.l.qte)+(c.dep?" = "+fm(c.l.montant):"")).join(", ")})`,"Budget mis à jour."); pvEv=keep; return renderResa(n);
       }
     }catch(err){flash(err.message||String(err),true);}
   });
@@ -5361,6 +5371,47 @@ $("haSave").onclick=()=>run(store.commit([{t:"merge",col:"parametres",id:"genera
 $("haTest").onclick=async()=>{try{await run(store.commit([{t:"merge",col:"parametres",id:"general",data:{helloasso:{url:$("haUrl").value.trim(),key:$("haKey").value.trim()}}}],[]),null);const j=await haCall({action:"forms"});flash(`HelloAsso relié : ${(j.forms||[]).length} formulaire(s) trouvé(s).`);}catch(e){flash(e.message||String(e),true);}};
 {const _r=renderReglages;renderReglages=function(){_r();if(canWrite())renderHaSettings();};VIEWS.reglages=renderReglages;}
 
+
+/* ---------- dépense traiteur, calculée sur le nombre de repas ---------- */
+function trConf(name){
+  const r=resaOf(name), c=Object.assign({line:"",pa:null,pe:null,same:true},r.traiteur||{}), L=pvLines(name).filter(l=>l.sens==="dep");
+  if(!r.traiteur){const g=L.find(l=>/traiteur|cassoulet|repas|menu|plat/i.test(`${l.libelle} ${l.poste}`));c.line=g?g.id:"__new";if(g&&+g.pu>0)c.pa=+g.pu;}
+  return c;
+}
+function renderTraiteur(name){
+  if(!$("rsTr"))return;
+  const c=trConf(name), L=pvLines(name).filter(l=>l.sens==="dep"), t=resaTot(resaOf(name));
+  $("rsTrLine").innerHTML=`<option value="">· ne pas mettre à jour</option><option value="__new" ${c.line==="__new"?"selected":""}>Créer une ligne « Traiteur »</option>`+L.map(l=>`<option value="${esc(l.id)}" ${l.id===c.line?"selected":""}>${esc(l.libelle||l.poste)} · ${fm(+l.montant||0)}</option>`).join("");
+  if(document.activeElement!==$("rsTrPa"))$("rsTrPa").value=c.pa!=null?dec(c.pa):"";
+  if(document.activeElement!==$("rsTrPe"))$("rsTrPe").value=c.pe!=null?dec(c.pe):"";
+  $("rsTrSame").checked=c.same!==false; $("rsTrPeF").hidden=$("rsTrSame").checked;
+  trInfo(name,t);
+}
+function trRead(){
+  const same=$("rsTrSame").checked, pa=parseNum($("rsTrPa").value);
+  return {line:$("rsTrLine").value,pa:pa>0?pa:null,pe:same?null:(parseNum($("rsTrPe").value)>0?parseNum($("rsTrPe").value):null),same};
+}
+function trCost(c,t){if(!(c.pa>0))return null;return round2(t.ad*c.pa+t.en*(c.same?c.pa:(c.pe>0?c.pe:c.pa)));}
+function trInfo(name,t){const c=trRead(), v=trCost(c,t||resaTot(resaOf(name)));$("rsTrInfo").textContent=c.line&&v!=null?`soit ${fm(v)} pour ${qfmt((t||resaTot(resaOf(name))).ad+(t||resaTot(resaOf(name))).en)} repas`:"";}
+["rsTrLine","rsTrPa","rsTrPe","rsTrSame"].forEach(id=>$(id).addEventListener(id==="rsTrLine"||id==="rsTrSame"?"change":"input",()=>{if(!FICHE)return;$("rsTrPeF").hidden=$("rsTrSame").checked;
+  if(id==="rsTrLine"){const l=pvLines(FICHE).find(x=>x.id===$("rsTrLine").value);if(l&&+l.pu>0&&!parseNum($("rsTrPa").value))$("rsTrPa").value=dec(+l.pu);}
+  trInfo(FICHE);}));
+// ajout au plan de mise à jour du budget
+const _plan=resaBudgetPlan;
+resaBudgetPlan=function(name){
+  const p=_plan(name), c=trRead(), t=resaTot(resaOf(name)), v=trCost(c,t);
+  p.tr=c;
+  if(c.line&&v!=null&&t.ad+t.en>0){
+    let l=c.line==="__new"?null:p.L.find(x=>x.id===c.line), avant=null;
+    if(!l){l={id:"ltr"+Date.now().toString(36),sens:"dep",poste:"Traiteur & repas",libelle:"Traiteur",qte:null,pu:null,montant:0,statut:"prevu",echeance:"",note:""};p.L.push(l);}
+    else avant={qte:l.qte,montant:l.montant};
+    const pe=c.same?c.pa:(c.pe||c.pa);
+    l.qte=t.ad+t.en; l.pu=c.same||pe===c.pa?c.pa:null; l.montant=v;
+    l.note=c.same||pe===c.pa?`${qfmt(t.ad+t.en)} repas au ${fdate(today())}`:`${qfmt(t.ad)} adultes × ${fm(c.pa)} + ${qfmt(t.en)} enfants × ${fm(pe)}, au ${fdate(today())}`;
+    p.ch.push({l,avant,dep:true});
+  }
+  return p;
+};
 </script>
 </body>
 </html>
